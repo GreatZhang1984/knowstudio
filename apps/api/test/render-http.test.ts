@@ -287,6 +287,27 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
     expect(duplicate.status).toBe(409);
 
     await runWorker(t.db);
+    const draftDiagnostic = await t.db
+      .selectFrom('render_job')
+      .select(['id', 'status', 'stage', 'error'])
+      .where('id', '=', accepted.jobId)
+      .executeTakeFirstOrThrow();
+    if (draftDiagnostic.status !== 'succeeded') {
+      const queueError = await t.db
+        .selectFrom('job_queue')
+        .select(['state', 'attempt', 'last_error'])
+        .where('job_id', '=', accepted.jobId)
+        .executeTakeFirst();
+      const errorEvents = await t.db
+        .selectFrom('render_job_event')
+        .select(['event_type', 'payload'])
+        .where('job_id', '=', accepted.jobId)
+        .execute();
+      console.error(
+        'DRAFT_RENDER_DIAGNOSTIC',
+        JSON.stringify({ job: draftDiagnostic, queueError, errorEvents }, undefined, 2),
+      );
+    }
     const layers = await t.db
       .selectFrom('asset_layer')
       .select('kind')
@@ -365,9 +386,11 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
       headers: auth(t.tokenA),
     });
     expect(persisted.status).toBe(200);
-    const rows = ((await persisted.json()) as {
-      derivatives: { platformId: string; title: string; tags: string[] }[];
-    }).derivatives;
+    const rows = (
+      (await persisted.json()) as {
+        derivatives: { platformId: string; title: string; tags: string[] }[];
+      }
+    ).derivatives;
     expect(rows.find((row) => row.platformId === 'bili')?.title).toBe(
       'B站专属：把费曼学习法讲成一套复习流程',
     );
@@ -378,7 +401,8 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
       { method: 'POST', headers: auth(t.tokenA) },
     );
     expect(regenerated.status).toBe(200);
-    const title = ((await regenerated.json()) as { derivative: { title: string } }).derivative.title;
+    const title = ((await regenerated.json()) as { derivative: { title: string } }).derivative
+      .title;
     expect(title).toContain('收藏版');
   }, 60_000);
 
@@ -440,9 +464,9 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
       .select(['platform_id', 'title'])
       .where('work_id', '=', workId)
       .execute();
-    expect(
-      derivativeRows.find((row) => row.platform_id === 'bili')?.title,
-    ).toBe('渲染中修改的 B站标题');
+    expect(derivativeRows.find((row) => row.platform_id === 'bili')?.title).toBe(
+      '渲染中修改的 B站标题',
+    );
     const audioLayers = await t.db
       .selectFrom('asset_layer')
       .select('id')
@@ -513,9 +537,13 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
     expect(accepted.reservationId).toBeNull();
 
     await runWorker(t.db);
-    const jobRes = await fetch(`${t.baseUrl}/api/jobs/${accepted.jobId}`, { headers: auth(t.tokenA) });
+    const jobRes = await fetch(`${t.baseUrl}/api/jobs/${accepted.jobId}`, {
+      headers: auth(t.tokenA),
+    });
     expect(jobRes.status).toBe(200);
-    expect(JobSchema.parse(((await jobRes.json()) as { job: unknown }).job).status).toBe('succeeded');
+    expect(JobSchema.parse(((await jobRes.json()) as { job: unknown }).job).status).toBe(
+      'succeeded',
+    );
 
     const listRes = await fetch(`${t.baseUrl}/api/works/${workId}/derivatives`, {
       headers: auth(t.tokenA),
@@ -556,11 +584,7 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
       details: { blockingItems: [{ kind: 'content', blocking: true }] },
     });
     expect(
-      await t.db
-        .selectFrom('export_package')
-        .select('id')
-        .where('work_id', '=', workId)
-        .execute(),
+      await t.db.selectFrom('export_package').select('id').where('work_id', '=', workId).execute(),
     ).toEqual([]);
 
     const removed = await fetch(`${t.baseUrl}/api/works/${workId}/materials/${t.mat.h1}`, {
@@ -580,7 +604,9 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
     const exportJob = await t.db
       .selectFrom('render_job')
       .select(['status', 'type'])
-      .where('id', '=',
+      .where(
+        'id',
+        '=',
         (
           await t.db
             .selectFrom('render_job')
@@ -641,9 +667,7 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
       'sph',
       'xhs',
     ]);
-    expect(entries.get('发布清单.md')?.toString('utf8')).toContain(
-      '需你本人登录各平台手动发布',
-    );
+    expect(entries.get('发布清单.md')?.toString('utf8')).toContain('需你本人登录各平台手动发布');
 
     const before = await t.db
       .selectFrom('export_package')
@@ -668,11 +692,7 @@ describe('T-35～T-48 E2E：分层渲染 / 配额 / 队列 / 视频产物', () =
       .executeTakeFirstOrThrow();
     expect(after).toEqual(before);
     expect(
-      await t.db
-        .selectFrom('export_package')
-        .select('id')
-        .where('work_id', '=', workId)
-        .execute(),
+      await t.db.selectFrom('export_package').select('id').where('work_id', '=', workId).execute(),
     ).toHaveLength(1);
   }, 120_000);
 });
