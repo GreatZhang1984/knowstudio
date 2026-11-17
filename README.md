@@ -38,4 +38,4 @@ pnpm test
 pnpm build
 ```
 
-以上命令等价于 `pnpm check`。GitHub 已配置 Actions：`main` 的 push 和 pull request 会启动 MySQL 8.4、Redis 7、MinIO、Node 22 与 ffmpeg，先执行 36 表迁移和种子，再跑完整检查。
+以上命令等价于 `pnpm check`。GitHub 已配置 Actions：`main` 的 push 和 pull request 会启动 MySQL 8.4、Redis 7、Node 22 与 ffmpeg，先执行 36 表迁移和种子，再跑完整检查。当前测试链路使用本地存储；MinIO S3 冒烟测试后续单独纳入 CI。

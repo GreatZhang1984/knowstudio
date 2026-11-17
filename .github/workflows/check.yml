@@ -16,7 +16,7 @@ permissions:
 jobs:
   check:
     name: Full check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     env:
@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -48,7 +48,7 @@ jobs:
           version: 10.33.0
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
@@ -61,16 +61,17 @@ jobs:
           docker compose version
 
       - name: Start infrastructure
-        run: docker compose --project-directory infra up -d mysql redis minio
+        # 当前检查链路使用 LOCAL_STORAGE_ROOT；MinIO S3 冒烟测试后续单独补，
+        # 先避免 CI 依赖可用性不稳定的 minio/minio:latest 镜像。
+        run: docker compose --project-directory infra up -d mysql redis
 
       - name: Wait for infrastructure
         run: |
           for i in $(seq 1 90); do
             mysql_status=$(docker inspect --format='{{.State.Health.Status}}' knowstudio-mysql84 2>/dev/null || echo missing)
             redis_status=$(docker exec knowstudio-redis7 redis-cli ping 2>/dev/null || echo missing)
-            minio_status=$(docker inspect --format='{{.State.Health.Status}}' knowstudio-minio 2>/dev/null || echo missing)
-            echo "mysql=$mysql_status redis=$redis_status minio=$minio_status"
-            if [ "$mysql_status" = healthy ] && [ "$redis_status" = PONG ] && [ "$minio_status" = healthy ]; then
+            echo "mysql=$mysql_status redis=$redis_status"
+            if [ "$mysql_status" = healthy ] && [ "$redis_status" = PONG ]; then
               exit 0
             fi
             sleep 2
