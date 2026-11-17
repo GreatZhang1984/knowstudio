@@ -24,20 +24,12 @@ jobs:
       MYSQL_DATABASE: knowstudio
       MYSQL_USER: knowstudio
       MYSQL_PASSWORD: knowstudio-ci-db
-      MINIO_ROOT_USER: knowstudio-ci-minio
-      MINIO_ROOT_PASSWORD: knowstudio-ci-minio-secret
       # GitHub runner 经宿主端口映射进入 Docker 网络时，mysql2 对业务账号的
       # caching_sha2 认证会稳定失败；CI 是一次性环境，迁移和测试直接用 root。
       DATABASE_URL: mysql://root:knowstudio-ci-root@127.0.0.1:3306/knowstudio
       KNOWSTUDIO_DB_USER: root
       KNOWSTUDIO_DB_PASSWORD: knowstudio-ci-root
       REDIS_URL: redis://127.0.0.1:6379
-      S3_ENDPOINT: http://127.0.0.1:9000
-      S3_REGION: us-east-1
-      S3_BUCKET: knowstudio-ci
-      S3_ACCESS_KEY_ID: knowstudio-ci-minio
-      S3_SECRET_ACCESS_KEY: knowstudio-ci-minio-secret
-      S3_FORCE_PATH_STYLE: 'true'
       JWT_SECRET: knowstudio-ci-jwt-secret-not-for-prod
       LOCAL_STORAGE_ROOT: ${{ github.workspace }}/.local-storage-ci
       NODE_OPTIONS: --max-old-space-size=4096
