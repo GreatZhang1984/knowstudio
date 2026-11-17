@@ -82,6 +82,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare CI database user
+        run: >
+          docker exec knowstudio-mysql84 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e
+          "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
+          ALTER USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
+          GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%'; FLUSH PRIVILEGES;"
+
       - name: Check database capabilities
         run: pnpm exec tsx packages/db/migrations/cli.ts capabilities
 
