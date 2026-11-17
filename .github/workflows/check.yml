@@ -89,6 +89,13 @@ jobs:
           ALTER USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
           GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%'; FLUSH PRIVILEGES;"
 
+      - name: Verify CI database login
+        run: |
+          printf 'env-password-sha256='
+          printf '%s' "$MYSQL_PASSWORD" | sha256sum | cut -d' ' -f1
+          node -e "const {createHash}=require('node:crypto'); const u=new URL(process.env.DATABASE_URL); console.log('url-password-sha256='+createHash('sha256').update(u.password).digest('hex'))"
+          docker exec knowstudio-mysql84 mysql -h127.0.0.1 -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e 'SELECT 1'
+
       - name: Check database capabilities
         run: pnpm exec tsx packages/db/migrations/cli.ts capabilities
 
