@@ -198,9 +198,10 @@ export async function migrate(options: MigrateOptions): Promise<MigrateResult> {
     const text = readFileSync(path.join(dir, file), 'utf8');
     const sha256 = createHash('sha256').update(text, 'utf8').digest('hex');
     const statements = splitSqlStatements(text);
+    const existing = new Set(await listTables(handle.db, handle.config.database));
 
     const recorded = entries.find((m) => m.id === id);
-    if (recorded !== undefined) {
+    if (recorded !== undefined && recorded.tablesCreated.every((table) => existing.has(table))) {
       if (recorded.sha256 !== sha256) {
         throw new MigrationChecksumMismatchError(id, recorded.sha256, sha256);
       }
@@ -208,7 +209,6 @@ export async function migrate(options: MigrateOptions): Promise<MigrateResult> {
       continue;
     }
 
-    const existing = new Set(await listTables(handle.db, handle.config.database));
     const created: string[] = [];
     const skippedTables: string[] = [];
 
@@ -241,7 +241,9 @@ export async function migrate(options: MigrateOptions): Promise<MigrateResult> {
       tablesSkipped: skippedTables,
     };
     applied.push(entry);
-    entries.push(entry);
+    const recordedIndex = entries.findIndex((m) => m.id === id);
+    if (recordedIndex >= 0) entries[recordedIndex] = entry;
+    else entries.push(entry);
   }
 
   const tables = await listTables(handle.db, handle.config.database);
