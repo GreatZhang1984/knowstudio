@@ -275,7 +275,7 @@ async function runDerivationClaim(
       .updateTable('render_job')
       .set({
         status: 'running',
-        stage: 'derive',
+        stage: 'mux',
         attempt: queueJob.attempt + 1,
         started_at: jobRow.started_at ?? nowLiteral(),
       })
@@ -318,12 +318,18 @@ async function runDerivationClaim(
       .where('platform_id', 'in', payloadPlatforms.length > 0 ? payloadPlatforms : ['-'])
       .execute();
     if (derivatives.length === 0) throw new Error('DERIVATIVE_METADATA_REQUIRED');
+    const audioFingerprint = fingerprint({
+      scriptVersion: script.row.version,
+      voiceId: masterHd.voice_id ?? 'voice_steady_male',
+      speed: Number(masterHd.speed),
+      kind: 'audio',
+    });
     const audioLayer = await db
       .selectFrom('asset_layer')
       .select(['id', 'storage_key'])
       .where('work_id', '=', jobRow.work_id)
       .where('kind', '=', 'audio')
-      .where('version', '=', script.row.version)
+      .where('input_fingerprint', '=', audioFingerprint)
       .orderBy('created_at', 'desc')
       .executeTakeFirst();
     if (audioLayer === undefined) throw new Error('AUDIO_LAYER_MISSING');
@@ -346,7 +352,7 @@ async function runDerivationClaim(
       const rule = rules.find((row) => row.platform_id === derivative.platform_id);
       if (rule === undefined) throw new Error('PLATFORM_RULE_MISSING');
       await event(db, queueJob.jobId, 'progress', {
-        stage: 'derive',
+        stage: 'mux',
         progress: Math.round((index / derivatives.length) * 90),
         platformId: derivative.platform_id,
       });

@@ -131,12 +131,19 @@ export function createWorkRepository(db: Kysely<Database>): WorkRepository {
        * 实例 ngram_token_size=2，1 个字符无法成词，若不降级会「不报错但返回空」——
        * 正是 §4.3.5 要消灭的静默失效。码点计数用 [...term] 而非 .length，
        * 避免把单个 astral 字符的 UTF-16 双码元误判成 2 字而错走全文路径。
+       * InnoDB 的 FULLTEXT 索引同步存在短暂窗口；多字查询再 OR 精确 LIKE，
+       * 保证新写入作品立即可搜，同时保留 ngram 的中文召回能力。
        */
       const withSearch = (qb: Base, q: string | undefined): Base => {
         const term = q?.trim();
         if (term === undefined || term === '') return qb;
         if ([...term].length >= 2) {
-          return qb.where(sql<boolean>`MATCH(title) AGAINST (${term} IN NATURAL LANGUAGE MODE)`);
+          return qb.where((eb) =>
+            eb.or([
+              sql<boolean>`MATCH(title) AGAINST (${term} IN NATURAL LANGUAGE MODE)`,
+              eb('title', 'like', `%${escapeLike(term)}%`),
+            ]),
+          );
         }
         return qb.where('title', 'like', `%${escapeLike(term)}%`);
       };

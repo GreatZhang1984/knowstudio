@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Full check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      MYSQL_ROOT_PASSWORD: knowstudio-ci-root
+      MYSQL_DATABASE: knowstudio
+      MYSQL_USER: knowstudio
+      MYSQL_PASSWORD: knowstudio-ci-db
+      MINIO_ROOT_USER: knowstudio-ci-minio
+      MINIO_ROOT_PASSWORD: knowstudio-ci-minio-secret
+      DATABASE_URL: mysql://knowstudio:knowstudio-ci-db@127.0.0.1:3306/knowstudio
+      REDIS_URL: redis://127.0.0.1:6379
+      S3_ENDPOINT: http://127.0.0.1:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: knowstudio-ci
+      S3_ACCESS_KEY_ID: knowstudio-ci-minio
+      S3_SECRET_ACCESS_KEY: knowstudio-ci-minio-secret
+      S3_FORCE_PATH_STYLE: 'true'
+      JWT_SECRET: knowstudio-ci-jwt-secret-not-for-prod
+      LOCAL_STORAGE_ROOT: ${{ github.workspace }}/.local-storage-ci
+      NODE_OPTIONS: --max-old-space-size=4096
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Show tool versions
+        run: |
+          node --version
+          pnpm --version
+          ffmpeg -version | head -n 1
+          docker compose version
+
+      - name: Start infrastructure
+        run: docker compose --project-directory infra up -d mysql redis minio
+
+      - name: Wait for infrastructure
+        run: |
+          for i in $(seq 1 90); do
+            mysql_status=$(docker inspect --format='{{.State.Health.Status}}' knowstudio-mysql84 2>/dev/null || echo missing)
+            redis_status=$(docker exec knowstudio-redis7 redis-cli ping 2>/dev/null || echo missing)
+            minio_status=$(docker inspect --format='{{.State.Health.Status}}' knowstudio-minio 2>/dev/null || echo missing)
+            echo "mysql=$mysql_status redis=$redis_status minio=$minio_status"
+            if [ "$mysql_status" = healthy ] && [ "$redis_status" = PONG ] && [ "$minio_status" = healthy ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose --project-directory infra ps
+          exit 1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check database capabilities
+        run: pnpm exec tsx packages/db/migrations/cli.ts capabilities
+
+      - name: Run migrations
+        run: pnpm exec tsx packages/db/migrations/cli.ts migrate
+
+      - name: Seed database
+        run: pnpm exec tsx packages/db/migrations/cli.ts seed
+
+      - name: Run full check
+        run: pnpm check

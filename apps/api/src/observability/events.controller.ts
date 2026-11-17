@@ -1,4 +1,13 @@
-import { BadRequestException, Controller, HttpCode, Inject, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  HttpCode,
+  Inject,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   RecordEventsRequest,
   ValidationFailed,
@@ -23,7 +32,10 @@ export class EventsController {
 
   @Post()
   @HttpCode(200)
-  async record(@Req() request: EventsRequest, body: unknown): Promise<RecordEventsResponse> {
+  async record(
+    @Req() request: EventsRequest,
+    @Body() body: unknown,
+  ): Promise<RecordEventsResponse> {
     const parsed = RecordEventsRequest.safeParse(body);
     if (!parsed.success) {
       throw new BadRequestException(

@@ -230,14 +230,15 @@ export class RenderService {
       .where('user_id', '=', userId)
       .orderBy('created_at', 'desc')
       .executeTakeFirst();
-    if (latestAssetId !== undefined) {
+    const patch = {
+      ...(input.templateId === undefined ? {} : { template_id: input.templateId }),
+      ...(input.voiceId === undefined ? {} : { voice_id: input.voiceId }),
+      ...(input.speed === undefined ? {} : { speed: input.speed.toFixed(3) }),
+    };
+    if (latestAssetId !== undefined && Object.keys(patch).length > 0) {
       await this.db
         .updateTable('video_asset')
-        .set({
-          ...(input.templateId === undefined ? {} : { template_id: input.templateId }),
-          ...(input.voiceId === undefined ? {} : { voice_id: input.voiceId }),
-          ...(input.speed === undefined ? {} : { speed: input.speed.toFixed(3) }),
-        })
+        .set(patch)
         .where('id', '=', latestAssetId.id)
         .execute();
     }
