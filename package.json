@@ -1,0 +1,46 @@
+{
+  "name": "knowstudio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "guards": "node scripts/check-publish-adapters.mjs",
+    "boundaries": "depcruise --config .dependency-cruiser.cjs apps packages",
+    "openapi": "pnpm --filter @knowstudio/contracts openapi",
+    "build": "pnpm --filter @knowstudio/web build",
+    "dev": "pnpm --filter @knowstudio/web dev",
+    "worker": "pnpm --filter @knowstudio/worker dev",
+    "check": "pnpm lint && pnpm typecheck && pnpm guards && pnpm boundaries && pnpm test && pnpm build"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/archiver": "^8.0.0",
+    "@types/node": "^22.19.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "dependency-cruiser": "18.7.2",
+    "eslint": "^9.39.0",
+    "globals": "^15.15.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.6.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vite": "6.4.6",
+    "vitest": "3.2.7"
+  }
+}

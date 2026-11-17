@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "migrations": [
+    {
+      "id": "0001_baseline",
+      "sha256": "2da4a7b4d531bb43247fe42c3e90e3fadd97084b1e25b52a7280c6c31eafab8f",
+      "appliedAt": "2026-11-13T02:06:01.843Z",
+      "statementCount": 36,
+      "tablesCreated": [
+        "app_user",
+        "style_sample",
+        "style_profile",
+        "work",
+        "material",
+        "work_material",
+        "search_session",
+        "topic_batch",
+        "topic",
+        "script",
+        "script_section",
+        "script_line",
+        "script_revision",
+        "style_hunk",
+        "script_variant",
+        "asset_layer",
+        "video_asset",
+        "video_asset_layer",
+        "render_job",
+        "render_job_event",
+        "platform_rule",
+        "derivative",
+        "compliance_report",
+        "export_package",
+        "quota_account",
+        "quota_reservation",
+        "quota_ledger",
+        "trend",
+        "job_queue",
+        "metric_snapshot",
+        "idempotency_record",
+        "analytics_event",
+        "ai_call_log",
+        "audit_log",
+        "voice_catalog",
+        "template_catalog"
+      ],
+      "tablesSkipped": []
+    }
+  ]
+}

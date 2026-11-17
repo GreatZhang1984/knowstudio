@@ -1,0 +1,32 @@
+{
+  "name": "@knowstudio/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/main.ts",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@knowstudio/ai": "workspace:*",
+    "@knowstudio/compliance": "workspace:*",
+    "@knowstudio/contracts": "workspace:*",
+    "@knowstudio/db": "workspace:*",
+    "@knowstudio/domain": "workspace:*",
+    "@knowstudio/gates": "workspace:*",
+    "@knowstudio/observability": "workspace:*",
+    "@knowstudio/redis": "workspace:*",
+    "@knowstudio/queue": "workspace:*",
+    "@knowstudio/quota": "workspace:*",
+    "@knowstudio/storage": "workspace:*",
+    "@nestjs/common": "^11.2.9",
+    "@nestjs/config": "^12.1.1",
+    "@nestjs/core": "^11.2.10",
+    "@nestjs/jwt": "^12.0.4",
+    "@nestjs/platform-express": "^11.2.10",
+    "@node-rs/argon2": "^2.2.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  }
+}

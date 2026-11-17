@@ -1,0 +1,354 @@
+/**
+ * 异常态基座样式（T-08）。
+ * 颜色一律走 tokens.css 变量：容器底色只用 --bg-2 / --surface / --surface-2 / --overlay，
+ * 不引入第六个表面；tone 只染强调条与圆点，文本一律 --text / --text-2 / --muted。
+ * 实测记录见 ../CONTRAST.md 第四节。
+ */
+
+.ks-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ks-state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--text-2);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.ks-state[data-tone='info'] {
+  border-left-color: var(--info);
+}
+
+.ks-state[data-tone='success'] {
+  border-left-color: var(--success);
+}
+
+.ks-state[data-tone='warning'] {
+  border-left-color: var(--warning);
+}
+
+.ks-state[data-tone='danger'] {
+  border-left-color: var(--danger);
+}
+
+.ks-state[data-level='inline'] {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.ks-state[data-level='banner'] {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.ks-state[data-level='page'] {
+  padding: 32px 28px;
+  background: var(--surface);
+}
+
+.ks-state__main {
+  display: flex;
+  flex: 1 1 320px;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ks-state__icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 15px;
+}
+
+.ks-state__text {
+  min-width: 0;
+}
+
+.ks-state__title {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ks-state__desc {
+  margin: 0;
+  color: var(--text-2);
+}
+
+.ks-state__notice {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ks-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 主行动只加字重与描边，不换底色：AntD primary 的白字落在 teal 上实测 1.85:1（见 CONTRAST.md 第四节）。 */
+.ks-state__btn[data-primary='true'] {
+  border-color: var(--text-2);
+  font-weight: 600;
+}
+
+/* ── 空态 ───────────────────────────────────────────── */
+
+.ks-empty {
+  align-items: center;
+}
+
+.ks-empty[data-level='page'] {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* ── 加载态（自建骨架） ─────────────────────────────── */
+
+.ks-loading {
+  position: relative;
+}
+
+.ks-loading__grid {
+  display: grid;
+  gap: 12px;
+  animation: ks-skel-breathe 1.4s ease-in-out infinite;
+}
+
+.ks-loading[data-variant='cards'] .ks-loading__grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.ks-loading[data-variant='grid'] .ks-loading__grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ks-loading[data-variant='list'] .ks-loading__grid,
+.ks-loading[data-variant='text'] .ks-loading__grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ks-loading[data-variant='inline'] .ks-loading__grid {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 240px;
+}
+
+.ks-skel__card,
+.ks-skel__cell,
+.ks-skel__para {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.ks-skel__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.ks-skel__lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ks-skel__bar {
+  display: block;
+  height: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  /* 浅色主题下 surface-2 与 surface 差值很小，用 --line 内描边保证形状可辨（非文本，AA 3:1）。 */
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.ks-skel__thumb {
+  display: block;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.ks-skel__dot {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.ks-loading__hint {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* 已有内容降透明 + 骨架覆盖（SPEC §9 选题脑暴）。降透明层 aria-hidden 且不可交互。 */
+.ks-loading__behind {
+  opacity: 0.45;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ks-loading[data-overlay='true'] .ks-loading__grid {
+  position: absolute;
+  inset: 0;
+  align-content: start;
+}
+
+@keyframes ks-skel-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ks-loading__grid {
+    animation: none;
+  }
+}
+
+/* ── 部分成功态 ─────────────────────────────────────── */
+
+.ks-partial__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ks-partial__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.ks-partial__badge {
+  flex: 0 0 auto;
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--overlay);
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.ks-partial__item[data-status='failed'] .ks-partial__badge {
+  border-color: var(--danger);
+  color: var(--text);
+}
+
+.ks-partial__item[data-status='success'] .ks-partial__badge {
+  border-color: var(--success);
+}
+
+.ks-partial__label {
+  color: var(--text);
+}
+
+.ks-partial__detail {
+  flex: 1 1 200px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ── 离线横幅 ───────────────────────────────────────── */
+
+.ks-offline {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.ks-offline__dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--text-2);
+}
+
+.ks-offline[data-tone='warning'] .ks-offline__dot {
+  background: var(--warning);
+}
+
+.ks-offline[data-tone='danger'] .ks-offline__dot {
+  background: var(--danger);
+}
+
+.ks-offline[data-tone='success'] .ks-offline__dot {
+  background: var(--success);
+}
+
+.ks-offline[data-tone='info'] .ks-offline__dot {
+  background: var(--info);
+}
+
+.ks-offline__text {
+  flex: 1 1 260px;
+  margin: 0;
+  color: var(--text);
+}
+
+.ks-offline__actions {
+  display: flex;
+  gap: 8px;
+}

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>知影工坊 KnowStudio</title>
+    <script>
+      // 首帧前落 data-theme：等 React 挂载再切会闪一次深色（架构 §11.1 首屏策略）。
+      // key 与 src/store/ui.ts 的 THEME_KEY 一致。
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem('knowstudio.theme') === 'light' ? 'light' : 'dark';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
+    <style>
+      /* 关键 CSS：只够画出 app shell 骨架，完整 token 由 @knowstudio/ui/tokens.css 接管。 */
+      html {
+        background: #0d1017;
+        color-scheme: dark;
+      }
+      html[data-theme='light'] {
+        background: #eef1f6;
+        color-scheme: light;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      }
+      .boot {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        min-height: 100vh;
+      }
+      .boot__side {
+        background: #161b27;
+        border-right: 1px solid #2a3348;
+      }
+      .boot__bar {
+        height: 56px;
+        border-bottom: 1px solid #2a3348;
+      }
+      html[data-theme='light'] .boot__side {
+        background: #ffffff;
+        border-color: #d7ddea;
+      }
+      html[data-theme='light'] .boot__bar {
+        border-color: #d7ddea;
+      }
+      @media (max-width: 959px) {
+        .boot {
+          grid-template-columns: 1fr;
+        }
+        .boot__side {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot" aria-hidden="true">
+        <div class="boot__side"></div>
+        <div><div class="boot__bar"></div></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

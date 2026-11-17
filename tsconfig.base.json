@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "useDefineForClassFields": true,
+    // NestJS 11 需要 TS 实验装饰器。刻意不开 emitDecoratorMetadata：
+    // tsx 与 vitest 都走 esbuild，esbuild 不生成设计期类型元数据，
+    // 开了会造成「tsc 通过但运行时注入 undefined」的假绿。故 DI 一律用显式 @Inject(TOKEN)。
+    "experimentalDecorators": true
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@knowstudio/compliance": ["packages/compliance/src/index.ts"],
+      "@knowstudio/ai": ["packages/ai/src/index.ts"],
+      "@knowstudio/contracts": ["packages/contracts/src/index.ts"],
+      "@knowstudio/domain": ["packages/domain/src/index.ts"],
+      "@knowstudio/gates": ["packages/gates/src/index.ts"],
+      "@knowstudio/ui": ["packages/ui/src/index.ts"],
+      "@knowstudio/db": ["packages/db/src/index.ts"],
+      "@knowstudio/db/repositories": ["packages/db/src/repositories/index.ts"],
+      "@knowstudio/storage": ["packages/storage/src/index.ts"],
+      "@knowstudio/redis": ["packages/redis/src/index.ts"],
+      "@knowstudio/quota": ["packages/quota/src/index.ts"],
+      "@knowstudio/queue": ["packages/queue/src/index.ts"],
+      "@knowstudio/media": ["packages/media/src/index.ts"]
+      ,"@knowstudio/observability": ["packages/observability/src/index.ts"],
+      "@knowstudio/observability/browser": ["packages/observability/src/browser.ts"]
+    }
+  },
+  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "packages/**/*.tsx", "*.ts"],
+  "exclude": ["**/dist/**", "node_modules"]
+}

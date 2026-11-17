@@ -1,0 +1,304 @@
+{
+  "meta": {
+    "source": "SPEC §4.3 种子数据（开发/测试 fixtures，取自原型）",
+    "task": "T-03",
+    "notes": [
+      "计数口径由 SPEC 明写：作品 3 / 素材 10 / 选题 12 / 文案 10 行 212 字 / 配额 total 60 used 22 left 38 / 音色 4 / 模板 4 / 平台 4 / 素材库 8。",
+      "ID 用 key（w1/k1/t01…）表示原型简写；落库时由 seed.ts 转成架构 §4.3.2 约定的「前缀_ + 26 位 ULID」。",
+      "所有 license/sample/manifest 链接一律 fixture:// 占位，不是真实外链，也不是真实商用凭证。",
+      "progress 不入库（架构 §4.4：由 domain.progressOf(step) 派生），故此处只给 step。"
+    ]
+  },
+  "user": {
+    "key": "u1",
+    "name": "李知夏",
+    "email": "lizhixia@example.invalid",
+    "phone": null,
+    "planId": "creator_168",
+    "theme": "dark",
+    "domainPrefs": ["学习方法", "认知科学"],
+    "defaultPlatforms": ["douyin", "sph", "bili", "xhs"]
+  },
+  "works": [
+    {
+      "key": "w1",
+      "title": "费曼学习法：为什么你学了就忘",
+      "keyword": "费曼学习法",
+      "step": "script",
+      "selectedTopicKey": "t03",
+      "scriptConfirmed": false,
+      "minutesAgo": 10,
+      "gates": { "G1": true, "G2": false, "G3": false, "G4": false }
+    },
+    {
+      "key": "w2",
+      "title": "番茄工作法：25 分钟为什么有效",
+      "keyword": "番茄工作法",
+      "step": "video.draft",
+      "selectedTopicKey": null,
+      "scriptConfirmed": false,
+      "minutesAgo": 120,
+      "gates": { "G1": false, "G2": false, "G3": false, "G4": false }
+    },
+    {
+      "key": "w3",
+      "title": "刻意练习：天才是怎么练出来的",
+      "keyword": "刻意练习",
+      "step": "done",
+      "selectedTopicKey": null,
+      "scriptConfirmed": false,
+      "minutesAgo": 1440,
+      "exported": true,
+      "gates": { "G1": false, "G2": false, "G3": false, "G4": false }
+    }
+  ],
+  "materials": [
+    {
+      "key": "k1",
+      "type": "knowledge",
+      "title": "费曼学习法：用输出倒逼输入",
+      "source": "知乎",
+      "sourceColor": "#0084ff",
+      "license": "cleared",
+      "licenseEvidence": { "type": "commercial_use_grant", "url": "fixture://license/k1", "uploadedAt": "2026-11-01 00:00:00.000" },
+      "tags": ["学习法", "费曼", "可商用"],
+      "meta": { "agrees": 12800 },
+      "bodyText": "费曼学习法的核心是把学到的东西用简单的话讲出来，讲不清楚的地方就是没懂的地方。",
+      "library": true
+    },
+    {
+      "key": "k2",
+      "type": "knowledge",
+      "title": "为什么重复阅读是最低效的学习",
+      "source": "公众号",
+      "sourceColor": "#07c160",
+      "license": "restricted",
+      "licenseEvidence": null,
+      "tags": ["学习法", "参考重述"],
+      "meta": { "reads": 43000 },
+      "bodyText": "重复阅读带来熟悉感，而熟悉感常被误当成理解，提取练习才是更有效的记忆方式。",
+      "library": true
+    },
+    {
+      "key": "k3",
+      "type": "knowledge",
+      "title": "认知天性·检索练习摘录",
+      "source": "书籍《认知天性》",
+      "sourceColor": "#8b5cf6",
+      "license": "restricted",
+      "licenseEvidence": null,
+      "tags": ["需授权", "检索练习", "书籍"],
+      "meta": { "book": "认知天性", "chapter": "检索练习" },
+      "bodyText": "检索练习之所以有效，是因为它迫使大脑重建知识，而不是被动地重新识别。",
+      "library": true
+    },
+    {
+      "key": "k4",
+      "type": "knowledge",
+      "title": "把知识讲给外行听的四个步骤",
+      "source": "知乎",
+      "sourceColor": "#0084ff",
+      "license": "cleared",
+      "licenseEvidence": { "type": "commercial_use_grant", "url": "fixture://license/k4", "uploadedAt": "2026-11-02 00:00:00.000" },
+      "tags": ["学习法", "费曼", "可商用"],
+      "meta": { "agrees": 6400 },
+      "bodyText": "选概念、讲给外行、定位卡点、简化重讲，这四步构成一个闭环。",
+      "library": true
+    },
+    {
+      "key": "h1",
+      "type": "hot",
+      "title": "假装努力",
+      "source": "抖音",
+      "sourceColor": "#fe2c55",
+      "license": "unknown",
+      "licenseEvidence": null,
+      "tags": ["热点", "假装努力"],
+      "meta": { "lifecycle": "rising", "windowHours": 24 },
+      "bodyText": null,
+      "library": true
+    },
+    {
+      "key": "h2",
+      "type": "hot",
+      "title": "期末复习",
+      "source": "B站",
+      "sourceColor": "#00a1d6",
+      "license": "unknown",
+      "licenseEvidence": null,
+      "tags": ["热点", "期末复习"],
+      "meta": { "lifecycle": "peaked", "windowHours": 72 },
+      "bodyText": null,
+      "library": true
+    },
+    {
+      "key": "h3",
+      "type": "hot",
+      "title": "技能焦虑",
+      "source": "微博",
+      "sourceColor": "#ff8200",
+      "license": "unknown",
+      "licenseEvidence": null,
+      "tags": ["热点", "技能焦虑"],
+      "meta": { "lifecycle": "rising", "windowHours": 12 },
+      "bodyText": null,
+      "library": true
+    },
+    {
+      "key": "p1",
+      "type": "peer",
+      "title": "三分钟讲透费曼学习法",
+      "source": "抖音",
+      "sourceColor": "#fe2c55",
+      "license": "unknown",
+      "licenseEvidence": null,
+      "tags": ["同行爆款", "同质化高"],
+      "meta": { "likes": 520000, "homogeneity": "high" },
+      "bodyText": null,
+      "library": true
+    },
+    {
+      "key": "p2",
+      "type": "peer",
+      "title": "我是怎么靠讲故事学会物理的",
+      "source": "B站",
+      "sourceColor": "#00a1d6",
+      "license": "unknown",
+      "licenseEvidence": null,
+      "tags": ["同行爆款", "故事化"],
+      "meta": { "plays": 1800000, "style": "故事化" },
+      "bodyText": null,
+      "library": false
+    },
+    {
+      "key": "p3",
+      "type": "peer",
+      "title": "费曼学习法模板直接抄",
+      "source": "小红书",
+      "sourceColor": "#ff2442",
+      "license": "unknown",
+      "licenseEvidence": null,
+      "tags": ["同行爆款", "工具化"],
+      "meta": { "collects": 80000, "style": "工具化" },
+      "bodyText": null,
+      "library": false
+    }
+  ],
+  "collected": ["k1", "h1"],
+  "topicBatch": {
+    "key": "tb1",
+    "workKey": "w1",
+    "batchIndex": 1,
+    "basedOnMaterialKeys": ["k1", "h1"],
+    "effectiveCount": 12,
+    "regenAttempts": 0
+  },
+  "topics": [
+    { "key": "t01", "hook": "为什么你学了就忘？大脑在骗你", "angle": "反常识切入·记忆机制", "blankPoint": "熟悉感被误当成理解", "basis": ["k1", "k2"] },
+    { "key": "t02", "hook": "费曼学习法：把知识讲成人话", "angle": "方法拆解·四步流程", "blankPoint": "只讲概念不讲步骤", "basis": ["k1", "k4"] },
+    { "key": "t03", "hook": "你以为的懂，只是认得", "angle": "认知错觉·熟悉感不等于理解", "blankPoint": "没人区分认得与讲得出", "basis": ["k2", "k3"] },
+    { "key": "t04", "hook": "学完就忘，是因为你从没输出过", "angle": "输入输出失衡·提取练习", "blankPoint": "只输入不提取", "basis": ["k3"] },
+    { "key": "t05", "hook": "讲给外行听，是最狠的自测", "angle": "受众降维·外行检验", "blankPoint": "自测对象选错", "basis": ["k4"] },
+    { "key": "t06", "hook": "卡壳的那一句，才是你的漏洞", "angle": "错误定位·卡点即缺口", "blankPoint": "卡点被当成失败而非线索", "basis": ["k1", "k4"] },
+    { "key": "t07", "hook": "费曼×职场汇报：把方案讲清楚", "angle": "场景迁移·职场汇报", "blankPoint": "学习法没迁到汇报场景", "basis": ["k1"] },
+    { "key": "t08", "hook": "费曼×假装努力：你在表演学习", "angle": "热点结合·假装努力", "blankPoint": "热点与方法论未打通", "basis": ["h1", "k1"] },
+    { "key": "t09", "hook": "费曼×卡片笔记：把书读成自己的", "angle": "工具结合·卡片笔记", "blankPoint": "笔记工具与输出脱节", "basis": ["k3", "k4"] },
+    { "key": "t10", "hook": "一天讲一个概念，30 天后变了", "angle": "习惯养成·最小行动", "blankPoint": "缺少可执行的最小单位", "basis": ["k1"] },
+    { "key": "t11", "hook": "为什么学霸都在用这套方法", "angle": "社会证明·群体背书", "blankPoint": "只有方法没有证据", "basis": ["k2", "p1"] },
+    { "key": "t12", "hook": "把知识『翻译』成人话的能力，值多少钱", "angle": "价值升华·职场竞争力", "blankPoint": "没把能力换算成价值", "basis": ["k1", "h3"] }
+  ],
+  "script": {
+    "key": "sc1",
+    "workKey": "w1",
+    "estimatedDuration": 50,
+    "sections": [
+      {
+        "kind": "hook3s",
+        "rangeStart": 0,
+        "rangeEnd": 3,
+        "lines": [
+          "你有没有过这种经历：书看了三遍，一合上就想不起来。",
+          "不是你笨，是你一直在用错误的方式学习。"
+        ]
+      },
+      {
+        "kind": "body",
+        "rangeStart": 3,
+        "rangeEnd": 50,
+        "lines": [
+          "费曼学习法的核心只有一句话：能用大白话讲清楚，才算学会。",
+          "第一步，选一个概念，写在纸的最上面。",
+          "第二步，假装讲给完全不懂的人听，不许用术语。",
+          "第三步，卡住的地方就是漏洞，回去重看资料。",
+          "第四步，把讲稿改得更简单，再讲一遍。",
+          "记住，讲不出来不是记性差，是理解没到位。"
+        ]
+      },
+      {
+        "kind": "outro",
+        "rangeStart": 50,
+        "rangeEnd": 60,
+        "lines": [
+          "今晚就挑一个概念，讲给自己听一遍。",
+          "评论区告诉我你卡在哪一步，关注我，下期讲怎么补。"
+        ]
+      }
+    ]
+  },
+  "search": {
+    "key": "ss1",
+    "workKey": "w1",
+    "keyword": "费曼学习法",
+    "domain": "学习方法",
+    "status": "succeeded",
+    "saturation": {
+      "score": 72,
+      "level": "讲的人很多 · 还有空间",
+      "sampleSize": 10,
+      "coveredPlatforms": ["douyin", "bili", "xhs"],
+      "sources": ["知乎", "公众号", "抖音", "B站", "微博", "小红书"]
+    },
+    "blankAngles": ["费曼×职场汇报", "费曼×「假装努力」热点", "费曼×卡片笔记"]
+  },
+  "quota": {
+    "planId": "creator_168",
+    "total": 60,
+    "used": 22,
+    "reserved": 0,
+    "hdPointsPerRender": 2,
+    "commitWorkKeys": ["w3", "w3", "w3", "w3", "w3", "w3", "w2", "w2", "w2", "w2", "w2"]
+  },
+  "styleProfile": {
+    "catchphrases": [],
+    "sentencePatterns": [],
+    "casePreferences": [],
+    "tone": null,
+    "sampleCount": 0,
+    "version": 1,
+    "isDefault": 1
+  },
+  "platformRules": [
+    { "platformId": "douyin", "version": 1, "name": "抖音", "ratio": "9:16", "maxDuration": 60, "orient": "vertical", "brandColor": "#fe2c55", "styleHint": "情绪强·节奏快", "titleMax": 30, "titleHardMax": 60, "tagMax": 4, "bannedPatterns": [], "isCurrent": 1 },
+    { "platformId": "sph", "version": 1, "name": "视频号", "ratio": "9:16", "maxDuration": 60, "orient": "vertical", "brandColor": "#07c160", "styleHint": "稳重·可信", "titleMax": 30, "titleHardMax": 60, "tagMax": 3, "bannedPatterns": [], "isCurrent": 1 },
+    { "platformId": "bili", "version": 1, "name": "B站", "ratio": "16:9", "maxDuration": 90, "orient": "horizontal", "brandColor": "#00a1d6", "styleHint": "深入·干货", "titleMax": 80, "titleHardMax": 160, "tagMax": 4, "bannedPatterns": [], "isCurrent": 1 },
+    { "platformId": "xhs", "version": 1, "name": "小红书", "ratio": "9:16", "maxDuration": 60, "orient": "vertical", "brandColor": "#ff2442", "styleHint": "亲和·种草", "titleMax": 30, "titleHardMax": 60, "tagMax": 4, "bannedPatterns": [], "isCurrent": 1 }
+  ],
+  "voices": [
+    { "key": "v1", "id": "voice_steady_male", "provider": "cosyvoice", "name": "沉稳男声·知性", "gender": "male", "timbre": "知性", "ord": 1 },
+    { "key": "v2", "id": "voice_bright_female", "provider": "cosyvoice", "name": "清亮女声·亲和", "gender": "female", "timbre": "亲和", "ord": 2 },
+    { "key": "v3", "id": "voice_magnetic_male", "provider": "cosyvoice", "name": "磁性男声·叙事", "gender": "male", "timbre": "叙事", "ord": 3 },
+    { "key": "v4", "id": "voice_lively_female", "provider": "cosyvoice", "name": "活力女声·轻快", "gender": "female", "timbre": "轻快", "ord": 4 }
+  ],
+  "templates": [
+    { "key": "tpl1", "id": "tpl_ink_minimal", "name": "墨白极简", "version": 1, "palette": { "slA": "#ffffff", "slB": "#111111", "slAccent": "#333333" }, "fontFamily": "思源黑体", "ord": 1 },
+    { "key": "tpl2", "id": "tpl_violet_knowledge", "name": "紫韵知识", "version": 1, "palette": { "slA": "#f5f3ff", "slB": "#2e1065", "slAccent": "#8b5cf6" }, "fontFamily": "思源黑体", "ord": 2 },
+    { "key": "tpl3", "id": "tpl_warm_classroom", "name": "暖橙课堂", "version": 1, "palette": { "slA": "#fff7ed", "slB": "#7c2d12", "slAccent": "#f97316" }, "fontFamily": "思源黑体", "ord": 3 },
+    { "key": "tpl4", "id": "tpl_coral_energy", "name": "珊瑚活力", "version": 1, "palette": { "slA": "#fff1f2", "slB": "#881337", "slAccent": "#fb7185" }, "fontFamily": "思源黑体", "ord": 4 }
+  ],
+  "pageTypes": ["标题页", "核心概念页", "步骤页", "结尾页"],
+  "trends": [
+    { "key": "tr1", "materialKey": "h1", "domain": "学习方法", "name": "假装努力", "lifecycle": "rising", "windowHours": 24, "source": "抖音", "heat": null },
+    { "key": "tr2", "materialKey": "h2", "domain": "学习方法", "name": "期末复习", "lifecycle": "peaked", "windowHours": 72, "source": "B站", "heat": null },
+    { "key": "tr3", "materialKey": "h3", "domain": "职场技能", "name": "技能焦虑", "lifecycle": "rising", "windowHours": 12, "source": "微博", "heat": null }
+  ]
+}

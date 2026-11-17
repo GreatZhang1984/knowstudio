@@ -1,0 +1,108 @@
+/**
+ * SPEC §2.4 基础 token 的 CSS 侧。值与 src/tokens.ts 的 PALETTE 一一对应，
+ * 由 test/tokens-css.test.ts 逐项比对，防止两侧漂移。
+ * 主题切换只换 data-theme，组件里不出现 mode 分叉，也就没有切换闪烁。
+ */
+
+:root {
+  --bg: #0d1017;
+  --bg-2: #11151f;
+  --surface: #161b27;
+  --surface-2: #1c2333;
+  --overlay: #232c40;
+  --line: #2a3348;
+  --text: #eef1f8;
+  --text-2: #aab3c8;
+  --muted: #8a93a8;
+
+  --teal: #2dd4bf;
+  --amber: #f5a524;
+  --violet: #a78bfa;
+  --coral: #fb7185;
+  --teal-dim: #134e4a;
+  --amber-dim: #4a3410;
+  --violet-dim: #3b2f63;
+  --coral-dim: #4c1f2a;
+
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #60a5fa;
+
+  /* 容器级阶段色，默认「搜」；由 Work 上下文容器按 phase 覆盖（架构 §11.4）。 */
+  --stage-c: var(--teal);
+  --stage-dim: var(--teal-dim);
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --sidebar-w: 250px;
+  --topbar-h: 56px;
+  --font-sans: Inter, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --bg: #eef1f6;
+  --bg-2: #f6f8fc;
+  --surface: #ffffff;
+  --surface-2: #f4f6fb;
+  --overlay: #ffffff;
+  --line: #d7ddea;
+  --text: #141a26;
+  --text-2: #475069;
+  --muted: #646d84;
+
+  --teal-dim: #d3f5ef;
+  --amber-dim: #fbeed3;
+  --violet-dim: #e9e2fb;
+  --coral-dim: #fbe2e7;
+
+  --shadow: 0 18px 50px rgba(20, 26, 38, 0.12);
+
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: var(--radius-sm);
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}

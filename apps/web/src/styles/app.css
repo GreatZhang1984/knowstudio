@@ -1,0 +1,1528 @@
+/* 工作台外壳。颜色全部走 @knowstudio/ui/tokens.css 的变量，断点与 SPEC §2.1 一致。 */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.shell[data-bp='medium'],
+.shell[data-bp='narrow'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shell__side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+}
+
+.shell__main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.shell__content {
+  padding: 20px;
+}
+
+.sidebar {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 12px;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sidebar__brand span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-link {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.nav-link.is-active {
+  background: var(--stage-dim);
+  box-shadow: inset 2px 0 0 var(--stage-c);
+  color: var(--text);
+}
+
+.sidebar__work {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+}
+
+.sidebar__caption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.sidebar__work-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.sidebar__empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sidebar__quota {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  height: var(--topbar-h);
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.topbar__spacer {
+  flex: 1;
+}
+
+.quota-pill {
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.quota__head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.quota__head strong {
+  color: var(--text);
+}
+
+.quota__track {
+  display: flex;
+  height: 8px;
+  margin: 6px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.quota__seg[data-kind='used'] {
+  background: var(--muted);
+}
+
+.quota__seg[data-kind='reserved'] {
+  background: var(--warning);
+}
+
+.quota__seg[data-kind='left'] {
+  background: var(--teal);
+}
+
+.quota__legend {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.page-stub {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.page-stub__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-stub__head h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.page-stub__note {
+  margin: 0;
+  color: var(--text-2);
+}
+
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.shell[data-bp='medium'] .page-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shell[data-bp='narrow'] .page-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bare-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+/* T-14 分片容器的临时消费点：本地草稿（T-31 编辑器落地后替换）。 */
+.work-draft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.work-draft__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.work-draft__tag {
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.work-draft__tag[data-dirty='true'] {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.work-draft__undo {
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.work-draft__undo:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.work-draft__input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-2);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+/* T-22 素材搜索：信息密度优先，阶段色只作为“搜”阶段的导航与数据强调。 */
+.discover-page {
+  display: grid;
+  gap: 16px;
+}
+
+.discover-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.discover-head h1,
+.discover-summary h2,
+.discover-materials__group h3,
+.discover-material h3 {
+  margin: 0;
+}
+
+.discover-head h1 {
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.discover-head p {
+  margin: 4px 0 0;
+  color: var(--text-2);
+}
+
+.discover-head__work {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.discover-head__work strong {
+  max-width: 280px;
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+}
+
+.discover-form {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.discover-form__main {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 0.8fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.discover-form label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.discover-form__examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.discover-form__issue {
+  margin-left: auto;
+  color: var(--warning);
+}
+
+.discover-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.discover-summary__main {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+}
+
+.discover-gauge {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.discover-gauge svg {
+  display: block;
+  width: 180px;
+  aspect-ratio: 180 / 104;
+}
+
+.discover-gauge__score,
+.discover-gauge__caption {
+  fill: var(--text);
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+.discover-gauge__score {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.discover-gauge__caption {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
+.discover-gauge__warning {
+  margin: 0;
+  color: var(--warning);
+  font-size: 12px;
+}
+
+.discover-gauge__details {
+  min-width: 0;
+}
+
+.discover-gauge__details dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.discover-gauge__details dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.discover-gauge__details dd {
+  margin: 2px 0 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.discover-gauge__sources {
+  margin: 12px 0 0;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.discover-angles {
+  min-width: 0;
+  padding-left: 16px;
+  border-left: 1px solid var(--line);
+}
+
+.discover-angles h2 {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.discover-angles > p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.discover-angles ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.discover-angles a {
+  display: block;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.discover-angles a:hover {
+  border-color: var(--teal);
+}
+
+.discover-materials {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.discover-materials__group {
+  min-width: 0;
+}
+
+.discover-materials__group > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.discover-materials__group h3 {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.discover-materials__group > header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.discover-materials__group > p {
+  margin: 8px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.discover-materials__group {
+  display: grid;
+  align-content: start;
+  gap: 0;
+}
+
+.discover-material {
+  display: grid;
+  min-height: 180px;
+  align-content: start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.discover-material + .discover-material {
+  margin-top: 10px;
+}
+
+.discover-material header,
+.discover-material footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.discover-material__source {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.discover-material__source i {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--teal);
+}
+
+.discover-material__license {
+  margin-inline-end: 0;
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.discover-material__license[data-license='cleared'] {
+  border-color: var(--success);
+  color: var(--text);
+}
+
+.discover-material__license[data-license='restricted'],
+.discover-material__license[data-license='unknown'] {
+  border-color: var(--warning);
+  color: var(--text);
+}
+
+.discover-material h3 {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.discover-material p {
+  display: -webkit-box;
+  min-height: 42px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 13px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.discover-material footer {
+  margin-top: auto;
+}
+
+.discover-material footer a,
+.discover-material__linkless {
+  min-width: 0;
+  color: var(--teal);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.discover-material__linkless {
+  color: var(--muted);
+}
+
+.discover-action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--overlay);
+  box-shadow: var(--shadow);
+}
+
+.discover-action-bar > div:first-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.discover-action-bar strong {
+  color: var(--text);
+}
+
+.discover-action-bar span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.discover-action-bar > div:last-of-type {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.discover-action-bar__secondary {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.discover-action-bar__secondary:hover {
+  color: var(--text);
+}
+
+.discover-action-bar__work {
+  display: none;
+}
+
+.discover-undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* T-23 素材库最小可用。 */
+.library-page,
+.topics-page {
+  display: grid;
+  gap: 16px;
+}
+
+.library-filter {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 150px 150px auto;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* T-49 配额与成本。 */
+.settings-page {
+  display: grid;
+  gap: 16px;
+}
+
+.quota-page {
+  display: grid;
+  gap: 16px;
+}
+
+.quota-page__summary {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.4fr) repeat(2, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.quota-page__summary p {
+  margin: 0 0 6px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.quota-page__summary p:last-child {
+  margin-bottom: 0;
+}
+
+.library-card {
+  display: grid;
+  min-height: 172px;
+  align-content: start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.library-card header,
+.library-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.library-card header span {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.library-card h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.library-card p {
+  display: -webkit-box;
+  min-height: 42px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 13px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.library-card footer {
+  margin-top: auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.library-card footer strong {
+  color: var(--teal);
+}
+
+/* T-27 选题脑暴。 */
+.topics-head__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.topic-card {
+  display: grid;
+  min-height: 164px;
+  align-content: start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.topic-card:hover,
+.topic-card[data-active='true'] {
+  border-color: var(--amber);
+  background: var(--surface-2);
+}
+
+.topic-card__ord {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.topic-card strong {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.topic-card p {
+  display: -webkit-box;
+  min-height: 42px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 13px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.topic-card footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.topics-work {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.topics-work a {
+  color: var(--text-2);
+}
+
+/* T-16/T-28～T-34 文案编辑与风格样本。 */
+.script-page,
+.style-page {
+  display: grid;
+  gap: 16px;
+}
+
+.script-head__meta,
+.script-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.script-toolbar {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.script-sections {
+  display: grid;
+  gap: 12px;
+}
+
+.script-section {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--violet);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.script-section header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.script-section h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.script-section header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.script-line {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.script-line__ord {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 34px;
+  text-align: right;
+}
+
+.script-line__editor {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  line-height: 1.6;
+  outline: none;
+  overflow-wrap: anywhere;
+}
+
+.script-line__editor:hover {
+  border-color: var(--line);
+}
+
+.script-line__editor:focus {
+  border-color: var(--violet);
+  background: var(--bg-2);
+}
+
+.script-line__editor:empty::before {
+  color: var(--muted);
+  content: attr(data-placeholder);
+}
+
+.script-style {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.script-style header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.script-style h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.script-style > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.script-style ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.script-style li {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.script-style li > div {
+  min-width: 0;
+}
+
+.script-style li span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.script-style li p {
+  margin: 4px 0 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.script-style li footer {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.style-form {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.style-form > .ant-input,
+.style-form > .ant-input-affix-wrapper {
+  width: 100%;
+}
+
+.style-list {
+  display: grid;
+  gap: 10px;
+}
+
+.style-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.style-list h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.style-list p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* T-35～T-48 视频与渲染中心。 */
+.video-page,
+.render-page {
+  display: grid;
+  gap: 16px;
+}
+
+.video-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.video-player,
+.render-video {
+  overflow: hidden;
+  max-width: 420px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #000;
+}
+
+.video-player video,
+.render-video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+}
+
+.video-timeline {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface);
+}
+
+.video-timeline span {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.render-progress {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.render-progress > span {
+  color: var(--violet);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.render-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.render-meta div {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.render-meta dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.render-meta dd {
+  margin: 4px 0 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+/* T-51/T-53 元数据派生。 */
+.publish-page {
+  display: grid;
+  gap: 16px;
+}
+
+.publish-workbench {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.platform-tabs {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.platform-tab {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.platform-tab[data-active='true'] {
+  border-color: var(--violet);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.platform-tab > strong {
+  min-width: 0;
+}
+
+.platform-tab > span:nth-of-type(2) {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.platform-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.platform-editor {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.platform-editor__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.platform-editor__head h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.platform-editor__head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field > span {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.derivative-tags,
+.derivative-validation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.derivative-media {
+  display: grid;
+  gap: 8px;
+  max-width: 320px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #000;
+}
+
+.derivative-media video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+}
+
+/* T-54/T-55 合规检查与修复。 */
+.compliance-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.compliance-panel > .discover-head {
+  margin: 0;
+}
+
+.compliance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.compliance-items {
+  display: grid;
+  gap: 10px;
+}
+
+.compliance-items p {
+  margin: 0;
+}
+
+.compliance-fix {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.compliance-license {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  gap: 8px;
+}
+
+.derivative-media > span {
+  padding: 0 10px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* T-56/T-57 导出打包。 */
+.export-page {
+  display: grid;
+  gap: 16px;
+}
+
+.export-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.export-panel > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.export-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.export-blocked {
+  display: grid;
+  gap: 10px;
+}
+
+.export-blocked p {
+  margin: 0;
+}
+
+.export-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.export-meta div {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.export-meta dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.export-meta dd {
+  margin: 4px 0 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.export-docs,
+.export-platform header,
+.export-platform {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-docs {
+  flex-wrap: wrap;
+}
+
+.export-platforms {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.export-platform {
+  align-items: stretch;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 128px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.export-platform header {
+  justify-content: space-between;
+}
+
+.export-platform strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.export-platform > div {
+  display: grid;
+  gap: 8px;
+}
+
+/* T-58 渲染等待期全局并行任务条。 */
+.global-task {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 220px auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.global-task > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.global-task strong,
+.global-task span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.global-task strong {
+  color: var(--text);
+}
+
+.global-task span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.global-task a {
+  color: var(--text-2);
+}
+
+.global-task__cta {
+  color: var(--violet) !important;
+  font-weight: 600;
+}
+
+.shell[data-bp='medium'] .discover-summary {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shell[data-bp='medium'] .discover-angles {
+  padding-left: 0;
+  border-left: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.shell[data-bp='medium'] .discover-materials,
+.shell[data-bp='narrow'] .discover-materials {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shell[data-bp='medium'] .library-grid,
+.shell[data-bp='medium'] .topics-grid,
+.shell[data-bp='medium'] .quota-page__summary,
+.shell[data-bp='medium'] .publish-workbench,
+.shell[data-bp='narrow'] .library-grid,
+.shell[data-bp='narrow'] .topics-grid,
+.shell[data-bp='narrow'] .quota-page__summary,
+.shell[data-bp='narrow'] .publish-workbench {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shell[data-bp='medium'] .publish-workbench,
+.shell[data-bp='narrow'] .publish-workbench {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shell[data-bp='medium'] .platform-tabs,
+.shell[data-bp='narrow'] .platform-tabs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  .discover-head,
+  .discover-action-bar,
+  .platform-editor__head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .discover-form__main,
+  .discover-summary__main,
+  .library-filter,
+  .compliance-license {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .library-grid,
+  .topics-grid,
+  .quota-page__summary,
+  .platform-tabs,
+  .export-platforms {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .export-meta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .global-task {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .global-task .ant-progress {
+    grid-column: 1 / -1;
+  }
+
+  .discover-gauge {
+    justify-self: center;
+  }
+
+  .discover-action-bar > div:last-of-type {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

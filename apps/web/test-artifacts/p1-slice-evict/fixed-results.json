@@ -1,0 +1,75 @@
+{
+  "tag": "fixed",
+  "base": "http://localhost:5173",
+  "storeUrl": "/src/work/store.ts",
+  "viewport": "1440x900",
+  "results": [
+    {
+      "name": "真实 textarea 收到输入",
+      "pass": true,
+      "detail": "一号作品的正文"
+    },
+    {
+      "name": "模块实例同一性：import 进来的 registry 看得见真实组件刚写的正文（否则后面全是假验证）",
+      "pass": true,
+      "detail": "ids=w1 w1草稿=\"一号作品的正文\""
+    },
+    {
+      "name": "MAX_WORK_SLICES = 8",
+      "pass": true
+    },
+    {
+      "name": "registry 饱和：8 片全 dirty 且未挂载",
+      "pass": true,
+      "detail": "ids=w1,sat1,sat2,sat3,sat4,sat5,sat6,sat7"
+    },
+    {
+      "name": "w1 卸载后仍受 dirty 保护，正文没丢",
+      "pass": true
+    },
+    {
+      "name": "不变量1/2 · w2 的分片在 registry 里（没被本次创建淘汰掉）",
+      "pass": true,
+      "detail": "ids=w1,sat1,sat2,sat3,sat4,sat5,sat6,sat7,w2"
+    },
+    {
+      "name": "不变量3 · 全保护时允许有界超限：size = 9",
+      "pass": true,
+      "detail": "count=9"
+    },
+    {
+      "name": "不变量5 · 真实 hook：UI 显示的字 === autosave 走 getWorkSlice 读到的字",
+      "pass": true,
+      "detail": "UI=\"二号作品的正文\" store=\"二号作品的正文\""
+    },
+    {
+      "name": "不变量5 · 不是静默丢失：store 侧非空",
+      "pass": true,
+      "detail": "\"二号作品的正文\""
+    },
+    {
+      "name": "不变量2 · 8 片旧脏片一个没丢",
+      "pass": true,
+      "detail": "ids=w1,sat1,sat2,sat3,sat4,sat5,sat6,sat7,w2"
+    },
+    {
+      "name": "饱和态下回 w1：正文原样还原",
+      "pass": true
+    },
+    {
+      "name": "饱和态下 w2 也没被污染",
+      "pass": true
+    },
+    {
+      "name": "不变量3 · 旧脏片保存后超限自然回落到 8",
+      "pass": true,
+      "detail": "count=8 ids=w1,sat3,sat4,sat5,sat6,sat7,w2,w3"
+    },
+    {
+      "name": "回落之后新开的 w3 仍在表里",
+      "pass": true
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": []
+}

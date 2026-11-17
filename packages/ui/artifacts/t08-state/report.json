@@ -1,0 +1,1446 @@
+{
+  "shots": [
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-empty.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-loading.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-error.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-partial.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-errors.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\light-empty.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\light-loading.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\light-error.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\light-partial.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\light-errors.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-offline-stashed.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-offline-sync-failed.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-offline-synced.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-offline-real-network.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\dark-offline-real-restored.png",
+    "C:\\Users\\27639\\Desktop\\知识点视频\\knowstudio\\packages\\ui\\artifacts\\t08-state\\light-narrow-599-errors.png"
+  ],
+  "contrast": {
+    "dark-empty": {
+      "leafTextNodes": 37,
+      "groups": [
+        {
+          "text": "空态 · 同一组件换 props 就是不",
+          "cls": "preview-h2",
+          "fg": "#8a93a8",
+          "bg": "#0d1017",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 6.1794,
+          "count": 1,
+          "min": 6.1794,
+          "samples": [
+            "空态 · 同一组件换 props 就是不（preview-h2）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#aab3c8",
+          "bg": "#161b27",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.1883,
+          "count": 11,
+          "min": 8.1883,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 dark）",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 13.8854,
+          "count": 16,
+          "min": 13.8854,
+          "samples": [
+            "切换主题（当前 dark）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#161b27",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 15.2215,
+          "count": 9,
+          "min": 15.2215,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "还没有作品（ks-state__title）",
+            "新建作品（）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "dark-loading": {
+      "leafTextNodes": 36,
+      "groups": [
+        {
+          "text": "加载态 · 骨架形状按屏切换",
+          "cls": "preview-h2",
+          "fg": "#8a93a8",
+          "bg": "#0d1017",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 6.1794,
+          "count": 6,
+          "min": 6.1794,
+          "samples": [
+            "加载态 · 骨架形状按屏切换（preview-h2）",
+            "工作台骨架卡（ks-loading__hint）",
+            "素材搜索：仪表 + 3×3 骨架（ks-loading__hint）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#aab3c8",
+          "bg": "#161b27",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.1883,
+          "count": 8,
+          "min": 8.1883,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 dark）",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 13.8854,
+          "count": 16,
+          "min": 13.8854,
+          "samples": [
+            "切换主题（当前 dark）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#161b27",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 15.2215,
+          "count": 1,
+          "min": 15.2215,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）"
+          ]
+        },
+        {
+          "text": "正在加载作品",
+          "cls": "ks-sr-only",
+          "fg": "#eef1f8",
+          "bg": "#0d1017",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 16.8294,
+          "count": 5,
+          "min": 16.8294,
+          "samples": [
+            "正在加载作品（ks-sr-only）",
+            "正在聚合素材（ks-sr-only）",
+            "正在生成文案（ks-sr-only）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "dark-error": {
+      "leafTextNodes": 38,
+      "groups": [
+        {
+          "text": "预扣的 2 点已退回（屏级补充信息）",
+          "cls": "ks-state__notice",
+          "fg": "#8a93a8",
+          "bg": "#161b27",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "div.ks-state",
+          "size": "13px",
+          "weight": "400",
+          "ratio": 5.589,
+          "count": 1,
+          "min": 5.589,
+          "samples": [
+            "预扣的 2 点已退回（屏级补充信息）（ks-state__notice）"
+          ]
+        },
+        {
+          "text": "错误态 · QUOTA_INSUFFIC",
+          "cls": "preview-h2",
+          "fg": "#8a93a8",
+          "bg": "#0d1017",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 6.1794,
+          "count": 1,
+          "min": 6.1794,
+          "samples": [
+            "错误态 · QUOTA_INSUFFIC（preview-h2）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#aab3c8",
+          "bg": "#161b27",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.1883,
+          "count": 11,
+          "min": 8.1883,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 dark）",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 13.8854,
+          "count": 16,
+          "min": 13.8854,
+          "samples": [
+            "切换主题（当前 dark）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#161b27",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 15.2215,
+          "count": 9,
+          "min": 15.2215,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "点数不够了（ks-state__title）",
+            "升级或等待重置（）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "dark-partial": {
+      "leafTextNodes": 52,
+      "groups": [
+        {
+          "text": "12 条已入库",
+          "cls": "ks-partial__detail",
+          "fg": "#8a93a8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "li.ks-partial__item",
+          "size": "13px",
+          "weight": "400",
+          "ratio": 5.0984,
+          "count": 6,
+          "min": 5.0984,
+          "samples": [
+            "12 条已入库（ks-partial__detail）",
+            "抓取超时（>60s）（ks-partial__detail）",
+            "3 段摘录（ks-partial__detail）"
+          ]
+        },
+        {
+          "text": "部分成功态 · 逐项标记 + 逐项恢复",
+          "cls": "preview-h2",
+          "fg": "#8a93a8",
+          "bg": "#0d1017",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 6.1794,
+          "count": 1,
+          "min": 6.1794,
+          "samples": [
+            "部分成功态 · 逐项标记 + 逐项恢复（preview-h2）"
+          ]
+        },
+        {
+          "text": "成功",
+          "cls": "ks-partial__badge",
+          "fg": "#aab3c8",
+          "bg": "#232c40",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "span.ks-partial__badge",
+          "size": "12px",
+          "weight": "400",
+          "ratio": 6.6353,
+          "count": 4,
+          "min": 6.6353,
+          "samples": [
+            "成功（ks-partial__badge）",
+            "成功（ks-partial__badge）",
+            "已跳过（ks-partial__badge）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#aab3c8",
+          "bg": "#161b27",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.1883,
+          "count": 10,
+          "min": 8.1883,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "失败",
+          "cls": "ks-partial__badge",
+          "fg": "#eef1f8",
+          "bg": "#232c40",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "span.ks-partial__badge",
+          "size": "12px",
+          "weight": "400",
+          "ratio": 12.3346,
+          "count": 2,
+          "min": 12.3346,
+          "samples": [
+            "失败（ks-partial__badge）",
+            "失败（ks-partial__badge）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 dark）",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 13.8854,
+          "count": 22,
+          "min": 13.8854,
+          "samples": [
+            "切换主题（当前 dark）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#161b27",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 15.2215,
+          "count": 7,
+          "min": 15.2215,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "部分完成（ks-state__title）",
+            "单独重试（）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "dark-errors": {
+      "leafTextNodes": 88,
+      "groups": [
+        {
+          "text": "回到上一门",
+          "cls": "",
+          "fg": "#ffffff",
+          "bg": "#29b7a5",
+          "rawColor": "rgb(255, 255, 255)",
+          "bgSrc": "button.ant-btn",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 2.4967,
+          "count": 1,
+          "min": 2.4967,
+          "samples": [
+            "回到上一门（）"
+          ]
+        },
+        {
+          "text": "这一步的前置条件还没有满足。",
+          "cls": "ant-result-subtitle",
+          "fg": "#7a7c7f",
+          "bg": "#0d1017",
+          "rawColor": "rgba(255, 255, 255, 0.45)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 4.5262,
+          "count": 1,
+          "min": 4.5262,
+          "samples": [
+            "这一步的前置条件还没有满足。（ant-result-subtitle）"
+          ]
+        },
+        {
+          "text": "错误态 · 15 个错误码逐个渲染",
+          "cls": "preview-h2",
+          "fg": "#8a93a8",
+          "bg": "#0d1017",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 6.1794,
+          "count": 16,
+          "min": 6.1794,
+          "samples": [
+            "错误态 · 15 个错误码逐个渲染（preview-h2）",
+            "VALIDATION_FAILED（preview-code）",
+            "UNAUTHENTICATED（preview-code）"
+          ]
+        },
+        {
+          "text": "已确认的文案不能直接改。解锁会让高清成片",
+          "cls": "ks-state__desc",
+          "fg": "#aab3c8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "div.ks-state",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 7.4696,
+          "count": 2,
+          "min": 7.4696,
+          "samples": [
+            "已确认的文案不能直接改。解锁会让高清成片（ks-state__desc）",
+            "歇 30 秒 再试，内容都还在。（ks-state__desc）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#aab3c8",
+          "bg": "#161b27",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.1883,
+          "count": 20,
+          "min": 8.1883,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "回到上一步完成后，这里会自动解锁。",
+          "cls": "ks-gate-locked__hint",
+          "fg": "#aab3c8",
+          "bg": "#171a20",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.321,
+          "count": 1,
+          "min": 8.321,
+          "samples": [
+            "回到上一步完成后，这里会自动解锁。（ks-gate-locked__hint）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 dark）",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 13.8854,
+          "count": 18,
+          "min": 13.8854,
+          "samples": [
+            "切换主题（当前 dark）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#161b27",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 15.2215,
+          "count": 28,
+          "min": 15.2215,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "有几项需要修正（ks-state__title）",
+            "去修正（）"
+          ]
+        },
+        {
+          "text": "高清渲染门 G3未解锁",
+          "cls": "ant-result-title",
+          "fg": "#eef1f8",
+          "bg": "#0d1017",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "div.preview-root",
+          "size": "24px",
+          "weight": "400",
+          "ratio": 16.8294,
+          "count": 1,
+          "min": 16.8294,
+          "samples": [
+            "高清渲染门 G3未解锁（ant-result-title）"
+          ]
+        }
+      ],
+      "belowAA": [
+        {
+          "text": "回到上一门",
+          "cls": "",
+          "fg": "#ffffff",
+          "bg": "#29b7a5",
+          "rawColor": "rgb(255, 255, 255)",
+          "bgSrc": "button.ant-btn",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 2.4967
+        }
+      ]
+    },
+    "light-empty": {
+      "leafTextNodes": 37,
+      "groups": [
+        {
+          "text": "空态 · 同一组件换 props 就是不",
+          "cls": "preview-h2",
+          "fg": "#646d84",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(100, 109, 132)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 4.5657,
+          "count": 1,
+          "min": 4.5657,
+          "samples": [
+            "空态 · 同一组件换 props 就是不（preview-h2）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#475069",
+          "bg": "#ffffff",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.0172,
+          "count": 11,
+          "min": 8.0172,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 light）",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 16.1112,
+          "count": 16,
+          "min": 16.1112,
+          "samples": [
+            "切换主题（当前 light）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#ffffff",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 17.4203,
+          "count": 9,
+          "min": 17.4203,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "还没有作品（ks-state__title）",
+            "新建作品（）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "light-loading": {
+      "leafTextNodes": 36,
+      "groups": [
+        {
+          "text": "加载态 · 骨架形状按屏切换",
+          "cls": "preview-h2",
+          "fg": "#646d84",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(100, 109, 132)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 4.5657,
+          "count": 6,
+          "min": 4.5657,
+          "samples": [
+            "加载态 · 骨架形状按屏切换（preview-h2）",
+            "工作台骨架卡（ks-loading__hint）",
+            "素材搜索：仪表 + 3×3 骨架（ks-loading__hint）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#475069",
+          "bg": "#ffffff",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.0172,
+          "count": 8,
+          "min": 8.0172,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "正在加载作品",
+          "cls": "ks-sr-only",
+          "fg": "#141a26",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 15.3865,
+          "count": 5,
+          "min": 15.3865,
+          "samples": [
+            "正在加载作品（ks-sr-only）",
+            "正在聚合素材（ks-sr-only）",
+            "正在生成文案（ks-sr-only）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 light）",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 16.1112,
+          "count": 16,
+          "min": 16.1112,
+          "samples": [
+            "切换主题（当前 light）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#ffffff",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 17.4203,
+          "count": 1,
+          "min": 17.4203,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "light-error": {
+      "leafTextNodes": 38,
+      "groups": [
+        {
+          "text": "错误态 · QUOTA_INSUFFIC",
+          "cls": "preview-h2",
+          "fg": "#646d84",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(100, 109, 132)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 4.5657,
+          "count": 1,
+          "min": 4.5657,
+          "samples": [
+            "错误态 · QUOTA_INSUFFIC（preview-h2）"
+          ]
+        },
+        {
+          "text": "预扣的 2 点已退回（屏级补充信息）",
+          "cls": "ks-state__notice",
+          "fg": "#646d84",
+          "bg": "#ffffff",
+          "rawColor": "rgb(100, 109, 132)",
+          "bgSrc": "div.ks-state",
+          "size": "13px",
+          "weight": "400",
+          "ratio": 5.1692,
+          "count": 1,
+          "min": 5.1692,
+          "samples": [
+            "预扣的 2 点已退回（屏级补充信息）（ks-state__notice）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#475069",
+          "bg": "#ffffff",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.0172,
+          "count": 11,
+          "min": 8.0172,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 light）",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 16.1112,
+          "count": 16,
+          "min": 16.1112,
+          "samples": [
+            "切换主题（当前 light）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#ffffff",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 17.4203,
+          "count": 9,
+          "min": 17.4203,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "点数不够了（ks-state__title）",
+            "升级或等待重置（）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "light-partial": {
+      "leafTextNodes": 52,
+      "groups": [
+        {
+          "text": "部分成功态 · 逐项标记 + 逐项恢复",
+          "cls": "preview-h2",
+          "fg": "#646d84",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(100, 109, 132)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 4.5657,
+          "count": 1,
+          "min": 4.5657,
+          "samples": [
+            "部分成功态 · 逐项标记 + 逐项恢复（preview-h2）"
+          ]
+        },
+        {
+          "text": "12 条已入库",
+          "cls": "ks-partial__detail",
+          "fg": "#646d84",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(100, 109, 132)",
+          "bgSrc": "li.ks-partial__item",
+          "size": "13px",
+          "weight": "400",
+          "ratio": 4.7808,
+          "count": 6,
+          "min": 4.7808,
+          "samples": [
+            "12 条已入库（ks-partial__detail）",
+            "抓取超时（>60s）（ks-partial__detail）",
+            "3 段摘录（ks-partial__detail）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#475069",
+          "bg": "#ffffff",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.0172,
+          "count": 14,
+          "min": 8.0172,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 light）",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 16.1112,
+          "count": 22,
+          "min": 16.1112,
+          "samples": [
+            "切换主题（当前 light）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#ffffff",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 17.4203,
+          "count": 9,
+          "min": 17.4203,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "部分完成（ks-state__title）",
+            "失败（ks-partial__badge）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "light-errors": {
+      "leafTextNodes": 88,
+      "groups": [
+        {
+          "text": "回到上一门",
+          "cls": "",
+          "fg": "#ffffff",
+          "bg": "#2dd4bf",
+          "rawColor": "rgb(255, 255, 255)",
+          "bgSrc": "button.ant-btn",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 1.8615,
+          "count": 1,
+          "min": 1.8615,
+          "samples": [
+            "回到上一门（）"
+          ]
+        },
+        {
+          "text": "这一步的前置条件还没有满足。",
+          "cls": "ant-result-subtitle",
+          "fg": "#838587",
+          "bg": "#eef1f6",
+          "rawColor": "rgba(0, 0, 0, 0.45)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 3.2855,
+          "count": 1,
+          "min": 3.2855,
+          "samples": [
+            "这一步的前置条件还没有满足。（ant-result-subtitle）"
+          ]
+        },
+        {
+          "text": "错误态 · 15 个错误码逐个渲染",
+          "cls": "preview-h2",
+          "fg": "#646d84",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(100, 109, 132)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 4.5657,
+          "count": 16,
+          "min": 4.5657,
+          "samples": [
+            "错误态 · 15 个错误码逐个渲染（preview-h2）",
+            "VALIDATION_FAILED（preview-code）",
+            "UNAUTHENTICATED（preview-code）"
+          ]
+        },
+        {
+          "text": "回到上一步完成后，这里会自动解锁。",
+          "cls": "ks-gate-locked__hint",
+          "fg": "#475069",
+          "bg": "#e9ecf1",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 6.7814,
+          "count": 1,
+          "min": 6.7814,
+          "samples": [
+            "回到上一步完成后，这里会自动解锁。（ks-gate-locked__hint）"
+          ]
+        },
+        {
+          "text": "已确认的文案不能直接改。解锁会让高清成片",
+          "cls": "ks-state__desc",
+          "fg": "#475069",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "div.ks-state",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 7.4147,
+          "count": 2,
+          "min": 7.4147,
+          "samples": [
+            "已确认的文案不能直接改。解锁会让高清成片（ks-state__desc）",
+            "歇 30 秒 再试，内容都还在。（ks-state__desc）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#475069",
+          "bg": "#ffffff",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.0172,
+          "count": 20,
+          "min": 8.0172,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "高清渲染门 G3未解锁",
+          "cls": "ant-result-title",
+          "fg": "#141a26",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "div.preview-root",
+          "size": "24px",
+          "weight": "400",
+          "ratio": 15.3865,
+          "count": 1,
+          "min": 15.3865,
+          "samples": [
+            "高清渲染门 G3未解锁（ant-result-title）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 light）",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 16.1112,
+          "count": 18,
+          "min": 16.1112,
+          "samples": [
+            "切换主题（当前 light）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#ffffff",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 17.4203,
+          "count": 28,
+          "min": 17.4203,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "有几项需要修正（ks-state__title）",
+            "去修正（）"
+          ]
+        }
+      ],
+      "belowAA": [
+        {
+          "text": "这一步的前置条件还没有满足。",
+          "cls": "ant-result-subtitle",
+          "fg": "#838587",
+          "bg": "#eef1f6",
+          "rawColor": "rgba(0, 0, 0, 0.45)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 3.2855
+        },
+        {
+          "text": "回到上一门",
+          "cls": "",
+          "fg": "#ffffff",
+          "bg": "#2dd4bf",
+          "rawColor": "rgb(255, 255, 255)",
+          "bgSrc": "button.ant-btn",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 1.8615
+        }
+      ]
+    },
+    "dark-offline": {
+      "leafTextNodes": 34,
+      "groups": [
+        {
+          "text": "18:32:36 DraftPort.c",
+          "cls": "preview-log",
+          "fg": "#8a93a8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "pre.preview-log",
+          "size": "12px",
+          "weight": "400",
+          "ratio": 5.0984,
+          "count": 1,
+          "min": 5.0984,
+          "samples": [
+            "18:32:36 DraftPort.c（preview-log）"
+          ]
+        },
+        {
+          "text": "离线横幅 · 假联网端口驱动（可确定性截",
+          "cls": "preview-h2",
+          "fg": "#8a93a8",
+          "bg": "#0d1017",
+          "rawColor": "rgb(138, 147, 168)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 6.1794,
+          "count": 1,
+          "min": 6.1794,
+          "samples": [
+            "离线横幅 · 假联网端口驱动（可确定性截（preview-h2）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#aab3c8",
+          "bg": "#161b27",
+          "rawColor": "rgb(170, 179, 200)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.1883,
+          "count": 8,
+          "min": 8.1883,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 dark）",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#1c2333",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 13.8854,
+          "count": 21,
+          "min": 13.8854,
+          "samples": [
+            "切换主题（当前 dark）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#eef1f8",
+          "bg": "#161b27",
+          "rawColor": "rgb(238, 241, 248)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 15.2215,
+          "count": 3,
+          "min": 15.2215,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "知道了（）",
+            "断网前写下的第一句：知识点视频的关键是前（preview-editor）"
+          ]
+        }
+      ],
+      "belowAA": []
+    },
+    "light-narrow-599": {
+      "leafTextNodes": 88,
+      "groups": [
+        {
+          "text": "回到上一门",
+          "cls": "",
+          "fg": "#ffffff",
+          "bg": "#2dd4bf",
+          "rawColor": "rgb(255, 255, 255)",
+          "bgSrc": "button.ant-btn",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 1.8615,
+          "count": 1,
+          "min": 1.8615,
+          "samples": [
+            "回到上一门（）"
+          ]
+        },
+        {
+          "text": "这一步的前置条件还没有满足。",
+          "cls": "ant-result-subtitle",
+          "fg": "#838587",
+          "bg": "#eef1f6",
+          "rawColor": "rgba(0, 0, 0, 0.45)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 3.2855,
+          "count": 1,
+          "min": 3.2855,
+          "samples": [
+            "这一步的前置条件还没有满足。（ant-result-subtitle）"
+          ]
+        },
+        {
+          "text": "错误态 · 15 个错误码逐个渲染",
+          "cls": "preview-h2",
+          "fg": "#646d84",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(100, 109, 132)",
+          "bgSrc": "div.preview-root",
+          "size": "15px",
+          "weight": "600",
+          "ratio": 4.5657,
+          "count": 16,
+          "min": 4.5657,
+          "samples": [
+            "错误态 · 15 个错误码逐个渲染（preview-h2）",
+            "VALIDATION_FAILED（preview-code）",
+            "UNAUTHENTICATED（preview-code）"
+          ]
+        },
+        {
+          "text": "回到上一步完成后，这里会自动解锁。",
+          "cls": "ks-gate-locked__hint",
+          "fg": "#475069",
+          "bg": "#e9ecf1",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 6.7814,
+          "count": 1,
+          "min": 6.7814,
+          "samples": [
+            "回到上一步完成后，这里会自动解锁。（ks-gate-locked__hint）"
+          ]
+        },
+        {
+          "text": "已确认的文案不能直接改。解锁会让高清成片",
+          "cls": "ks-state__desc",
+          "fg": "#475069",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "div.ks-state",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 7.4147,
+          "count": 2,
+          "min": 7.4147,
+          "samples": [
+            "已确认的文案不能直接改。解锁会让高清成片（ks-state__desc）",
+            "歇 30 秒 再试，内容都还在。（ks-state__desc）"
+          ]
+        },
+        {
+          "text": "all",
+          "cls": "",
+          "fg": "#475069",
+          "bg": "#ffffff",
+          "rawColor": "rgb(71, 80, 105)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 8.0172,
+          "count": 20,
+          "min": 8.0172,
+          "samples": [
+            "all（）",
+            "empty（）",
+            "loading（）"
+          ]
+        },
+        {
+          "text": "高清渲染门 G3未解锁",
+          "cls": "ant-result-title",
+          "fg": "#141a26",
+          "bg": "#eef1f6",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "div.preview-root",
+          "size": "24px",
+          "weight": "400",
+          "ratio": 15.3865,
+          "count": 1,
+          "min": 15.3865,
+          "samples": [
+            "高清渲染门 G3未解锁（ant-result-title）"
+          ]
+        },
+        {
+          "text": "切换主题（当前 light）",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#f4f6fb",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "button.",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 16.1112,
+          "count": 18,
+          "min": 16.1112,
+          "samples": [
+            "切换主题（当前 light）（）",
+            "VALIDATION_FAILED（）",
+            "UNAUTHENTICATED（）"
+          ]
+        },
+        {
+          "text": "T-08 异常态基座预览（临时，验证后删",
+          "cls": "",
+          "fg": "#141a26",
+          "bg": "#ffffff",
+          "rawColor": "rgb(20, 26, 38)",
+          "bgSrc": "header.preview-bar",
+          "size": "14px",
+          "weight": "700",
+          "ratio": 17.4203,
+          "count": 28,
+          "min": 17.4203,
+          "samples": [
+            "T-08 异常态基座预览（临时，验证后删（）",
+            "有几项需要修正（ks-state__title）",
+            "去修正（）"
+          ]
+        }
+      ],
+      "belowAA": [
+        {
+          "text": "这一步的前置条件还没有满足。",
+          "cls": "ant-result-subtitle",
+          "fg": "#838587",
+          "bg": "#eef1f6",
+          "rawColor": "rgba(0, 0, 0, 0.45)",
+          "bgSrc": "div.preview-root",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 3.2855
+        },
+        {
+          "text": "回到上一门",
+          "cls": "",
+          "fg": "#ffffff",
+          "bg": "#2dd4bf",
+          "rawColor": "rgb(255, 255, 255)",
+          "bgSrc": "button.ant-btn",
+          "size": "14px",
+          "weight": "400",
+          "ratio": 1.8615
+        }
+      ]
+    }
+  },
+  "offline": {
+    "clickOffline": "clicked",
+    "offlineState": {
+      "phase": "offline",
+      "tone": "warning",
+      "text": "网络已断开。编辑内容已暂存在本机，恢复联网后会自动同步。"
+    },
+    "logAfterOffline": "18:32:34 DraftPort.save(work:w1:script) baseVersion=6\n18:32:34 connectivity → offline",
+    "clickFailNext": "clicked",
+    "clickOnline": "clicked",
+    "syncFailedState": {
+      "phase": "sync-failed",
+      "tone": "danger",
+      "text": "网络已恢复，但本地改动同步失败。内容还在本机，可以重试。",
+      "hasRetry": true
+    },
+    "clickRetry": "clicked",
+    "syncedState": {
+      "phase": "synced",
+      "tone": "success",
+      "text": "网络已恢复，本地改动已同步。"
+    },
+    "logAfterSync": "18:32:36 DraftPort.clear(work:w1:script)\n18:32:36 onSync(#2) payload=有暂存\n18:32:36 DraftPort.load(work:w1:script)\n18:32:35 onSync(#1) payload=有暂存\n18:32:35 DraftPort.load(work:w1:script)\n18:32:35 connectivity → online\n18:32:35 下一次 sync 将失败\n18:32:34 DraftPort.save(work:w1:script) baseVersion=6\n18:32:34 connectivity → offline",
+    "realOnlineFlagBefore": "true",
+    "realBannerOffline": {
+      "navigatorOnLine": false,
+      "banner": {
+        "phase": "offline",
+        "text": "网络已断开。编辑内容已暂存在本机，恢复联网后会自动同步。"
+      }
+    },
+    "realBannerRestored": {
+      "navigatorOnLine": true,
+      "banner": {
+        "phase": "synced",
+        "text": "网络已恢复，本地改动已同步。"
+      },
+      "log": "18:32:38 DraftPort.clear(work:w1:real)\n18:32:38 real onSync payload=有暂存\n18:32:38 DraftPort.load(work:w1:real)\n18:32:37 DraftPort.save(work:w1:real) baseVersion=3"
+    }
+  },
+  "consoleErrors": [
+    "log: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "recoveryClick": "去修复合规项",
+  "recoveryLog": "（error 视图无日志面板，见 offline 视图日志）",
+  "narrow": {
+    "scrollW": 599,
+    "clientW": 599,
+    "innerW": 599
+  }
+}

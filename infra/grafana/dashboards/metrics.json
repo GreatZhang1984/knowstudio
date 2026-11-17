@@ -1,0 +1,75 @@
+{
+  "annotations": { "list": [] },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "mysql", "uid": "knowstudio-mysql" },
+      "fieldConfig": { "defaults": { "unit": "m" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "legend": { "displayMode": "list" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "knowstudio-mysql" },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT bucket AS time, value_num AS value, metric FROM metric_snapshot WHERE metric IN ('g1_e2e_p50','g3_polish_p50','g5_adapt_p50') ORDER BY bucket",
+          "refId": "A"
+        }
+      ],
+      "title": "G1 / G3 / G5 耗时",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "knowstudio-mysql" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto" },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "knowstudio-mysql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT metric, value_num, sample_n, computed_at FROM metric_snapshot WHERE metric IN ('g2_daily_days','g5_platform_coverage','g6_cost_per_work') AND bucket = (SELECT MAX(bucket) FROM metric_snapshot) ORDER BY metric",
+          "refId": "A"
+        }
+      ],
+      "title": "G2 / G5 / G6",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "knowstudio-mysql" },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "id": 3,
+      "options": { "legend": { "displayMode": "list" }, "tooltip": { "mode": "single" } },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "knowstudio-mysql" },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT bucket AS time, value_num AS value, metric FROM metric_snapshot WHERE metric IN ('major_edit_rate','render_failure_rate','compliance_block_rate','north_star_within_60m') ORDER BY bucket",
+          "refId": "A"
+        }
+      ],
+      "title": "护栏指标",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "tags": ["knowstudio", "metrics"],
+  "templating": { "list": [] },
+  "time": { "from": "now-7d", "to": "now" },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "KnowStudio 指标",
+  "uid": "knowstudio-metrics",
+  "version": 1
+}

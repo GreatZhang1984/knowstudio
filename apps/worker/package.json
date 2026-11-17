@@ -1,0 +1,21 @@
+{
+  "name": "@knowstudio/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@knowstudio/contracts": "workspace:*",
+    "@knowstudio/db": "workspace:*",
+    "@knowstudio/domain": "workspace:*",
+    "@knowstudio/media": "workspace:*",
+    "@knowstudio/observability": "workspace:*",
+    "@knowstudio/queue": "workspace:*",
+    "@knowstudio/quota": "workspace:*",
+    "@knowstudio/storage": "workspace:*",
+    "archiver": "^8.0.0"
+  }
+}

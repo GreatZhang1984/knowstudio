@@ -1,0 +1,112 @@
+# 本地开发容器基座（协调者引导产物）。
+# 计划 T-02 的 CI 半边（mysql:8.4 service container + VERSION() 断言）仍未开工，
+# 本文件只覆盖「本地能起 MySQL/Redis/MinIO」这一半，不冒充 T-02 已交付。
+#
+# 卷名一律带 knowstudio_ 前缀：本机存在遗留卷 mysql8-data / redis7-data（无容器、root 口令未知），
+# 刻意不复用也不删除，避免误伤既有数据。
+name: knowstudio
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: knowstudio-mysql84
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 infra/.env 设置}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-knowstudio}
+      MYSQL_USER: ${MYSQL_USER:-knowstudio}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?请在 infra/.env 设置}
+      TZ: UTC
+    ports:
+      - '3306:3306'
+    # 刻意不用 bind mount 的 .cnf：Windows 下挂载文件权限是 0777，
+    # MySQL 会报 "World-writable config file ... is ignored" 并**静默忽略整个文件**，
+    # 于是 ngram_token_size / READ-COMMITTED / binlog 口径全部不生效（已实测踩到）。
+    # 启动参数不受该检查影响，故一律走 command。
+    command:
+      - --ngram-token-size=2
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --transaction-isolation=READ-COMMITTED
+      - --default-time-zone=+00:00
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+      - --binlog-format=ROW
+      - --sync-binlog=1
+      - --binlog-expire-logs-seconds=604800
+      - --slow-query-log=1
+      - --long-query-time=0.5
+    volumes:
+      - knowstudio_mysql84_data:/var/lib/mysql
+    healthcheck:
+      test:
+        ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+  redis:
+    image: redis:7-alpine
+    container_name: knowstudio-redis7
+    restart: unless-stopped
+    # 客户 2026-11-13 拍板：refresh 会话存 Redis 以保住 36 表不变量。
+    # 会话是可吊销凭据，掉电即全员登出不可接受，故开 AOF。
+    command: ['redis-server', '--appendonly', 'yes', '--appendfsync', 'everysec']
+    ports:
+      - '6379:6379'
+    volumes:
+      - knowstudio_redis7_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  minio:
+    image: minio/minio:latest
+    container_name: knowstudio-minio
+    restart: unless-stopped
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?请在 infra/.env 设置}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?请在 infra/.env 设置}
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - knowstudio_minio_data:/data
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  grafana:
+    profiles:
+      - metrics
+    image: grafana/grafana:12.1.0
+    container_name: knowstudio-grafana
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-knowstudio}
+      MYSQL_USER: ${MYSQL_USER:-knowstudio}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?请在 infra/.env 设置}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-knowstudio-dev}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+    ports:
+      - '3001:3000'
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - knowstudio_grafana_data:/var/lib/grafana
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  knowstudio_mysql84_data:
+  knowstudio_redis7_data:
+  knowstudio_minio_data:
+  knowstudio_grafana_data:

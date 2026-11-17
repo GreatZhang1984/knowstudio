@@ -1,0 +1,9 @@
+apiVersion: 1
+providers:
+  - name: KnowStudio
+    folder: KnowStudio
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 3600
+    options:
+      path: /var/lib/grafana/dashboards

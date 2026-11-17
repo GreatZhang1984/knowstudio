@@ -1,0 +1,84 @@
+/* packages/ui 自建组件的样式。颜色一律走 tokens.css 的变量，不写死主题色。 */
+
+.ks-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ks-stepper__btn {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.ks-stepper__btn:disabled {
+  cursor: default;
+}
+
+.ks-stepper__dot {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--seg-c);
+  border-radius: 50%;
+  background: var(--seg-dim);
+  /* 序号用 --text：阶段色直接写在 dim 底上实测只有 1.60–4.35:1（见 ../CONTRAST.md）。 */
+  color: var(--text);
+  font-size: 12px;
+}
+
+.ks-stepper__label {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ks-stepper[data-compact='true'] .ks-stepper__btn {
+  padding: 6px 2px;
+}
+
+.ks-stepper__item[data-state='current'] .ks-stepper__btn {
+  border-color: var(--seg-c);
+  background: var(--seg-dim);
+  color: var(--text);
+}
+
+.ks-stepper__item[data-state='done'] .ks-stepper__btn {
+  color: var(--text-2);
+}
+
+/* 阶段色在深浅两套主题下都是亮色，完成态因此固定用深墨色做前景。 */
+.ks-stepper__item[data-state='done'] .ks-stepper__dot {
+  background: var(--seg-c);
+  color: #0d1017;
+}
+
+.ks-gate-locked {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.ks-gate-locked__hint {
+  margin: 0 0 12px;
+  color: var(--text-2);
+  text-align: center;
+}
+
+.ks-gate-locked__meta {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}

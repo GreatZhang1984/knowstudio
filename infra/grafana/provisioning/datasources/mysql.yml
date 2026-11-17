@@ -1,0 +1,13 @@
+apiVersion: 1
+datasources:
+  - name: KnowStudio MySQL
+    uid: knowstudio-mysql
+    type: mysql
+    access: proxy
+    url: mysql:3306
+    user: ${MYSQL_USER}
+    secureJsonData:
+      password: ${MYSQL_PASSWORD}
+    database: ${MYSQL_DATABASE}
+    isDefault: true
+    editable: false

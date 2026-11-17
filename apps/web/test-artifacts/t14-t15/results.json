@@ -1,0 +1,118 @@
+{
+  "base": "http://localhost:5175",
+  "viewport": "1440x900",
+  "results": [
+    {
+      "name": "深链 /studio/w2/video 显示 G2 锁定态",
+      "pass": true,
+      "detail": "/studio/w2/video"
+    },
+    {
+      "name": "锁定态有「回到上一门」CTA",
+      "pass": true
+    },
+    {
+      "name": "探针本身活着（否则上一条是假阴性）",
+      "pass": true,
+      "detail": "{\"sawVideoStub\":false,\"sawGateLocked\":true,\"firstGateAt\":648,\"sawSkeleton\":false,\"t0\":20.700000002980232,\"probeReady\":true}"
+    },
+    {
+      "name": "深链无内容闪现：视频页占位从未出现",
+      "pass": true,
+      "detail": "{\"sawVideoStub\":false,\"sawGateLocked\":true,\"firstGateAt\":648,\"sawSkeleton\":false,\"t0\":20.700000002980232,\"probeReady\":true}"
+    },
+    {
+      "name": "深链无骨架中间帧：内容区从未进入 loading",
+      "pass": true,
+      "detail": "{\"sawVideoStub\":false,\"sawGateLocked\":true,\"firstGateAt\":648,\"sawSkeleton\":false,\"t0\":20.700000002980232,\"probeReady\":true}"
+    },
+    {
+      "name": "点 CTA 落到服务端 redirectTo",
+      "pass": true,
+      "detail": "/studio/w2/script"
+    },
+    {
+      "name": "w1 已确认文案 → 视频页正常渲染，不误锁",
+      "pass": true
+    },
+    {
+      "name": "不存在的作品 → 页面内错误态，不放行也不白屏",
+      "pass": true
+    },
+    {
+      "name": "w1 写入草稿",
+      "pass": true,
+      "detail": "一号作品的草稿"
+    },
+    {
+      "name": "切到 w2 是空白草稿，没捡到 w1 的内容",
+      "pass": true,
+      "detail": "\"\""
+    },
+    {
+      "name": "浏览器后退回到 w1，草稿原样还原",
+      "pass": true,
+      "detail": "/studio/w1/script"
+    },
+    {
+      "name": "浏览器前进回到 w2，草稿各自独立",
+      "pass": true,
+      "detail": "/studio/w2/script"
+    },
+    {
+      "name": "第三个 Work 打开是空白，没带旧数据（D-05）",
+      "pass": true,
+      "detail": "\"\""
+    },
+    {
+      "name": "回到 w1：新建/编辑别的 Work 之后 w1 一字未改",
+      "pass": true
+    },
+    {
+      "name": "回到 w2：同样一字未改",
+      "pass": true
+    },
+    {
+      "name": "点「创作」→ /studio 重定向到最近活跃 Work 的 step 落点",
+      "pass": true,
+      "detail": "/studio/w1/render"
+    },
+    {
+      "name": "点「发布」→ /publish 重定向（架构 §11.1「同 /studio」）",
+      "pass": true,
+      "detail": "/studio/w1/render"
+    },
+    {
+      "name": "深链 /publish/w2/export 显示 G4 锁定态",
+      "pass": true
+    },
+    {
+      "name": "w3 四门全过 → 导出页正常渲染",
+      "pass": true
+    },
+    {
+      "name": "导出页固定文案「知影不会替你自动发出去」在位（G5）",
+      "pass": true
+    },
+    {
+      "name": "深链 /studio/w2/render 同样被 G2 锁定",
+      "pass": true
+    },
+    {
+      "name": "顶栏 pill 与侧栏额度条同源（AC-H3）",
+      "pass": true,
+      "detail": "pill=36 点 bar=36/60点"
+    }
+  ],
+  "observations": [
+    {
+      "name": "G4 的 CTA 落地页等于 export 页自身，点击后仍停在锁定态",
+      "beforeCta": "/publish/w2/export",
+      "afterCta": "/publish/w2/export",
+      "stillLocked": true,
+      "serverRedirectTo": "/publish/w2/export"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": []
+}

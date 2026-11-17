@@ -1,0 +1,560 @@
+{
+  "dark-banner-offline-stashed": {
+    "banner": {
+      "phase": "offline",
+      "tone": "warning",
+      "text": "网络已断开。编辑内容已暂存在本机，恢复联网后会自动同步。",
+      "role": "status"
+    },
+    "leaves": 2,
+    "groups": [
+      {
+        "text": "网络已断开。编辑内容已暂存在本机，恢复联网后会自动同步。",
+        "cls": "ks-offline__text",
+        "fg": "#eef1f8",
+        "bg": "#1c2333",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 13.8854,
+        "inBanner": true,
+        "count": 1,
+        "min": 13.8854
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#8a93a8",
+        "bg": "#0d1017",
+        "rawColor": "rgb(138, 147, 168)",
+        "size": "14px",
+        "ratio": 6.1794,
+        "inBanner": false,
+        "count": 1,
+        "min": 6.1794
+      }
+    ],
+    "belowAA": []
+  },
+  "dark-banner-sync-failed": {
+    "banner": {
+      "phase": "sync-failed",
+      "tone": "danger",
+      "text": "网络已恢复，但本地改动同步失败。内容还在本机，可以重试。",
+      "role": "alert"
+    },
+    "leaves": 3,
+    "groups": [
+      {
+        "text": "网络已恢复，但本地改动同步失败。内容还在本机，可以重试。",
+        "cls": "ks-offline__text",
+        "fg": "#eef1f8",
+        "bg": "#1c2333",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 13.8854,
+        "inBanner": true,
+        "count": 1,
+        "min": 13.8854
+      },
+      {
+        "text": "重 试",
+        "cls": "",
+        "fg": "#eef1f8",
+        "bg": "#161b27",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 15.2215,
+        "inBanner": true,
+        "count": 1,
+        "min": 15.2215
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#8a93a8",
+        "bg": "#0d1017",
+        "rawColor": "rgb(138, 147, 168)",
+        "size": "14px",
+        "ratio": 6.1794,
+        "inBanner": false,
+        "count": 1,
+        "min": 6.1794
+      }
+    ],
+    "belowAA": []
+  },
+  "dark-banner-synced": {
+    "banner": {
+      "phase": "synced",
+      "tone": "success",
+      "text": "网络已恢复，本地改动已同步。",
+      "role": "status"
+    },
+    "leaves": 3,
+    "groups": [
+      {
+        "text": "网络已恢复，本地改动已同步。",
+        "cls": "ks-offline__text",
+        "fg": "#eef1f8",
+        "bg": "#1c2333",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 13.8854,
+        "inBanner": true,
+        "count": 1,
+        "min": 13.8854
+      },
+      {
+        "text": "知道了",
+        "cls": "",
+        "fg": "#eef1f8",
+        "bg": "#161b27",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 15.2215,
+        "inBanner": true,
+        "count": 1,
+        "min": 15.2215
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#8a93a8",
+        "bg": "#0d1017",
+        "rawColor": "rgb(138, 147, 168)",
+        "size": "14px",
+        "ratio": 6.1794,
+        "inBanner": false,
+        "count": 1,
+        "min": 6.1794
+      }
+    ],
+    "belowAA": []
+  },
+  "dark-banner-offline-stash-failed": {
+    "banner": {
+      "phase": "offline",
+      "tone": "danger",
+      "text": "网络已断开，本地暂存也失败了。请先把重要内容复制出来，别关掉页面。",
+      "role": "alert"
+    },
+    "leaves": 3,
+    "groups": [
+      {
+        "text": "网络已断开，本地暂存也失败了。请先把重要内容复制出来，别关掉页面。",
+        "cls": "ks-offline__text",
+        "fg": "#eef1f8",
+        "bg": "#1c2333",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 13.8854,
+        "inBanner": true,
+        "count": 1,
+        "min": 13.8854
+      },
+      {
+        "text": "重 试",
+        "cls": "",
+        "fg": "#eef1f8",
+        "bg": "#161b27",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 15.2215,
+        "inBanner": true,
+        "count": 1,
+        "min": 15.2215
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#8a93a8",
+        "bg": "#0d1017",
+        "rawColor": "rgb(138, 147, 168)",
+        "size": "14px",
+        "ratio": 6.1794,
+        "inBanner": false,
+        "count": 1,
+        "min": 6.1794
+      }
+    ],
+    "belowAA": []
+  },
+  "dark-banner-synced-pending": {
+    "banner": {
+      "phase": "synced",
+      "tone": "success",
+      "text": "本地改动已同步，但本机副本没清掉，下次联网会再同步一次。",
+      "role": "status"
+    },
+    "leaves": 3,
+    "groups": [
+      {
+        "text": "本地改动已同步，但本机副本没清掉，下次联网会再同步一次。",
+        "cls": "ks-offline__text",
+        "fg": "#eef1f8",
+        "bg": "#1c2333",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 13.8854,
+        "inBanner": true,
+        "count": 1,
+        "min": 13.8854
+      },
+      {
+        "text": "知道了",
+        "cls": "",
+        "fg": "#eef1f8",
+        "bg": "#161b27",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 15.2215,
+        "inBanner": true,
+        "count": 1,
+        "min": 15.2215
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#8a93a8",
+        "bg": "#0d1017",
+        "rawColor": "rgb(138, 147, 168)",
+        "size": "14px",
+        "ratio": 6.1794,
+        "inBanner": false,
+        "count": 1,
+        "min": 6.1794
+      }
+    ],
+    "belowAA": []
+  },
+  "dark-banner-offline-no-port": {
+    "banner": {
+      "phase": "offline",
+      "tone": "warning",
+      "text": "网络已断开，改动暂时无法保存到服务器。恢复联网后会重新同步。",
+      "role": "status"
+    },
+    "leaves": 2,
+    "groups": [
+      {
+        "text": "网络已断开，改动暂时无法保存到服务器。恢复联网后会重新同步。",
+        "cls": "ks-offline__text",
+        "fg": "#eef1f8",
+        "bg": "#1c2333",
+        "rawColor": "rgb(238, 241, 248)",
+        "size": "14px",
+        "ratio": 13.8854,
+        "inBanner": true,
+        "count": 1,
+        "min": 13.8854
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#8a93a8",
+        "bg": "#0d1017",
+        "rawColor": "rgb(138, 147, 168)",
+        "size": "14px",
+        "ratio": 6.1794,
+        "inBanner": false,
+        "count": 1,
+        "min": 6.1794
+      }
+    ],
+    "belowAA": []
+  },
+  "light-banner-offline-stashed": {
+    "banner": {
+      "phase": "offline",
+      "tone": "warning",
+      "text": "网络已断开。编辑内容已暂存在本机，恢复联网后会自动同步。",
+      "role": "status"
+    },
+    "leaves": 2,
+    "groups": [
+      {
+        "text": "网络已断开。编辑内容已暂存在本机，恢复联网后会自动同步。",
+        "cls": "ks-offline__text",
+        "fg": "#141a26",
+        "bg": "#f4f6fb",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 16.1112,
+        "inBanner": true,
+        "count": 1,
+        "min": 16.1112
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#646d84",
+        "bg": "#eef1f6",
+        "rawColor": "rgb(100, 109, 132)",
+        "size": "14px",
+        "ratio": 4.5657,
+        "inBanner": false,
+        "count": 1,
+        "min": 4.5657
+      }
+    ],
+    "belowAA": []
+  },
+  "light-banner-sync-failed": {
+    "banner": {
+      "phase": "sync-failed",
+      "tone": "danger",
+      "text": "网络已恢复，但本地改动同步失败。内容还在本机，可以重试。",
+      "role": "alert"
+    },
+    "leaves": 3,
+    "groups": [
+      {
+        "text": "网络已恢复，但本地改动同步失败。内容还在本机，可以重试。",
+        "cls": "ks-offline__text",
+        "fg": "#141a26",
+        "bg": "#f4f6fb",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 16.1112,
+        "inBanner": true,
+        "count": 1,
+        "min": 16.1112
+      },
+      {
+        "text": "重 试",
+        "cls": "",
+        "fg": "#141a26",
+        "bg": "#ffffff",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 17.4203,
+        "inBanner": true,
+        "count": 1,
+        "min": 17.4203
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#646d84",
+        "bg": "#eef1f6",
+        "rawColor": "rgb(100, 109, 132)",
+        "size": "14px",
+        "ratio": 4.5657,
+        "inBanner": false,
+        "count": 1,
+        "min": 4.5657
+      }
+    ],
+    "belowAA": []
+  },
+  "light-banner-synced": {
+    "banner": {
+      "phase": "synced",
+      "tone": "success",
+      "text": "网络已恢复，本地改动已同步。",
+      "role": "status"
+    },
+    "leaves": 3,
+    "groups": [
+      {
+        "text": "网络已恢复，本地改动已同步。",
+        "cls": "ks-offline__text",
+        "fg": "#141a26",
+        "bg": "#f4f6fb",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 16.1112,
+        "inBanner": true,
+        "count": 1,
+        "min": 16.1112
+      },
+      {
+        "text": "知道了",
+        "cls": "",
+        "fg": "#141a26",
+        "bg": "#ffffff",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 17.4203,
+        "inBanner": true,
+        "count": 1,
+        "min": 17.4203
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#646d84",
+        "bg": "#eef1f6",
+        "rawColor": "rgb(100, 109, 132)",
+        "size": "14px",
+        "ratio": 4.5657,
+        "inBanner": false,
+        "count": 1,
+        "min": 4.5657
+      }
+    ],
+    "belowAA": []
+  },
+  "light-banner-offline-stash-failed": {
+    "banner": {
+      "phase": "offline",
+      "tone": "danger",
+      "text": "网络已断开，本地暂存也失败了。请先把重要内容复制出来，别关掉页面。",
+      "role": "alert"
+    },
+    "leaves": 3,
+    "groups": [
+      {
+        "text": "网络已断开，本地暂存也失败了。请先把重要内容复制出来，别关掉页面。",
+        "cls": "ks-offline__text",
+        "fg": "#141a26",
+        "bg": "#f4f6fb",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 16.1112,
+        "inBanner": true,
+        "count": 1,
+        "min": 16.1112
+      },
+      {
+        "text": "重 试",
+        "cls": "",
+        "fg": "#141a26",
+        "bg": "#ffffff",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 17.4203,
+        "inBanner": true,
+        "count": 1,
+        "min": 17.4203
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#646d84",
+        "bg": "#eef1f6",
+        "rawColor": "rgb(100, 109, 132)",
+        "size": "14px",
+        "ratio": 4.5657,
+        "inBanner": false,
+        "count": 1,
+        "min": 4.5657
+      }
+    ],
+    "belowAA": []
+  },
+  "light-banner-synced-pending": {
+    "banner": {
+      "phase": "synced",
+      "tone": "success",
+      "text": "本地改动已同步，但本机副本没清掉，下次联网会再同步一次。",
+      "role": "status"
+    },
+    "leaves": 3,
+    "groups": [
+      {
+        "text": "本地改动已同步，但本机副本没清掉，下次联网会再同步一次。",
+        "cls": "ks-offline__text",
+        "fg": "#141a26",
+        "bg": "#f4f6fb",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 16.1112,
+        "inBanner": true,
+        "count": 1,
+        "min": 16.1112
+      },
+      {
+        "text": "知道了",
+        "cls": "",
+        "fg": "#141a26",
+        "bg": "#ffffff",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 17.4203,
+        "inBanner": true,
+        "count": 1,
+        "min": 17.4203
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#646d84",
+        "bg": "#eef1f6",
+        "rawColor": "rgb(100, 109, 132)",
+        "size": "14px",
+        "ratio": 4.5657,
+        "inBanner": false,
+        "count": 1,
+        "min": 4.5657
+      }
+    ],
+    "belowAA": []
+  },
+  "light-banner-offline-no-port": {
+    "banner": {
+      "phase": "offline",
+      "tone": "warning",
+      "text": "网络已断开，改动暂时无法保存到服务器。恢复联网后会重新同步。",
+      "role": "status"
+    },
+    "leaves": 2,
+    "groups": [
+      {
+        "text": "网络已断开，改动暂时无法保存到服务器。恢复联网后会重新同步。",
+        "cls": "ks-offline__text",
+        "fg": "#141a26",
+        "bg": "#f4f6fb",
+        "rawColor": "rgb(20, 26, 38)",
+        "size": "14px",
+        "ratio": 16.1112,
+        "inBanner": true,
+        "count": 1,
+        "min": 16.1112
+      },
+      {
+        "text": "页面正文（--muted on --bg，用于确认横幅之外的容器也在矩阵里）",
+        "cls": "",
+        "fg": "#646d84",
+        "bg": "#eef1f6",
+        "rawColor": "rgb(100, 109, 132)",
+        "size": "14px",
+        "ratio": 4.5657,
+        "inBanner": false,
+        "count": 1,
+        "min": 4.5657
+      }
+    ],
+    "belowAA": []
+  },
+  "portLog": [
+    "save(work:w1:script)",
+    "load(work:w1:script)",
+    "onSync",
+    "load(work:w1:script)",
+    "onSync",
+    "clear(work:w1:script)",
+    "save(work:w1:script)",
+    "load(work:w1:script)",
+    "onSync",
+    "save(work:w1:script)",
+    "load(work:w1:script)",
+    "onSync",
+    "clear(work:w1:script)",
+    "onSync",
+    "save(work:w1:script)",
+    "load(work:w1:script)",
+    "onSync",
+    "load(work:w1:script)",
+    "onSync",
+    "clear(work:w1:script)",
+    "save(work:w1:script)",
+    "load(work:w1:script)",
+    "onSync",
+    "save(work:w1:script)",
+    "load(work:w1:script)",
+    "onSync",
+    "clear(work:w1:script)",
+    "onSync"
+  ]
+}

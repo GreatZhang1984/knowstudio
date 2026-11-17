@@ -1,0 +1,2 @@
+export const ANALYTICS_RECORDER = Symbol('ANALYTICS_RECORDER');
+export const METRICS_READER = Symbol('METRICS_READER');
