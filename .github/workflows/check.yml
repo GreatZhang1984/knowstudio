@@ -65,6 +65,9 @@ jobs:
         # 当前检查链路使用 LOCAL_STORAGE_ROOT；MinIO S3 冒烟测试后续单独补，
         # 先避免 CI 依赖可用性不稳定的 minio/minio:latest 镜像。
         run: docker compose --project-directory infra up -d mysql redis
+        env:
+          MINIO_ROOT_USER: knowstudio-ci-minio
+          MINIO_ROOT_PASSWORD: knowstudio-ci-minio-secret
 
       - name: Wait for infrastructure
         run: |
