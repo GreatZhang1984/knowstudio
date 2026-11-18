@@ -12,6 +12,11 @@ import {
   GenerateScriptRequest,
   JobSchema,
   LedgerEntrySchema,
+  MaterialSourceConfigRequest,
+  MaterialSourceConfigResponse,
+  MaterialSourceConfigTestRequest,
+  MaterialSourceConfigTestResponse,
+  MaterialSourcesResponse,
   MaterialSchema,
   PlatformRuleSchema,
   PatchScriptRequest,
@@ -46,6 +51,7 @@ import type {
   ExportPackage,
   LicenseState,
   Material,
+  MaterialSource,
   MaterialType,
   PlatformId,
   PlatformRule,
@@ -143,10 +149,58 @@ export interface SearchInput {
   readonly keyword: string;
   readonly domain?: string;
   readonly force?: boolean;
+  readonly sources?: readonly MaterialSource['id'][];
+}
+
+export async function fetchMaterialSources(): Promise<MaterialSourcesResponse> {
+  if (USE_FIXTURES) return (await import('./fixtures')).fetchFixtureMaterialSources();
+  return MaterialSourcesResponse.parse(await sendJson('/api/material-sources'));
+}
+
+export type MaterialSourceConfigInput = MaterialSourceConfigRequest;
+
+export async function fetchMaterialSourceConfig(): Promise<MaterialSourceConfigResponse> {
+  if (USE_FIXTURES) return (await import('./fixtures')).fetchFixtureMaterialSourceConfig();
+  return MaterialSourceConfigResponse.parse(await sendJson('/api/material-sources/config'));
+}
+
+export async function updateMaterialSourceConfig(
+  input: MaterialSourceConfigInput,
+): Promise<MaterialSourceConfigResponse> {
+  const body = MaterialSourceConfigRequest.parse(input);
+  if (USE_FIXTURES) {
+    return (await import('./fixtures')).updateFixtureMaterialSourceConfig(body);
+  }
+  return MaterialSourceConfigResponse.parse(
+    await sendJson('/api/material-sources/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
+  );
+}
+
+export async function testMaterialSource(
+  sourceId: MaterialSourceConfigTestRequest['sourceId'],
+): Promise<MaterialSourceConfigTestResponse> {
+  if (USE_FIXTURES) return (await import('./fixtures')).testFixtureMaterialSource(sourceId);
+  return MaterialSourceConfigTestResponse.parse(
+    await sendJson('/api/material-sources/config/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(MaterialSourceConfigTestRequest.parse({ sourceId })),
+    }),
+  );
 }
 
 export async function startSearch(input: SearchInput): Promise<SearchStart> {
-  const body = SearchRequest.parse(input);
+  const body = SearchRequest.parse({
+    workId: input.workId,
+    keyword: input.keyword,
+    ...(input.domain == null ? {} : { domain: input.domain }),
+    ...(input.sources == null ? {} : { sources: input.sources }),
+    force: input.force,
+  });
   if (USE_FIXTURES) return (await import('./fixtures')).startFixtureSearch(body);
   const json = await sendJson('/api/discover/search', {
     method: 'POST',
@@ -191,11 +245,7 @@ export async function replaceMaterial(
   replacementId: string,
 ): Promise<CollectMaterialResponse> {
   if (USE_FIXTURES) {
-    return (await import('./fixtures')).replaceFixtureMaterial(
-      workId,
-      materialId,
-      replacementId,
-    );
+    return (await import('./fixtures')).replaceFixtureMaterial(workId, materialId, replacementId);
   }
   return CollectMaterialResponse.parse(
     await sendJson(`/api/works/${workId}/materials/${materialId}/replace`, {
@@ -494,9 +544,7 @@ export async function fetchDerivatives(workId: string): Promise<DerivativesView>
   return DerivativesResponse.parse(await sendJson(`/api/works/${workId}/derivatives`));
 }
 
-export async function generateDerivativeMetadata(
-  workId: string,
-): Promise<DerivativesView> {
+export async function generateDerivativeMetadata(workId: string): Promise<DerivativesView> {
   if (USE_FIXTURES) return (await import('./fixtures')).generateFixtureDerivatives(workId);
   return DerivativesResponse.parse(
     await sendJson(`/api/works/${workId}/derivatives:generate`, {

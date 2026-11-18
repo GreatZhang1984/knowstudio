@@ -1,4 +1,4 @@
-import { Button, Input, Tag } from 'antd';
+import { Button, Checkbox, Input, Tag } from 'antd';
 import { Link } from 'react-router-dom';
 import {
   EmptyState,
@@ -7,7 +7,7 @@ import {
   PartialSuccessState,
   formatTimestamp,
 } from '@knowstudio/ui';
-import type { ApiError, Material, SearchSession } from '@knowstudio/contracts';
+import type { ApiError, Material, MaterialSource, SearchSession } from '@knowstudio/contracts';
 import {
   confidencePercent,
   licenseLabel,
@@ -27,6 +27,9 @@ export interface DiscoverViewProps {
   readonly workLoading: boolean;
   readonly keyword: string;
   readonly domain: string;
+  readonly materialSources: readonly MaterialSource[];
+  readonly selectedSourceIds: readonly string[];
+  readonly sourcesLoading: boolean;
   readonly sameResult: boolean;
   readonly submitting: boolean;
   readonly session: SearchSession | null;
@@ -37,12 +40,13 @@ export interface DiscoverViewProps {
   readonly collectingMaterialId: string | null;
   readonly onKeywordChange: (value: string) => void;
   readonly onDomainChange: (value: string) => void;
+  readonly onToggleSource: (source: MaterialSource) => void;
   readonly onSubmit: () => void;
   readonly onRetry: () => void;
   readonly onToggleCollect: (material: Material) => void;
 }
 
-const EXAMPLES = ['费曼学习法', '间隔重复', '职场汇报'] as const;
+const EXAMPLES = ['费曼学习法'] as const;
 
 function SaturationGauge({ session }: { session: SearchSession }) {
   const saturation = session.saturation;
@@ -250,6 +254,9 @@ export function DiscoverView(props: DiscoverViewProps) {
     workLoading,
     keyword,
     domain,
+    materialSources,
+    selectedSourceIds,
+    sourcesLoading,
     sameResult,
     submitting,
     session,
@@ -260,12 +267,16 @@ export function DiscoverView(props: DiscoverViewProps) {
     collectingMaterialId,
     onKeywordChange,
     onDomainChange,
+    onToggleSource,
     onSubmit,
     onRetry,
     onToggleCollect,
   } = props;
   const issue = searchInputIssue(keyword, domain);
   const submitLabel = sameResult ? '已是最新结果' : session == null ? '开始聚合' : '重新聚合';
+  const realSourceConfigured = materialSources.some(
+    (source) => source.configured && source.id !== 'recorded',
+  );
 
   return (
     <section className="discover-page">
@@ -332,6 +343,36 @@ export function DiscoverView(props: DiscoverViewProps) {
           ))}
           {issue == null ? null : <span className="discover-form__issue">{issue}</span>}
         </div>
+        <fieldset className="discover-form__sources" aria-label="素材源">
+          <legend>素材源</legend>
+          {sourcesLoading ? (
+            <span className="discover-form__source-status">正在读取配置</span>
+          ) : (
+            <div className="discover-form__source-list">
+              {materialSources.map((source) => (
+                <label
+                  key={source.id}
+                  className="discover-form__source"
+                  data-configured={source.configured}
+                >
+                  <Checkbox
+                    checked={source.configured && selectedSourceIds.includes(source.id)}
+                    disabled={!source.configured}
+                    onChange={() => onToggleSource(source)}
+                  >
+                    {source.name}
+                  </Checkbox>
+                  <span>{source.description}</span>
+                  {source.id === 'recorded' ? null : (
+                    <Link className="discover-form__source-link" to="/settings/sources">
+                      配置
+                    </Link>
+                  )}
+                </label>
+              ))}
+            </div>
+          )}
+        </fieldset>
       </form>
 
       {collectFailed ? (
@@ -385,7 +426,13 @@ export function DiscoverView(props: DiscoverViewProps) {
       {view.kind === 'empty' ? (
         <EmptyState
           title="没有搜到结果"
-          description="换一个更具体的词，或放宽领域偏好再试一次。"
+          description={
+            selectedSourceIds.includes('recorded') && selectedSourceIds.length === 1
+              ? realSourceConfigured
+                ? '当前录制源只包含示例关键词；勾选 Web 搜索或 Obsidian 后重试。'
+                : '当前录制源只包含示例关键词；服务端配置 Tavily 或 Obsidian MCP 并重启 API 后可搜索真实内容。'
+              : '换一个更具体的词，或放宽领域偏好再试一次。'
+          }
           level="section"
           actions={[{ key: 'retry', label: '重新聚合', primary: true, onClick: onRetry }]}
           testId="discover-empty"

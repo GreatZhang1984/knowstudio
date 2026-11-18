@@ -7,6 +7,8 @@ import {
   ExportPackageSchema,
   JobSchema,
   LedgerEntrySchema,
+  MaterialSourceConfigResponse,
+  MaterialSourcesResponse,
   MetricsResponse,
   PlatformRuleSchema,
   PatchScriptResponse,
@@ -29,6 +31,8 @@ import type {
   ExportPackage,
   LedgerEntry,
   Material,
+  MaterialSourceConfigRequest,
+  MaterialSourceConfigTestResponse,
   MetricsResponse as MetricsResponseData,
   PlatformRule,
   PlatformId,
@@ -135,6 +139,14 @@ export const FIXTURE_RECENT: WorkListItem = {
   updatedAt: '2026-11-12T10:20:00Z',
 };
 
+const FIXTURE_MATERIAL_SOURCES = MaterialSourcesResponse.parse({
+  items: [
+    { id: 'recorded', name: '录制演示', description: '内置素材。', configured: true },
+    { id: 'web_search', name: 'Web 搜索', description: '真实 API 未启用。', configured: false },
+    { id: 'obsidian', name: 'Obsidian', description: 'MCP 未启用。', configured: false },
+  ],
+});
+
 export const FIXTURE_QUOTA: Quota = {
   total: 60,
   used: 22,
@@ -145,13 +157,51 @@ export const FIXTURE_QUOTA: Quota = {
 
 export const FIXTURE_METRICS: MetricsResponseData = MetricsResponse.parse({
   items: [
-    { metric: 'g1_e2e_p50', value: 42.5, sampleN: 6, bucket: '2026-11-17T00:00:00Z', computedAt: '2026-11-17T00:10:00Z' },
-    { metric: 'g3_polish_p50', value: 8.2, sampleN: 6, bucket: '2026-11-17T00:00:00Z', computedAt: '2026-11-17T00:10:00Z' },
-    { metric: 'g5_platform_coverage', value: 4, sampleN: 4, bucket: '2026-11-17T00:00:00Z', computedAt: '2026-11-17T00:10:00Z' },
-    { metric: 'g6_cost_per_work', value: 2.8, sampleN: 6, bucket: '2026-11-17T00:00:00Z', computedAt: '2026-11-17T00:10:00Z' },
+    {
+      metric: 'g1_e2e_p50',
+      value: 42.5,
+      sampleN: 6,
+      bucket: '2026-11-17T00:00:00Z',
+      computedAt: '2026-11-17T00:10:00Z',
+    },
+    {
+      metric: 'g3_polish_p50',
+      value: 8.2,
+      sampleN: 6,
+      bucket: '2026-11-17T00:00:00Z',
+      computedAt: '2026-11-17T00:10:00Z',
+    },
+    {
+      metric: 'g5_platform_coverage',
+      value: 4,
+      sampleN: 4,
+      bucket: '2026-11-17T00:00:00Z',
+      computedAt: '2026-11-17T00:10:00Z',
+    },
+    {
+      metric: 'g6_cost_per_work',
+      value: 2.8,
+      sampleN: 6,
+      bucket: '2026-11-17T00:00:00Z',
+      computedAt: '2026-11-17T00:10:00Z',
+    },
   ],
   fresh: true,
+  dataStatus: 'fresh',
   generatedAt: '2026-11-17T00:10:00Z',
+  expectedBucket: '2026-11-17T00:00:00Z',
+  task: {
+    bucket: '2026-11-17T00:00:00Z',
+    status: 'succeeded',
+    state: 'done',
+    attempt: 1,
+    maxAttempt: 3,
+    startedAt: '2026-11-17T00:09:58Z',
+    finishedAt: '2026-11-17T00:10:01Z',
+    durationMs: 3000,
+    runAfter: '2026-11-17T00:00:00Z',
+    lastError: null,
+  },
   g4BlindTest: { source: 'manual', value: null },
 });
 
@@ -692,6 +742,7 @@ export type FixtureSearchStart =
 export function startFixtureSearch(input: {
   readonly keyword: string;
   readonly force?: boolean;
+  readonly sources?: readonly string[];
 }): FixtureSearchStart {
   const normalized = input.keyword.trim().normalize('NFKC').toLowerCase();
   const session =
@@ -701,6 +752,67 @@ export function startFixtureSearch(input: {
   if (session === undefined) throw new Error('fixture search missing');
   if (!input.force) return { kind: 'session', session: { ...session, cacheHit: true } };
   return { kind: 'accepted', searchId: session.id };
+}
+
+export function fetchFixtureMaterialSources(): MaterialSourcesResponse {
+  return FIXTURE_MATERIAL_SOURCES;
+}
+
+let fixtureConfig = MaterialSourceConfigResponse.parse({
+  webSearch: {
+    enabled: false,
+    apiKeyLast4: null,
+    maxResults: 5,
+    testedAt: null,
+    updatedAt: null,
+  },
+  obsidian: {
+    enabled: false,
+    endpoint: null,
+    tool: null,
+    timeoutMs: 8000,
+    maxResults: 5,
+    testedAt: null,
+    updatedAt: null,
+  },
+});
+
+export function fetchFixtureMaterialSourceConfig(): MaterialSourceConfigResponse {
+  return fixtureConfig;
+}
+
+export function updateFixtureMaterialSourceConfig(
+  input: MaterialSourceConfigRequest,
+): MaterialSourceConfigResponse {
+  const now = new Date().toISOString();
+  fixtureConfig = MaterialSourceConfigResponse.parse({
+    webSearch: {
+      ...fixtureConfig.webSearch,
+      enabled: input.webSearch?.enabled ?? fixtureConfig.webSearch.enabled,
+      apiKeyLast4:
+        input.webSearch?.apiKey === undefined
+          ? fixtureConfig.webSearch.apiKeyLast4
+          : input.webSearch.apiKey.slice(-4),
+      maxResults: input.webSearch?.maxResults ?? fixtureConfig.webSearch.maxResults,
+      updatedAt: now,
+    },
+    obsidian: {
+      ...fixtureConfig.obsidian,
+      enabled: input.obsidian?.enabled ?? fixtureConfig.obsidian.enabled,
+      endpoint: input.obsidian?.endpoint ?? fixtureConfig.obsidian.endpoint,
+      tool: input.obsidian?.tool ?? fixtureConfig.obsidian.tool,
+      timeoutMs: input.obsidian?.timeoutMs ?? fixtureConfig.obsidian.timeoutMs,
+      maxResults: input.obsidian?.maxResults ?? fixtureConfig.obsidian.maxResults,
+      updatedAt: now,
+    },
+  });
+  return fixtureConfig;
+}
+
+export function testFixtureMaterialSource(
+  sourceId: 'web_search' | 'obsidian',
+): MaterialSourceConfigTestResponse {
+  return { sourceId, ok: false, latencyMs: 0, error: 'fixture 模式不访问外部服务' };
 }
 
 export function fetchFixtureSearchSession(searchId: string): SearchSession {
@@ -769,9 +881,27 @@ function fixtureCompliance(workId: string, force = false): ComplianceReport {
     id: `cr_${workId}_${force ? 'force' : 'cached'}`,
     workId,
     items: [
-      { kind: 'image', status: 'pass', detail: '当前未引用图片素材。', blocking: false, materialIds: [] },
-      { kind: 'music', status: 'pass', detail: '当前未引用音乐素材。', blocking: false, materialIds: [] },
-      { kind: 'font', status: 'pass', detail: '模板使用思源黑体。', blocking: false, materialIds: [] },
+      {
+        kind: 'image',
+        status: 'pass',
+        detail: '当前未引用图片素材。',
+        blocking: false,
+        materialIds: [],
+      },
+      {
+        kind: 'music',
+        status: 'pass',
+        detail: '当前未引用音乐素材。',
+        blocking: false,
+        materialIds: [],
+      },
+      {
+        kind: 'font',
+        status: 'pass',
+        detail: '模板使用思源黑体。',
+        blocking: false,
+        materialIds: [],
+      },
       {
         kind: 'content',
         status: blocked.length === 0 ? 'pass' : 'block',

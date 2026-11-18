@@ -30,6 +30,9 @@ describe('T-60 指标看板', () => {
 
     expect(await screen.findByText('指标看板')).toBeTruthy();
     expect(screen.getByText('G1 端到端 P50')).toBeTruthy();
+    expect(screen.getByText('实时')).toBeTruthy();
+    expect(screen.getByText(/最近聚合：成功/)).toBeTruthy();
+    expect(screen.getByText(/耗时 3000ms/)).toBeTruthy();
     expect(screen.getByText('G4 盲测结果需人工录入')).toBeTruthy();
     expect(screen.getByText('42.5 分钟')).toBeTruthy();
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);

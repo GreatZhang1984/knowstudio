@@ -2,7 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import type { QueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import type { PlatformId } from '@knowstudio/contracts';
-import { fetchMetrics, fetchQuota, fetchRecentWork, fetchWorkEnvelope } from './api';
+import {
+  fetchMaterialSources,
+  fetchMetrics,
+  fetchQuota,
+  fetchRecentWork,
+  fetchWorkEnvelope,
+} from './api';
 
 /**
  * queryKey 一律带 workId，天然按作品隔离（架构 §11.2）。
@@ -43,6 +49,8 @@ export const workKeys = {
   recent: ['works', 'recent'] as const,
   quota: ['quota'] as const,
   metrics: ['metrics'] as const,
+  materialSources: ['material-sources'] as const,
+  materialSourceConfig: ['material-source-config'] as const,
   ledger: (month: string) => [...workKeys.quota, 'ledger', month] as const,
   platformRules: ['platform-rules'] as const,
 };
@@ -78,6 +86,10 @@ export function useQuota() {
 
 export function useMetrics() {
   return useQuery({ queryKey: workKeys.metrics, queryFn: fetchMetrics });
+}
+
+export function useMaterialSources() {
+  return useQuery({ queryKey: workKeys.materialSources, queryFn: fetchMaterialSources });
 }
 
 /** 当前作品：路由上有 :id 就用它，否则回落到最近活跃 Work。 */

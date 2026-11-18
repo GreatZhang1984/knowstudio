@@ -48,6 +48,21 @@ CREATE TABLE `style_profile` (
   CONSTRAINT `fk_profile_user` FOREIGN KEY (`user_id`) REFERENCES `app_user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- ===== user_source_config =====
+CREATE TABLE `user_source_config` (
+  `user_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `source_id` enum('web_search','obsidian') NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `settings` json NOT NULL,
+  `credential_ciphertext` text,
+  `credential_last4` char(4) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
+  `tested_at` datetime(3) DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`user_id`,`source_id`),
+  CONSTRAINT `fk_source_config_user` FOREIGN KEY (`user_id`) REFERENCES `app_user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- ===== work =====
 CREATE TABLE `work` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,

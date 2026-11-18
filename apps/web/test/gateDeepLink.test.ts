@@ -70,7 +70,7 @@ async function renderDeepLink(path: string, qc: QueryClient): Promise<string> {
   );
 }
 
-describe('路由树：18 页 + 2 域入口在 loader 改造后原样保留', () => {
+describe('路由树：19 页 + 2 域入口在 loader 改造后原样保留', () => {
   it('页面路径与重定向一个不多一个不少', () => {
     const objects = buildRouteObjects(newClient());
     const shell = objects.find((o) => o.children != null);
@@ -80,7 +80,7 @@ describe('路由树：18 页 + 2 域入口在 loader 改造后原样保留', () 
     ];
     for (const r of PAGE_ROUTES) expect(paths, r.pageId).toContain(r.path);
     for (const r of REDIRECT_ROUTES) expect(paths, r.path).toContain(r.path);
-    expect(PAGE_ROUTES).toHaveLength(18);
+    expect(PAGE_ROUTES).toHaveLength(19);
     expect(REDIRECT_ROUTES.map((r) => r.path)).toEqual(['/studio', '/publish']);
   });
 

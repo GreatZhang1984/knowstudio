@@ -1,5 +1,13 @@
 /** ① 用户与风格（架构 §4.4 420–467 行）。app_user 的 DDL 属客户冻结项，类型亦逐列对齐。 */
-import type { Bool, Defaulted, Id, JsonColDefaulted, Nullable, UtcDateTime } from './column-types.js';
+import type {
+  Bool,
+  Defaulted,
+  Id,
+  JsonCol,
+  JsonColDefaulted,
+  Nullable,
+  UtcDateTime,
+} from './column-types.js';
 import type { StyleSampleSource, StyleSampleStatus } from './db-enums.js';
 import type { PlatformIdList } from './json-shapes.js';
 
@@ -29,6 +37,20 @@ export interface StyleSampleTable {
   /** 注意：这是**普通 INT 列**，不是生成列（与 script_line.char_count 不同）。 */
   char_count: number;
   created_at: Defaulted<UtcDateTime>;
+}
+
+export type UserSourceConfigId = 'web_search' | 'obsidian';
+
+export interface UserSourceConfigTable {
+  user_id: Id;
+  source_id: UserSourceConfigId;
+  enabled: Defaulted<0 | 1>;
+  settings: JsonCol;
+  credential_ciphertext: Nullable<string>;
+  credential_last4: Nullable<string>;
+  tested_at: Nullable<UtcDateTime>;
+  created_at: Defaulted<UtcDateTime>;
+  updated_at: Defaulted<UtcDateTime>;
 }
 
 export interface StyleProfileTable {

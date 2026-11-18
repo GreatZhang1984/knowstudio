@@ -320,6 +320,10 @@ export const ExportPackageSchema = z.object({
 export type ExportPackage = z.infer<typeof ExportPackageSchema>;
 
 // ── 搜索 ──────────────────────────────────────────────────────────────────────
+export const MaterialSourceId = z.enum(['recorded', 'web_search', 'obsidian']);
+export type MaterialSourceId = z.infer<typeof MaterialSourceId>;
+export const ExternalMaterialSourceId = z.enum(['web_search', 'obsidian']);
+export type ExternalMaterialSourceId = z.infer<typeof ExternalMaterialSourceId>;
 
 export const SearchRequest = z.object({
   /**
@@ -335,11 +339,89 @@ export const SearchRequest = z.object({
   keyword: z.string().min(1).max(40),
   /** SPEC §3.2：可选领域偏好（来自设置）。SPEC 未枚举值域，故为自由短串。 */
   domain: z.string().min(1).max(40).optional(),
+  /** T-64：素材源可多选；不传保持原录制回放行为，兼容既有客户端。 */
+  sources: z.array(MaterialSourceId).min(1).max(3).default(['recorded']),
   force: z.boolean().default(false),
 });
 export type SearchRequest = z.infer<typeof SearchRequest>;
 
 export const SearchAccepted = z.object({ searchId: PrefixedId, cacheHit: z.boolean() });
+
+export const MaterialSourceSchema = z.object({
+  id: MaterialSourceId,
+  name: z.string(),
+  description: z.string(),
+  configured: z.boolean(),
+});
+export type MaterialSource = z.infer<typeof MaterialSourceSchema>;
+
+export const MaterialSourcesResponse = z.object({ items: z.array(MaterialSourceSchema) });
+export type MaterialSourcesResponse = z.infer<typeof MaterialSourcesResponse>;
+
+export const WebSearchConfigRequest = z
+  .object({
+    enabled: z.boolean(),
+    /** 省略表示保留已保存密钥；首次启用时必填。 */
+    apiKey: z.string().min(8).max(255).optional(),
+    maxResults: z.number().int().min(1).max(10).default(5),
+  })
+  .strict();
+export type WebSearchConfigRequest = z.infer<typeof WebSearchConfigRequest>;
+
+export const ObsidianConfigRequest = z
+  .object({
+    enabled: z.boolean(),
+    endpoint: z.string().min(1).max(1024),
+    tool: z.string().min(1).max(120),
+    timeoutMs: z.number().int().min(1000).max(30_000).default(8000),
+    maxResults: z.number().int().min(1).max(10).default(5),
+  })
+  .strict();
+export type ObsidianConfigRequest = z.infer<typeof ObsidianConfigRequest>;
+
+export const MaterialSourceConfigRequest = z
+  .object({
+    webSearch: WebSearchConfigRequest.optional(),
+    obsidian: ObsidianConfigRequest.optional(),
+  })
+  .strict()
+  .refine((value) => value.webSearch !== undefined || value.obsidian !== undefined, {
+    message: '至少配置一个素材源',
+  });
+export type MaterialSourceConfigRequest = z.infer<typeof MaterialSourceConfigRequest>;
+
+export const MaterialSourceConfigResponse = z.object({
+  webSearch: z.object({
+    enabled: z.boolean(),
+    apiKeyLast4: z.string().length(4).nullable(),
+    maxResults: z.number().int().min(1).max(10),
+    testedAt: UtcTimestamp.nullable(),
+    updatedAt: UtcTimestamp.nullable(),
+  }),
+  obsidian: z.object({
+    enabled: z.boolean(),
+    endpoint: z.string().nullable(),
+    tool: z.string().nullable(),
+    timeoutMs: z.number().int().min(1000).max(30_000),
+    maxResults: z.number().int().min(1).max(10),
+    testedAt: UtcTimestamp.nullable(),
+    updatedAt: UtcTimestamp.nullable(),
+  }),
+});
+export type MaterialSourceConfigResponse = z.infer<typeof MaterialSourceConfigResponse>;
+
+export const MaterialSourceConfigTestRequest = z
+  .object({ sourceId: ExternalMaterialSourceId })
+  .strict();
+export type MaterialSourceConfigTestRequest = z.infer<typeof MaterialSourceConfigTestRequest>;
+
+export const MaterialSourceConfigTestResponse = z.object({
+  sourceId: ExternalMaterialSourceId,
+  ok: z.boolean(),
+  latencyMs: z.number().int().min(0),
+  error: z.string().nullable(),
+});
+export type MaterialSourceConfigTestResponse = z.infer<typeof MaterialSourceConfigTestResponse>;
 
 export const MaterialSchema = z.object({
   id: PrefixedId,
@@ -651,10 +733,59 @@ export const MetricSnapshotItem = z.object({
 });
 export type MetricSnapshotItem = z.infer<typeof MetricSnapshotItem>;
 
+export const MetricTaskStatus = z.enum([
+  'idle',
+  'queued',
+  'running',
+  'retry_scheduled',
+  'succeeded',
+  'failed',
+  'canceled',
+]);
+export type MetricTaskStatus = z.infer<typeof MetricTaskStatus>;
+
+export const MetricTaskError = z.object({
+  code: z.string().min(1),
+  message: z.string().min(1),
+});
+export type MetricTaskError = z.infer<typeof MetricTaskError>;
+
+export const MetricTask = z.object({
+  bucket: UtcTimestamp,
+  status: MetricTaskStatus,
+  state: z.enum(['pending', 'leased', 'done', 'dead', 'canceled']),
+  attempt: z.number().int().min(0),
+  maxAttempt: z.number().int().min(1),
+  startedAt: UtcTimestamp.nullable(),
+  finishedAt: UtcTimestamp.nullable(),
+  durationMs: z.number().int().min(0).nullable(),
+  runAfter: UtcTimestamp.nullable(),
+  lastError: MetricTaskError.nullable(),
+});
+export type MetricTask = z.infer<typeof MetricTask>;
+
+export const MetricDataStatus = z.enum(['missing', 'partial', 'stale', 'fresh']);
+export type MetricDataStatus = z.infer<typeof MetricDataStatus>;
+
 export const MetricsResponse = z.object({
   items: z.array(MetricSnapshotItem),
   fresh: z.boolean(),
+  dataStatus: MetricDataStatus,
   generatedAt: UtcTimestamp.nullable(),
+  expectedBucket: UtcTimestamp,
+  task: MetricTask.nullable(),
   g4BlindTest: z.object({ source: z.literal('manual'), value: z.number().nullable() }),
 });
 export type MetricsResponse = z.infer<typeof MetricsResponse>;
+
+export const MetricRecomputeRequest = z.object({
+  bucket: UtcTimestamp.optional(),
+});
+export type MetricRecomputeRequest = z.infer<typeof MetricRecomputeRequest>;
+
+export const MetricRecomputeAccepted = z.object({
+  bucket: UtcTimestamp,
+  queued: z.boolean(),
+  dedupKey: z.string().nullable(),
+});
+export type MetricRecomputeAccepted = z.infer<typeof MetricRecomputeAccepted>;

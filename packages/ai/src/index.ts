@@ -8,6 +8,7 @@
  */
 export * from './ports.js';
 export * from './sources/framework.js';
+export * from './sources/real.js';
 export * from './sources/recorded.js';
 export * from './saturation/compute.js';
 export * from './saturation/blank-angles.js';

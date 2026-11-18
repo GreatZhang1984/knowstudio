@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Material, SearchSession } from '@knowstudio/contracts';
 import {
+  normalizeSourceSelection,
   blankAngleTarget,
   isSameKeyword,
   materialGroups,
@@ -10,6 +11,12 @@ import {
   topicsTarget,
   withMaterialCollected,
 } from '../searchLogic';
+
+const AVAILABLE_SOURCES = [
+  { id: 'recorded', name: '录制演示', description: '', configured: true },
+  { id: 'web_search', name: 'Web 搜索', description: '', configured: true },
+  { id: 'obsidian', name: 'Obsidian', description: '', configured: false },
+] as const;
 
 const material = (id: string, type: Material['type'], collected = false): Material => ({
   id,
@@ -61,6 +68,16 @@ describe('搜索输入与结果判定', () => {
     expect(searchInputIssue('x'.repeat(41), '')).toBe('关键词最多 40 字');
     expect(searchInputIssue('费曼', 'x'.repeat(41))).toBe('领域偏好最多 40 字');
     expect(searchInputIssue('费曼', ' 学习方法 ')).toBeUndefined();
+  });
+
+  it('素材源选择去重排序，未配置源被移除，空选择回落录制源', () => {
+    expect(
+      normalizeSourceSelection(['obsidian', 'web_search', 'web_search'], AVAILABLE_SOURCES),
+    ).toEqual(['web_search']);
+    expect(normalizeSourceSelection(['obsidian'], AVAILABLE_SOURCES)).toEqual(['recorded']);
+    expect(
+      normalizeSourceSelection(['obsidian', 'recorded', 'web_search'], AVAILABLE_SOURCES),
+    ).toEqual(['recorded', 'web_search']);
   });
 
   it('五态：无会话 initial；排队/提交 loading；空结果 empty；失败 error；成功 success', () => {

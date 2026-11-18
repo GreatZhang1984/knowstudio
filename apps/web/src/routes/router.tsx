@@ -11,7 +11,7 @@ import { PAGE_ROUTES, REDIRECT_ROUTES } from './manifest';
 import type { PageRoute } from './manifest';
 
 /**
- * 路由树由 manifest 派生：18 页 + 2 个域入口重定向，一个不多一个不少。
+ * 路由树由 manifest 派生：19 页 + 2 个域入口重定向，一个不多一个不少。
  * 页面组件仍是 manifest 里的 React.lazy，chunk 边界不变。
  */
 
@@ -48,13 +48,11 @@ export function buildRouteObjects(queryClient: QueryClient): RouteObject[] {
       element: <AppLayout />,
       children: [
         ...PAGE_ROUTES.filter((r) => r.shell === 'app').map((r) => pageRouteObject(r, queryClient)),
-        ...REDIRECT_ROUTES.map(
-          (r): RouteObject => ({
-            path: r.path,
-            element: <DomainEntryRedirect />,
-            loader: () => prefetchRecentWork(queryClient),
-          }),
-        ),
+        ...REDIRECT_ROUTES.map((r): RouteObject => ({
+          path: r.path,
+          element: <DomainEntryRedirect />,
+          loader: () => prefetchRecentWork(queryClient),
+        })),
       ],
     },
     { path: '*', element: <Navigate to="/" replace /> },

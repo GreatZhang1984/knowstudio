@@ -1,6 +1,13 @@
 import { sql } from 'kysely';
 import type { Database, Kysely, Transaction } from '@knowstudio/db';
-import type { MetricName, MetricSnapshotItem, MetricsResponse } from '@knowstudio/contracts';
+import type {
+  MetricDataStatus,
+  MetricName,
+  MetricSnapshotItem,
+  MetricTask,
+  MetricTaskStatus,
+  MetricsResponse,
+} from '@knowstudio/contracts';
 
 export const METRIC_NAMES: readonly MetricName[] = [
   'g1_e2e_p50',
@@ -34,12 +41,27 @@ interface MetricRow {
   readonly computed_at: string;
 }
 
+interface MetricQueueRow {
+  readonly payload: Record<string, unknown> | null;
+  readonly state: 'pending' | 'leased' | 'done' | 'dead' | 'canceled';
+  readonly attempt: number;
+  readonly max_attempt: number;
+  readonly started_at: string | null;
+  readonly finished_at: string | null;
+  readonly run_after: string;
+  readonly last_error: Record<string, unknown> | null;
+}
+
 function hourBucket(date = new Date()): string {
   return `${date.toISOString().slice(0, 13)}:00:00.000`.replace('T', ' ');
 }
 
 function ms(value: string): number {
   return Date.parse(`${value.replace(' ', 'T')}Z`);
+}
+
+function rfc3339(value: string): string {
+  return `${value.replace(' ', 'T')}Z`;
 }
 
 function numberOr(props: Record<string, unknown> | null, key: string): number | null {
@@ -221,6 +243,65 @@ async function metricRows(trx: MetricTransaction, bucket: string): Promise<Metri
   }));
 }
 
+function metricTaskStatus(row: MetricQueueRow): MetricTaskStatus {
+  switch (row.state) {
+    case 'leased':
+      return 'running';
+    case 'done':
+      return 'succeeded';
+    case 'dead':
+      return 'failed';
+    case 'canceled':
+      return 'canceled';
+    case 'pending':
+      return row.attempt > 0 && row.last_error !== null ? 'retry_scheduled' : 'queued';
+  }
+}
+
+async function metricTask(db: Kysely<Database>): Promise<MetricTask | null> {
+  const row = await db
+    .selectFrom('job_queue')
+    .select([
+      'payload',
+      'state',
+      'attempt',
+      'max_attempt',
+      'started_at',
+      'finished_at',
+      'run_after',
+      'last_error',
+    ])
+    .where('queue', '=', 'sys.metric')
+    .orderBy('id', 'desc')
+    .executeTakeFirst();
+  if (row === undefined) return null;
+
+  const typedRow = row as MetricQueueRow;
+  const bucket = typedRow.payload?.bucket;
+  if (typeof bucket !== 'string' || !Number.isFinite(ms(bucket))) return null;
+  const duration =
+    typedRow.started_at !== null && typedRow.finished_at !== null
+      ? Math.max(0, ms(typedRow.finished_at) - ms(typedRow.started_at))
+      : null;
+  const error = typedRow.last_error;
+
+  return {
+    bucket: rfc3339(bucket),
+    status: metricTaskStatus(typedRow),
+    state: typedRow.state,
+    attempt: Number(typedRow.attempt),
+    maxAttempt: Number(typedRow.max_attempt),
+    startedAt: typedRow.started_at === null ? null : rfc3339(typedRow.started_at),
+    finishedAt: typedRow.finished_at === null ? null : rfc3339(typedRow.finished_at),
+    durationMs: duration,
+    runAfter: rfc3339(typedRow.run_after),
+    lastError:
+      typeof error?.code === 'string' && typeof error.message === 'string'
+        ? { code: error.code, message: error.message }
+        : null,
+  };
+}
+
 export async function computeMetricSnapshots(
   db: Kysely<Database>,
   bucket = hourBucket(),
@@ -274,8 +355,8 @@ export async function readMetrics(db: Kysely<Database>): Promise<MetricsResponse
     metric: row.metric as MetricName,
     value: row.sample_n === 0 ? null : Number(row.value_num),
     sampleN: row.sample_n,
-    bucket: `${row.bucket.replace(' ', 'T')}Z`,
-    computedAt: `${row.computed_at.replace(' ', 'T')}Z`,
+    bucket: rfc3339(row.bucket),
+    computedAt: rfc3339(row.computed_at),
   }));
   const generatedAt = items.reduce<string | null>(
     (acc, item) => (acc === null || item.computedAt > acc ? item.computedAt : acc),
@@ -285,10 +366,24 @@ export async function readMetrics(db: Kysely<Database>): Promise<MetricsResponse
     latest.size === METRIC_NAMES.length &&
     generatedAt !== null &&
     Date.now() - Date.parse(generatedAt) < 2 * 60 * 60 * 1000;
+  const dataStatus: MetricDataStatus =
+    latest.size === 0
+      ? 'missing'
+      : latest.size < METRIC_NAMES.length
+        ? 'partial'
+        : fresh
+          ? 'fresh'
+          : 'stale';
+  const expectedBucket = hourBucket();
   return {
-    items,
+    items: [...items].sort(
+      (a, b) => METRIC_NAMES.indexOf(a.metric) - METRIC_NAMES.indexOf(b.metric),
+    ),
     fresh,
+    dataStatus,
     generatedAt,
+    expectedBucket: rfc3339(expectedBucket),
+    task: await metricTask(db),
     g4BlindTest: { source: 'manual', value: null },
   };
 }

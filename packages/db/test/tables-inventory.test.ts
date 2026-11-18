@@ -1,8 +1,8 @@
 /**
- * 36 表硬不变量测试（客户 2026-11-13 拍板：恰好 36，不得有第 37 张）。
+ * 37 表硬不变量测试（T-65 客户确认在 36 表基线上新增用户级素材源配置表）。
  *
  * 三层防线都测：
- *   1) 清单自身：24 实体 + 12 支撑 = 36，无重复，禁止表不相交
+ *   1) 清单自身：25 实体 + 12 支撑 = 37，无重复，禁止表不相交
  *   2) 编译期：Database 的键集合与 TABLE_ORDER **双向**相等
  *   3) 运行期：assertSchemaInvariant 对少表/多表/禁止表/重复必须抛错
  *
@@ -35,7 +35,9 @@ type AssertTrue<T extends true> = T;
 export type SchemaKeysMatchTableOrder = AssertTrue<Equal<keyof Database, TableName>>;
 
 /** 负向①：少一张表必须被判为不等（证明上面的检查有鉴别力）。 */
-export type MissingTableIsDetected = AssertTrue<Equal<Equal<keyof Omit<Database, 'app_user'>, TableName>, false>>;
+export type MissingTableIsDetected = AssertTrue<
+  Equal<Equal<keyof Omit<Database, 'app_user'>, TableName>, false>
+>;
 
 /** 负向②：多一张禁止表必须被判为不等。 */
 export type ExtraTableIsDetected = AssertTrue<
@@ -46,16 +48,21 @@ const baseline = readFileSync(
   fileURLToPath(new URL('../migrations/0001_baseline.sql', import.meta.url)),
   'utf8',
 );
+const incremental = readFileSync(
+  fileURLToPath(new URL('../migrations/0002_user_source_config.sql', import.meta.url)),
+  'utf8',
+);
 const baselineNames = splitSqlStatements(baseline).map((s) => createdTableName(s) as string);
+const incrementalNames = splitSqlStatements(incremental).map((s) => createdTableName(s) as string);
 
 describe('表清单自身', () => {
-  it('恰好 36 张', () => {
+  it('恰好 37 张', () => {
     expect(TABLE_ORDER).toHaveLength(TOTAL_TABLE_COUNT);
-    expect(TOTAL_TABLE_COUNT).toBe(36);
+    expect(TOTAL_TABLE_COUNT).toBe(37);
   });
 
-  it('24 实体 + 12 支撑 = 36（架构 §16 口径）', () => {
-    expect(ENTITY_TABLE_COUNT).toBe(24);
+  it('25 实体 + 12 支撑 = 37（36 表基线 + T-65 增量）', () => {
+    expect(ENTITY_TABLE_COUNT).toBe(25);
     expect(SUPPORT_TABLE_COUNT).toBe(12);
     expect(ENTITY_TABLE_COUNT + SUPPORT_TABLE_COUNT).toBe(TOTAL_TABLE_COUNT);
     expect(ENTITY_TABLES).toHaveLength(ENTITY_TABLE_COUNT);
@@ -75,7 +82,7 @@ describe('表清单自身', () => {
     expect([...ENTITY_TABLES, ...SUPPORT_TABLES].sort()).toEqual([...TABLE_ORDER].sort());
   });
 
-  it('禁止表与 36 张表不相交（会话存 Redis，不建会话表）', () => {
+  it('禁止表与 37 张表不相交（会话存 Redis，不建会话表）', () => {
     const all = new Set<string>(TABLE_ORDER);
     for (const t of FORBIDDEN_TABLES) expect(all.has(t)).toBe(false);
   });
@@ -87,14 +94,15 @@ describe('表清单自身', () => {
     expect(FORBIDDEN_TABLES.some((t) => t.includes('refresh_token'))).toBe(true);
   });
 
-  it('清单与基线 DDL 解析出的表名双向一致', () => {
-    expect(baselineNames).toHaveLength(TOTAL_TABLE_COUNT);
-    expect([...baselineNames].sort()).toEqual([...TABLE_ORDER].sort());
+  it('基线 36 张 + 增量 1 张，与清单双向一致', () => {
+    expect(baselineNames).toHaveLength(36);
+    expect(incrementalNames).toEqual(['user_source_config']);
+    expect([...baselineNames, ...incrementalNames].sort()).toEqual([...TABLE_ORDER].sort());
   });
 });
 
 describe('assertSchemaInvariant · 运行期门禁', () => {
-  it('接受恰好 36 张的正确集合', () => {
+  it('接受恰好 37 张的正确集合', () => {
     expect(() => assertSchemaInvariant([...TABLE_ORDER])).not.toThrow();
   });
 
@@ -115,14 +123,14 @@ describe('assertSchemaInvariant · 运行期门禁', () => {
     expect(err.problems.join('\n')).toContain(fragment);
   };
 
-  it('35 张（少一张）必须拒绝', () => {
-    expectViolation(TABLE_ORDER.slice(1), '表数量为 35');
+  it('36 张（少一张）必须拒绝', () => {
+    expectViolation(TABLE_ORDER.slice(1), '表数量为 36');
     expectViolation(TABLE_ORDER.slice(1), '缺少表 app_user');
   });
 
-  it('37 张（多一张）必须拒绝——这是客户硬约束的核心', () => {
-    expectViolation([...TABLE_ORDER, 'extra_table'], '表数量为 37');
-    expectViolation([...TABLE_ORDER, 'extra_table'], '不得有第 37 张');
+  it('38 张（多一张）必须拒绝——表清单不得继续隐式膨胀', () => {
+    expectViolation([...TABLE_ORDER, 'extra_table'], '表数量为 38');
+    expectViolation([...TABLE_ORDER, 'extra_table'], '预期外的表 extra_table');
   });
 
   it('出现 kysely_migration 必须拒绝（内置 Migrator 被禁用的理由）', () => {

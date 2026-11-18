@@ -10,7 +10,7 @@
  *  - 全部源失败 → allFailed=true，上层给「聚合失败，可手动导入」（架构 §9.3）；
  *  - empty ≠ error：源健康但无命中是 empty（前端空态），不是故障（D-08 要求真实空态）。
  */
-import type { Material } from '@knowstudio/contracts';
+import type { Material, MaterialSourceId } from '@knowstudio/contracts';
 import type { PartialResult, SourceAdapter, SourceKind, SourceQuery } from '../ports.js';
 
 /** 超时预算切分（架构 §14）：总预算 20s，知识 8s / 热点 6s / 同行 6s。 */
@@ -38,6 +38,7 @@ interface BreakerState {
 /** 单源编排产出（供上层构造 SearchSession.partialErrors 与每列状态）。 */
 export interface SourceOutcome {
   id: string;
+  sourceId: MaterialSourceId;
   kind: SourceKind;
   status: PartialResult<Material[]>['status'];
   latencyMs: number;
@@ -46,6 +47,8 @@ export interface SourceOutcome {
 export interface AggregatedSearch {
   /** 跨源去重后的素材（按 id）。 */
   materials: Material[];
+  /** 需要写入当前用户素材库的真实外部源素材。 */
+  readonly externalMaterials: Material[];
   /** 失败/部分源的错误清单，形状对齐 SearchSession.partialErrors。 */
   partialErrors: { source: string; code: string; message: string }[];
   perSource: SourceOutcome[];
@@ -55,6 +58,7 @@ export interface AggregatedSearch {
 
 export interface AggregateOptions {
   budgetMs?: Partial<Record<SourceKind, number>>;
+  sourceIds?: readonly MaterialSourceId[];
 }
 
 /** 给单源调用套超时预算：超时→error(SOURCE_TIMEOUT)，适配器自身 reject→error(SOURCE_FAILED)。 */
@@ -110,25 +114,33 @@ export class SourceRegistry {
   async aggregate(q: SourceQuery, opts: AggregateOptions = {}): Promise<AggregatedSearch> {
     const budget = { ...DEFAULT_SOURCE_BUDGET_MS, ...opts.budgetMs };
 
+    const selectedSourceIds = opts.sourceIds;
+    const selected =
+      selectedSourceIds === undefined
+        ? this.adapters
+        : this.adapters.filter((a) => selectedSourceIds.includes(a.sourceId));
     const outcomes = await Promise.all(
-      this.adapters.map(async (adapter) => {
+      selected.map(async (adapter) => {
         const result = await this.runOne(adapter, q, budget[adapter.kind]);
         return { adapter, result };
       }),
     );
 
     const materialsById = new Map<string, Material>();
+    const externalMaterials: Material[] = [];
     const partialErrors: AggregatedSearch['partialErrors'] = [];
     const perSource: SourceOutcome[] = [];
 
     for (const { adapter, result } of outcomes) {
       perSource.push({
         id: adapter.id,
+        sourceId: adapter.sourceId,
         kind: adapter.kind,
         status: result.status,
         latencyMs: result.latencyMs,
       });
       for (const m of result.data) materialsById.set(m.id, m);
+      if (adapter.sourceId !== 'recorded') externalMaterials.push(...result.data);
       if (result.error) {
         partialErrors.push({
           source: adapter.id,
@@ -138,10 +150,15 @@ export class SourceRegistry {
       }
     }
 
-    const allFailed =
-      outcomes.length > 0 && outcomes.every((o) => o.result.status === 'error');
+    const allFailed = outcomes.length > 0 && outcomes.every((o) => o.result.status === 'error');
 
-    return { materials: [...materialsById.values()], partialErrors, perSource, allFailed };
+    return {
+      materials: [...materialsById.values()],
+      externalMaterials,
+      partialErrors,
+      perSource,
+      allFailed,
+    };
   }
 
   /** 单源 + 熔断：开路直接短路；半开/闭路真跑，按结果更新熔断状态。 */

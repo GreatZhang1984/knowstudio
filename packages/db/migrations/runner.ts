@@ -3,22 +3,29 @@
  *
  * 为什么禁用内置 Migrator（客户 2026-11-13 拍板的硬不变量）：
  *   Kysely Migrator 会建 `kysely_migration` 与 `kysely_migration_lock` 两张表，
- *   36 张表立刻变成 38 张，直接破坏「恰好 36 张」的验收口径。
+ *   37 张表立刻变成 39 张，直接破坏当前表清单的验收口径。
  *   会话/refresh token 存 Redis，同样不建会话表。
- *   故账本落在 `packages/db/migrations/.applied.json`，DB 里只有那 36 张业务表。
+ *   故账本落在 `packages/db/migrations/.applied.json`，DB 里只有清单内的业务表。
  *
  * 幂等性由两道保证叠加：
  *   1) 账本：同 id + 同 sha256 已记录 → 整个迁移跳过；
  *   2) 存在性：逐条 CREATE TABLE 前查 information_schema，表已存在 → 跳过该条。
  *   因此「账本丢了重跑」与「账本在重跑」都收敛到同一状态，不会报 already exists。
  *
- * 事务口径：MySQL 的 DDL 是**隐式提交**的，无法把 36 条 CREATE TABLE 包进一个事务。
+ * 事务口径：MySQL 的 DDL 是**隐式提交**的，无法把全部 CREATE TABLE 包进一个事务。
  *   所以这里不假装原子，而是靠「逐条 + 存在性跳过」让中断后可安全续跑。
  *
  * 执行前必须过 `assertServerCapabilities`：低于 8.0.17 拒绝执行。
  *   CHECK 在 <8.0.16 被解析但忽略，超支兜底会静默失效——静默降级比报错危险得多。
  */
-import { existsSync, readFileSync, readdirSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -69,7 +76,7 @@ export class MigrationChecksumMismatchError extends Error {
 export class SchemaInvariantError extends Error {
   readonly code = 'SCHEMA_INVARIANT_VIOLATION';
   constructor(readonly problems: readonly string[]) {
-    super(`36 表硬不变量被破坏：\n${problems.map((p) => `  - ${p}`).join('\n')}`);
+    super(`数据库表清单校验失败：\n${problems.map((p) => `  - ${p}`).join('\n')}`);
     this.name = 'SchemaInvariantError';
   }
 }
@@ -82,7 +89,9 @@ export class MigrationStatementError extends Error {
     readonly tableName: string | null,
     override readonly cause: unknown,
   ) {
-    super(`迁移 ${migrationId} 第 ${statementIndex + 1} 条语句执行失败（表 ${tableName ?? '未知'}）`);
+    super(
+      `迁移 ${migrationId} 第 ${statementIndex + 1} 条语句执行失败（表 ${tableName ?? '未知'}）`,
+    );
     this.name = 'MigrationStatementError';
   }
 }
@@ -103,7 +112,10 @@ export function readLedger(ledgerPath: string = DEFAULT_LEDGER_PATH): MigrationL
 }
 
 /** 原子写账本：先写 .tmp 再 rename；失败用 unlinkSync 清理（本机 rmSync 静默失败）。 */
-export function writeLedger(ledger: MigrationLedger, ledgerPath: string = DEFAULT_LEDGER_PATH): void {
+export function writeLedger(
+  ledger: MigrationLedger,
+  ledgerPath: string = DEFAULT_LEDGER_PATH,
+): void {
   const tmp = `${ledgerPath}.tmp`;
   try {
     writeFileSync(tmp, `${JSON.stringify(ledger, null, 2)}\n`, 'utf8');
@@ -133,7 +145,7 @@ export async function listTables(db: Kysely<Database>, schema: string): Promise<
 }
 
 /**
- * 校验 36 表不变量：数量、集合双向一致、无禁止表。
+ * 校验表清单不变量：数量、集合双向一致、无禁止表。
  * 单独导出，供测试与运维复核复用（不是只在迁移末尾偷偷跑一次）。
  */
 export function assertSchemaInvariant(liveTables: readonly string[]): void {
@@ -148,7 +160,7 @@ export function assertSchemaInvariant(liveTables: readonly string[]): void {
     if (!live.has(t)) problems.push(`缺少表 ${t}`);
   }
   for (const t of liveTables) {
-    if (!expected.has(t)) problems.push(`出现预期外的表 ${t}（不得有第 37 张）`);
+    if (!expected.has(t)) problems.push(`出现预期外的表 ${t}`);
   }
   for (const t of FORBIDDEN_TABLES) {
     if (live.has(t)) problems.push(`出现禁止表 ${t}（会话存 Redis；内置 Migrator 已禁用）`);

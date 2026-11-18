@@ -126,6 +126,8 @@ export async function completeJob(
       state: 'done',
       finished_at: sql`CURRENT_TIMESTAMP(3)`,
       lease_owner: null,
+      lease_expires_at: null,
+      last_error: null,
     })
     .where('job_id', '=', jobId)
     .where('lease_owner', '=', owner)
@@ -187,6 +189,44 @@ export async function failJob(
     .where('job_id', '=', jobId)
     .where('lease_owner', '=', owner)
     .where('lease_token', '=', token)
+    .execute();
+  return dead ? 'dead' : 'ready';
+}
+
+/** 系统任务失败也按队列行 fencing，重试或死信并保留结构化错误。 */
+export async function failClaimedJob(
+  db: Kysely<Database>,
+  owner: string,
+  claimed: ClaimedJob,
+  error: { readonly code: string; readonly message: string },
+): Promise<'ready' | 'dead' | 'fenced'> {
+  const rows = await db
+    .selectFrom('job_queue')
+    .select(['attempt', 'max_attempt'])
+    .where('id', '=', claimed.id)
+    .where('lease_owner', '=', owner)
+    .where('lease_token', '=', claimed.leaseToken)
+    .where('state', '=', 'leased')
+    .executeTakeFirst();
+  if (rows === undefined) return 'fenced';
+
+  const nextAttempt = rows.attempt + 1;
+  const dead = nextAttempt >= rows.max_attempt;
+  await db
+    .updateTable('job_queue')
+    .set({
+      state: dead ? 'dead' : 'pending',
+      attempt: nextAttempt,
+      run_after: sql`DATE_ADD(CURRENT_TIMESTAMP(3), INTERVAL LEAST(300, 5 * POW(2, ${nextAttempt} - 1)) SECOND)`,
+      last_error: JSON.stringify(error),
+      lease_owner: null,
+      lease_expires_at: null,
+      finished_at: dead ? sql`CURRENT_TIMESTAMP(3)` : null,
+    })
+    .where('id', '=', claimed.id)
+    .where('lease_owner', '=', owner)
+    .where('lease_token', '=', claimed.leaseToken)
+    .where('state', '=', 'leased')
     .execute();
   return dead ? 'dead' : 'ready';
 }

@@ -15,6 +15,7 @@ import {
   CreateStyleSampleRequest,
   CreateWorkRequest,
   DerivativesResponse,
+  ExternalMaterialSourceId,
   ExportAccepted,
   ExportPackageSchema,
   GenerateDerivativesRequest,
@@ -28,7 +29,15 @@ import {
   ListWorksQuery,
   LoginRequest,
   MaterialSchema,
+  MaterialSourceConfigRequest,
+  MaterialSourceConfigResponse,
+  MaterialSourceConfigTestRequest,
+  MaterialSourceConfigTestResponse,
+  MaterialSourceSchema,
+  MaterialSourcesResponse,
   MeResponse,
+  MetricRecomputeAccepted,
+  MetricRecomputeRequest,
   MetricsResponse,
   PatchDerivativeRequest,
   PatchScriptRequest,
@@ -125,6 +134,12 @@ const NAMED_SCHEMAS = {
   SseEvent: SseEventSchema,
   WorkListItem,
   Material: MaterialSchema,
+  MaterialSource: MaterialSourceSchema,
+  MaterialSources: MaterialSourcesResponse,
+  MaterialSourceConfigRequest,
+  MaterialSourceConfigResponse,
+  MaterialSourceConfigTestRequest,
+  MaterialSourceConfigTestResponse,
   TopicBatch: TopicBatchSchema,
   SearchSession: SearchSessionSchema,
   SearchRequest,
@@ -159,6 +174,8 @@ const NAMED_SCHEMAS = {
   ExportAccepted,
   PlatformRule: PlatformRuleSchema,
   Metrics: MetricsResponse,
+  MetricRecomputeRequest,
+  MetricRecomputeAccepted,
   RecordEventsRequest,
   RecordEventsResponse,
   PlatformId,
@@ -227,7 +244,7 @@ const WRITE = [400, 401, 404, 429] as const;
 const GATED = [400, 401, 404, 409, 429] as const;
 
 interface RouteDef {
-  method: 'get' | 'post' | 'patch' | 'delete';
+  method: 'get' | 'post' | 'put' | 'patch' | 'delete';
   path: string;
   summary: string;
   gate?: string;
@@ -350,6 +367,48 @@ function routeDefs(r: SchemaRefs): RouteDef[] {
     },
 
     // ── 搜索与素材收藏 ──
+    {
+      method: 'get',
+      path: '/material-sources',
+      summary: '可选素材源与配置状态（不暴露外部服务地址或密钥）',
+      responses: { 200: { description: 'OK', content: json(r.MaterialSources) }, ...err(r, AUTH) },
+    },
+    {
+      method: 'get',
+      path: '/material-sources/config',
+      summary: '读取当前用户素材源配置（API Key 只返回末四位）',
+      responses: {
+        200: { description: 'OK', content: json(r.MaterialSourceConfigResponse) },
+        ...err(r, AUTH),
+      },
+    },
+    {
+      method: 'put',
+      path: '/material-sources/config',
+      summary: '保存当前用户 Web Search / Obsidian 配置',
+      request: { body: { content: json(r.MaterialSourceConfigRequest) } },
+      responses: {
+        200: { description: 'OK', content: json(r.MaterialSourceConfigResponse) },
+        ...err(r, COLLECTION),
+      },
+    },
+    {
+      method: 'post',
+      path: '/material-sources/config/test',
+      summary: '测试已保存的真实素材源连通性',
+      request: { body: { content: json(r.MaterialSourceConfigTestRequest) } },
+      responses: {
+        200: { description: 'OK', content: json(r.MaterialSourceConfigTestResponse) },
+        ...err(r, COLLECTION),
+      },
+    },
+    {
+      method: 'delete',
+      path: '/material-sources/config/{sourceId}',
+      summary: '删除当前用户的指定素材源配置',
+      request: { params: z.object({ sourceId: ExternalMaterialSourceId }) },
+      responses: { 204: { description: 'No Content' }, ...err(r, AUTH) },
+    },
     {
       method: 'post',
       path: '/discover/search',
@@ -691,13 +750,26 @@ function routeDefs(r: SchemaRefs): RouteDef[] {
       path: '/events',
       summary: '前端可信事件批量上报（script_first_edit / publish_receipt_marked）',
       request: { body: { content: json(r.RecordEventsRequest) } },
-      responses: { 200: { description: 'OK', content: json(r.RecordEventsResponse) }, ...err(r, COLLECTION) },
+      responses: {
+        200: { description: 'OK', content: json(r.RecordEventsResponse) },
+        ...err(r, COLLECTION),
+      },
     },
     {
       method: 'get',
       path: '/metrics',
-      summary: '指标快照（只读 metric_snapshot；G4 盲测需人工录入）',
+      summary: '指标快照与 sys.metric 任务健康（G4 盲测需人工录入）',
       responses: { 200: { description: 'OK', content: json(r.Metrics) }, ...err(r, AUTH) },
+    },
+    {
+      method: 'post',
+      path: '/metrics/recompute',
+      summary: '运维重算指定小时指标（生产需 METRIC_RECOMPUTE_TOKEN）',
+      request: { body: { content: json(r.MetricRecomputeRequest) } },
+      responses: {
+        202: { description: 'Accepted', content: json(r.MetricRecomputeAccepted) },
+        ...err(r, [400, ...AUTH]),
+      },
     },
     {
       method: 'get',

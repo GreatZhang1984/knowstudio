@@ -7,7 +7,12 @@
  * 不含任何会话表：会话/refresh token 存 Redis（客户 2026-11-13 拍板），
  * 也不含 kysely_migration / kysely_migration_lock（内置 Migrator 被禁用）。
  */
-import type { AppUserTable, StyleProfileTable, StyleSampleTable } from './user.js';
+import type {
+  AppUserTable,
+  StyleProfileTable,
+  StyleSampleTable,
+  UserSourceConfigTable,
+} from './user.js';
 import type { MaterialTable, WorkMaterialTable, WorkTable } from './work.js';
 import type { SearchSessionTable, TopicBatchTable, TopicTable, TrendTable } from './discover.js';
 import type {
@@ -42,6 +47,7 @@ export interface Database {
   app_user: AppUserTable;
   style_sample: StyleSampleTable;
   style_profile: StyleProfileTable;
+  user_source_config: UserSourceConfigTable;
   // ② Work
   work: WorkTable;
   // ③ 素材与引用
@@ -95,7 +101,12 @@ export type SchemaTableName = keyof Database;
 export * from './column-types.js';
 export * from './db-enums.js';
 export * from './json-shapes.js';
-export type { AppUserTable, StyleProfileTable, StyleSampleTable } from './user.js';
+export type {
+  AppUserTable,
+  StyleProfileTable,
+  StyleSampleTable,
+  UserSourceConfigTable,
+} from './user.js';
 export type { MaterialTable, WorkMaterialTable, WorkTable } from './work.js';
 export type { SearchSessionTable, TopicBatchTable, TopicTable, TrendTable } from './discover.js';
 export type {

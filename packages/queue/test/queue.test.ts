@@ -4,6 +4,7 @@ import {
   claimJob,
   completeJob,
   enqueueInTransaction,
+  failClaimedJob,
   recoverExpiredLeases,
   renewLease,
 } from '../src/index';
@@ -13,6 +14,7 @@ describe('T-44 持久队列租约与 fencing', () => {
   const jobId = `job_queue_fence_${Date.now()}`;
   const expiredJobId = `job_queue_expired_${Date.now()}`;
   const deadJobId = `job_queue_dead_${Date.now()}`;
+  const systemDedupKey = `queue-system-dead:${Date.now()}`;
 
   beforeAll(() => {
     handle = createDb({ connectionLimit: 2 });
@@ -23,6 +25,7 @@ describe('T-44 持久队列租约与 fencing', () => {
       .deleteFrom('job_queue')
       .where('job_id', 'in', [jobId, expiredJobId, deadJobId])
       .execute();
+    await handle.db.deleteFrom('job_queue').where('dedup_key', '=', systemDedupKey).execute();
     await handle.destroy();
   });
 
@@ -94,5 +97,44 @@ describe('T-44 持久队列租约与 fencing', () => {
     expect(deadRow.attempt).toBe(1);
 
     expect(await completeJob(handle.db, expiredJobId, 'worker-new', reclaimed!.leaseToken)).toBe(true);
+  });
+
+  it('系统任务失败保留结构化错误，达到上限进入死信且不伪装成功', async () => {
+    await handle.db.transaction().execute(async (trx) => {
+      await enqueueInTransaction(trx, {
+        queue: 'sys.metric',
+        jobId: null,
+        userId: null,
+        payload: { bucket: '2026-11-18 00:00:00.000' },
+        dedupKey: systemDedupKey,
+      });
+    });
+    await handle.db
+      .updateTable('job_queue')
+      .set({ max_attempt: 1 })
+      .where('dedup_key', '=', systemDedupKey)
+      .execute();
+
+    const claimed = await claimJob(handle.db, 'sys.metric', 'worker-system');
+    expect(claimed?.jobId).toBeNull();
+    expect(
+      await failClaimedJob(handle.db, 'worker-system', claimed!, {
+        code: 'METRIC_AGGREGATION_FAILED',
+        message: 'aggregation failed',
+      }),
+    ).toBe('dead');
+
+    const row = await handle.db
+      .selectFrom('job_queue')
+      .select(['state', 'attempt', 'finished_at', 'last_error'])
+      .where('dedup_key', '=', systemDedupKey)
+      .executeTakeFirstOrThrow();
+    expect(row.state).toBe('dead');
+    expect(row.attempt).toBe(1);
+    expect(row.finished_at).not.toBeNull();
+    expect(row.last_error).toMatchObject({
+      code: 'METRIC_AGGREGATION_FAILED',
+      message: 'aggregation failed',
+    });
   });
 });

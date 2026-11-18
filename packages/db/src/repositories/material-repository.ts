@@ -20,9 +20,10 @@
  * （搜索按当前 work、素材库按用户任一 work），本仓储只返回素材真相行，不谎报收藏态（D-04 同源精神）。
  */
 import { sql, type Kysely, type Selectable } from 'kysely';
-import type { LicenseState, MaterialType } from '@knowstudio/contracts';
+import type { LicenseState, Material, MaterialType } from '@knowstudio/contracts';
 import type { Database } from '../schema/index.js';
 import type { MaterialTable } from '../schema/work.js';
+import { toJsonParam } from '../schema/column-types.js';
 import { decodeWorkCursor, encodeWorkCursor, WorkCursorInvalidError } from './work-cursor.js';
 
 export type MaterialRow = Selectable<MaterialTable>;
@@ -69,6 +70,8 @@ export interface MaterialPage {
 }
 
 export interface ScopedMaterialRepository {
+  /** T-64：真实外部源素材按当前用户落库；稳定 ID 保证重复搜索可复用。 */
+  upsertExternalMaterials(materials: readonly Material[]): Promise<void>;
   /** 按 id 批量取可见素材（收藏校验 / 搜索结果回填）。按 id 升序确定性排序，调用方自行按 id 索引。 */
   findByIds(ids: readonly string[]): Promise<MaterialRow[]>;
   listLibrary(filter: LibraryFilter, page: MaterialPageRequest): Promise<MaterialPage>;
@@ -93,7 +96,8 @@ function escapeLike(term: string): string {
 export function createMaterialRepository(db: Kysely<Database>): MaterialRepository {
   return {
     forUser(userId: string): ScopedMaterialRepository {
-      if (typeof userId !== 'string' || !ID_PATTERN.test(userId)) throw new MaterialScopeRequiredError();
+      if (typeof userId !== 'string' || !ID_PATTERN.test(userId))
+        throw new MaterialScopeRequiredError();
 
       /** 所有读取的唯一入口：可见性（自有 OR 全局）+ 软删除过滤都在这里。 */
       const visible = () =>
@@ -120,6 +124,40 @@ export function createMaterialRepository(db: Kysely<Database>): MaterialReposito
         withLicense(withType(withSearch(visible(), filter.q), filter.type), filter.license);
 
       return {
+        async upsertExternalMaterials(materials: readonly Material[]): Promise<void> {
+          if (materials.length === 0) return;
+          const fetchedAt = new Date().toISOString().replace('T', ' ').replace('Z', '');
+          for (const material of materials) {
+            await db
+              .insertInto('material')
+              .values({
+                id: assertId(material.id),
+                user_id: userId,
+                type: material.type,
+                title: material.title,
+                source: material.source,
+                source_url: material.url,
+                source_color: null,
+                meta: toJsonParam({}),
+                body_text: material.summary,
+                storage_key: null,
+                license: material.license,
+                license_evidence: null,
+                tags: toJsonParam([]),
+                fetched_at: fetchedAt,
+              })
+              .onDuplicateKeyUpdate({
+                title: material.title,
+                source: material.source,
+                source_url: material.url,
+                body_text: material.summary,
+                license: material.license,
+                fetched_at: fetchedAt,
+              })
+              .execute();
+          }
+        },
+
         async findByIds(ids: readonly string[]): Promise<MaterialRow[]> {
           const clean = ids.map(assertId);
           if (clean.length === 0) return [];
@@ -136,7 +174,8 @@ export function createMaterialRepository(db: Kysely<Database>): MaterialReposito
               c = decodeWorkCursor(page.cursor);
             } catch (err) {
               // 只把「游标形状非法」转成素材库专属 code；其它异常原样上抛，不吞。
-              if (err instanceof WorkCursorInvalidError) throw new MaterialCursorInvalidError(page.cursor);
+              if (err instanceof WorkCursorInvalidError)
+                throw new MaterialCursorInvalidError(page.cursor);
               throw err;
             }
             qb = qb.where((eb) =>
@@ -158,7 +197,9 @@ export function createMaterialRepository(db: Kysely<Database>): MaterialReposito
           const items = hasMore ? rows.slice(0, limit) : rows;
           const last = items[items.length - 1];
           const nextCursor =
-            hasMore && last !== undefined ? encodeWorkCursor({ u: last.created_at, i: last.id }) : null;
+            hasMore && last !== undefined
+              ? encodeWorkCursor({ u: last.created_at, i: last.id })
+              : null;
           return { items, nextCursor };
         },
 

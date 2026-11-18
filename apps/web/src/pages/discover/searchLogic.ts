@@ -3,6 +3,8 @@ import type {
   BlankAngle,
   LicenseState,
   Material,
+  MaterialSource,
+  MaterialSourceId,
   MaterialType,
   PlatformId,
   Saturation,
@@ -43,6 +45,27 @@ export function normalizeSearchTerm(value: string): string {
 
 export function isSameKeyword(a: string, b: string): boolean {
   return normalizeSearchTerm(a) === normalizeSearchTerm(b);
+}
+
+const SOURCE_ORDER: readonly MaterialSourceId[] = ['recorded', 'web_search', 'obsidian'];
+
+export function normalizeSourceSelection(
+  value: readonly string[],
+  sources: readonly MaterialSource[],
+): MaterialSourceId[] {
+  const available = new Set(
+    sources.filter((source) => source.configured).map((source) => source.id as MaterialSourceId),
+  );
+  const selected = SOURCE_ORDER.filter((id) => available.has(id) && value.includes(id));
+  return selected.length === 0 ? (['recorded'] as MaterialSourceId[]) : selected;
+}
+
+export function isSameSourceSelection(a: readonly string[], b: readonly string[]): boolean {
+  const normalize = (value: readonly string[]): string[] => {
+    const selected = SOURCE_ORDER.filter((id) => value.includes(id));
+    return selected.length === 0 ? (['recorded'] as MaterialSourceId[]) : selected;
+  };
+  return normalize(a).join('|') === normalize(b).join('|');
 }
 
 export function searchInputIssue(keyword: string, domain: string): string | undefined {

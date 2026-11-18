@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App as AntApp, Button } from 'antd';
-import type { Material, SearchSession } from '@knowstudio/contracts';
+import type {
+  Material,
+  MaterialSource,
+  MaterialSourceId,
+  SearchSession,
+} from '@knowstudio/contracts';
 import { DiscoverView } from './discover/DiscoverView';
 import {
   apiErrorOf,
   isSameKeyword,
+  isSameSourceSelection,
+  normalizeSourceSelection,
   searchInputIssue,
   searchViewState,
   withMaterialCollected,
@@ -17,12 +24,13 @@ import {
   startSearch,
   type SearchStart,
 } from '../work/api';
-import { invalidateWork, useCurrentWork, workKeys } from '../work/queries';
+import { invalidateWork, useCurrentWork, useMaterialSources, workKeys } from '../work/queries';
 
 interface SearchSubmitInput {
   readonly keyword: string;
   readonly domain?: string;
   readonly force: boolean;
+  readonly sources: readonly MaterialSourceId[];
 }
 
 interface ActiveSearch {
@@ -30,6 +38,7 @@ interface ActiveSearch {
   readonly searchId: string;
   readonly keyword: string;
   readonly domain: string;
+  readonly sources: readonly string[];
   readonly startedAt: number;
 }
 
@@ -50,17 +59,43 @@ interface CollectContext {
 }
 
 const SEARCH_TIMEOUT_MS = 60_000;
+const SOURCE_STORAGE_KEY = 'knowstudio.materialSources';
+const FALLBACK_SOURCES: readonly MaterialSource[] = [
+  { id: 'recorded', name: '录制演示', description: '内置素材。', configured: true },
+];
 
 function normalizedDomain(domain: string): string {
   return domain.trim().normalize('NFKC').toLowerCase().replace(/\s+/g, ' ');
+}
+
+function readStoredSources(): MaterialSourceId[] | null {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(SOURCE_STORAGE_KEY);
+    if (raw === null) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+    const valid = new Set<MaterialSourceId>(['recorded', 'web_search', 'obsidian']);
+    const selected = parsed.filter(
+      (item): item is MaterialSourceId =>
+        typeof item === 'string' && valid.has(item as MaterialSourceId),
+    );
+    return selected;
+  } catch {
+    return null;
+  }
 }
 
 export default function DiscoverPage() {
   const queryClient = useQueryClient();
   const { message } = AntApp.useApp();
   const { workId, recent, envelope } = useCurrentWork();
+  const sourcesQuery = useMaterialSources();
   const [keyword, setKeyword] = useState('');
   const [domain, setDomain] = useState('');
+  const [selectedSourceIds, setSelectedSourceIds] = useState<MaterialSourceId[]>(
+    () => readStoredSources() ?? ['recorded'],
+  );
   const [activeSearch, setActiveSearch] = useState<ActiveSearch | null>(null);
   const [localSession, setLocalSession] = useState<SearchSession | null>(null);
   const [timedOut, setTimedOut] = useState(false);
@@ -73,6 +108,11 @@ export default function DiscoverPage() {
     if (keywordTouched.current || envelope.data?.keyword == null) return;
     setKeyword(envelope.data.keyword);
   }, [envelope.data?.keyword]);
+
+  useEffect(() => {
+    if (sourcesQuery.data === undefined) return;
+    setSelectedSourceIds((current) => normalizeSourceSelection(current, sourcesQuery.data.items));
+  }, [sourcesQuery.data]);
 
   // 只在已有 Work 被切换成另一个 Work 时清空结果；首次从“无 Work”创建时保留新搜索。
   useEffect(() => {
@@ -135,6 +175,7 @@ export default function DiscoverPage() {
         keyword: input.keyword,
         ...(input.domain == null ? {} : { domain: input.domain }),
         force: input.force,
+        sources: input.sources,
       });
       return { workId: targetWorkId, created, outcome };
     },
@@ -152,6 +193,7 @@ export default function DiscoverPage() {
         searchId: result.searchId,
         keyword: input.keyword,
         domain: input.domain ?? '',
+        sources: input.sources,
         startedAt: Date.now(),
       });
       setLocalSession(result.session);
@@ -227,7 +269,8 @@ export default function DiscoverPage() {
       session.status === 'succeeded' &&
       session.partialErrors.length === 0 &&
       isSameKeyword(session.keyword, nextKeyword) &&
-      normalizedDomain(activeSearch?.domain ?? '') === normalizedDomain(nextDomain);
+      normalizedDomain(activeSearch?.domain ?? '') === normalizedDomain(nextDomain) &&
+      isSameSourceSelection(activeSearch?.sources ?? ['recorded'], selectedSourceIds);
     if (!force && unchanged) {
       message.info('已是最新结果');
       return;
@@ -237,6 +280,7 @@ export default function DiscoverPage() {
     startMutation.mutate({
       keyword: nextKeyword,
       ...(nextDomain === '' ? {} : { domain: nextDomain }),
+      sources: selectedSourceIds,
       force: force || retryFailedSession,
     });
   };
@@ -258,7 +302,9 @@ export default function DiscoverPage() {
     session.status === 'succeeded' &&
     session.partialErrors.length === 0 &&
     isSameKeyword(session.keyword, keyword) &&
-    normalizedDomain(activeSearch?.domain ?? '') === normalizedDomain(domain);
+    normalizedDomain(activeSearch?.domain ?? '') === normalizedDomain(domain) &&
+    isSameSourceSelection(activeSearch?.sources ?? ['recorded'], selectedSourceIds);
+  const materialSources = sourcesQuery.data?.items ?? FALLBACK_SOURCES;
 
   return (
     <DiscoverView
@@ -267,6 +313,9 @@ export default function DiscoverPage() {
       workLoading={workLoading}
       keyword={keyword}
       domain={domain}
+      materialSources={materialSources}
+      selectedSourceIds={selectedSourceIds}
+      sourcesLoading={sourcesQuery.isPending}
       sameResult={sameResult}
       submitting={startMutation.isPending}
       session={session}
@@ -284,6 +333,17 @@ export default function DiscoverPage() {
         setKeyword(value);
       }}
       onDomainChange={setDomain}
+      onToggleSource={(source) => {
+        if (!source.configured) return;
+        const next = normalizeSourceSelection(
+          selectedSourceIds.includes(source.id)
+            ? selectedSourceIds.filter((id) => id !== source.id)
+            : [...selectedSourceIds, source.id as MaterialSourceId],
+          materialSources,
+        );
+        setSelectedSourceIds(next);
+        localStorage.setItem(SOURCE_STORAGE_KEY, JSON.stringify(next));
+      }}
       onSubmit={() => submitSearch(false)}
       onRetry={() => submitSearch(true)}
       onToggleCollect={(material) =>

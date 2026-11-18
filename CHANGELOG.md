@@ -2,6 +2,23 @@
 
 ## 2026-11-18
 
+- 完成 T-65 用户级素材源配置：
+  - 新增 `user_source_config` 表，配置按 `user_id + source_id` 隔离；Tavily API Key 以 AES-256-GCM 密文保存，接口只返回末四位。
+  - 新增素材源配置读写、测试与删除接口，API 启动时不再依赖 Tavily / Obsidian 系统环境变量，而是按当前用户动态装配真实素材源。
+  - 新增 `/settings/sources` 配置页，可在界面配置 Web 搜索与 Obsidian MCP；Obsidian 地址仅允许本机、内网和 `.local`。
+  - 服务端加密密钥保存于 `infra/.source-config.key`，文件不入库且必须随部署卷持久化。
+- 完成 T-64 多素材源接入：
+  - 新增 `GET /api/material-sources`，工作台可多选录制演示、Tavily Web Search 与 Obsidian MCP 素材源，并在本浏览器记住默认选择。
+  - `POST /api/discover/search` 支持 `sources`；真实源素材按当前用户稳定 ID 落库，可进入素材库、收藏与后续选题链路。
+  - 新增 Tavily Web Search 适配器与 Obsidian Streamable HTTP MCP 适配器；单源失败保持 partial，外部配置由 T-65 的用户级配置安全保存。
+- 修正素材搜索示例词与真实源配置状态展示：未配置源不可选，不再把录制库未收录关键词误认为前后端断链。
+
+- 完成 T-63 指标可信度补强：
+  - `GET /api/metrics` 新增 `dataStatus`、期望小时桶与最近 `sys.metric` 任务状态、次数、起止时间、耗时、重试时间和结构化错误。
+  - Worker 按队列 payload 指定的小时桶聚合，不再忽略 bucket；聚合失败进入队列重试/死信并保留错误，成功后清空旧错误。
+  - 新增 `POST /api/metrics/recompute` 运维重算入口：开发环境可免运维令牌，生产必须配置 `METRIC_RECOMPUTE_TOKEN`；同 bucket 已在排队或执行时不重复入队。
+  - 指标页展示快照状态、最近聚合任务、耗时与失败原因；Grafana 新增 `sys.metric` 任务健康表。
+
 - 完成 T-61/T-62 上线前收口：
   - 新增真实作品全链路验收测试：从新建 Work、搜索、收藏、生成/选定选题、生成/润色/确认文案、草稿与高清渲染、元数据与四平台媒体派生、合规阻断与授权修复、导出 ZIP、手动发布回执，到小时指标聚合全链路真实 MySQL/Redis/Nest/Worker 验证。
   - 修复客户端事件接口漏挂 `@Body()` 导致合法埋点请求始终 400 的问题。

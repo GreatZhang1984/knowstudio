@@ -1,11 +1,8 @@
 /**
  * discover 模块 provider / controller 清单（沿用 works.module.ts 约定，由 app.module 组合）。
  *
- * ## 端口绑定（M1 dev/CI = 录制回放 VCR）
- * SOURCE_REGISTRY / LLM_PORT 绑 packages/ai 的录制适配器，store 由 dev-fixtures 从 fixtures/seed.json 构建。
- * 这是架构 §9.1 / plan §6.1·§7.1 指定的 dev provider（无供应商凭证、确定性、零成本），**不是桩**：
- * 真实编排框架 SourceRegistry + 真实饱和度纯函数 + 真实 schema 校验都跑在其上。
- * staging/prod 换真实供应商适配器即可，端口与上层服务零改动（ADR-15）。
+ * ## 端口绑定
+ * 素材源由用户配置动态装配；LLM_PORT 仍绑录制适配器。
  *
  * ## 仓储工厂
  * 与 works.module 同一手法：useFactory 注入 DB_CLIENT（Kysely<Database>），用 Parameters<typeof>[0]
@@ -21,34 +18,36 @@ import {
   createStyleRepository,
   createTopicRepository,
   createWorkMaterialRepository,
+  createUserSourceConfigRepository,
   type MaterialRepository,
   type SearchSessionRepository,
   type ScriptRepository,
   type StyleRepository,
   type TopicRepository,
   type WorkMaterialRepository,
+  type UserSourceConfigRepository,
 } from '@knowstudio/db/repositories';
-import {
-  RecordedLlmAdapter,
-  RecordedEmbeddingAdapter,
-  SourceRegistry,
-  recordedSourceAdapters,
-  type LlmPort,
-} from '@knowstudio/ai';
+import { RecordedLlmAdapter, RecordedEmbeddingAdapter, type LlmPort } from '@knowstudio/ai';
 import { DB_CLIENT } from '../shared/tokens.js';
 import { buildDevRecordingStores, type DevRecordingStores } from './dev-fixtures.js';
 import { DiscoverController } from './discover.controller.js';
 import { DiscoverService } from './discover.service.js';
+import { createFileSourceConfigCipher } from './source-config.crypto.js';
+import { MaterialSourceService } from './material-source.service.js';
+import { MaterialSourcesController } from './material-sources.controller.js';
 import {
   LLM_PORT,
   MATERIAL_REPOSITORY,
+  MATERIAL_SOURCE_SERVICE,
   SEARCH_SESSION_REPOSITORY,
-  SOURCE_REGISTRY,
+  SOURCE_CONFIG_CIPHER,
   TOPIC_REPOSITORY,
   SCRIPT_REPOSITORY,
   STYLE_REPOSITORY,
   WORK_MATERIAL_REPOSITORY,
   EMBEDDING_PORT,
+  USER_SOURCE_CONFIG_REPOSITORY,
+  WEB_SEARCH_ENDPOINT,
 } from './discover.tokens.js';
 import { LibraryController } from './library.controller.js';
 import { MaterialsController } from './materials.controller.js';
@@ -60,7 +59,7 @@ import { StyleController } from './style.controller.js';
 import { DerivativesController } from './derivatives.controller.js';
 import { DerivativesService } from './derivatives.service.js';
 
-// dev 录制 store 只构建一次（读 seed.json），两个端口工厂共享，避免重复 IO。
+// LLM 录制 store 只构建一次（读 seed.json），避免重复 IO。
 let devStores: DevRecordingStores | undefined;
 function stores(): DevRecordingStores {
   devStores ??= buildDevRecordingStores();
@@ -87,13 +86,20 @@ export const DISCOVER_PROVIDERS: Provider[] = [
     inject: [DB_CLIENT],
   },
   {
-    provide: SOURCE_REGISTRY,
-    useFactory: (): SourceRegistry => {
-      const registry = new SourceRegistry();
-      for (const adapter of recordedSourceAdapters(stores().sourceStore))
-        registry.register(adapter);
-      return registry;
-    },
+    provide: USER_SOURCE_CONFIG_REPOSITORY,
+    useFactory: (db: unknown): UserSourceConfigRepository =>
+      createUserSourceConfigRepository(
+        db as Parameters<typeof createUserSourceConfigRepository>[0],
+      ),
+    inject: [DB_CLIENT],
+  },
+  {
+    provide: SOURCE_CONFIG_CIPHER,
+    useFactory: () => createFileSourceConfigCipher(),
+  },
+  {
+    provide: WEB_SEARCH_ENDPOINT,
+    useValue: 'https://api.tavily.com/search',
   },
   {
     provide: LLM_PORT,
@@ -122,6 +128,10 @@ export const DISCOVER_PROVIDERS: Provider[] = [
     inject: [DB_CLIENT],
   },
   DiscoverService,
+  {
+    provide: MATERIAL_SOURCE_SERVICE,
+    useClass: MaterialSourceService,
+  },
   TopicsService,
   ScriptService,
   DerivativesService,
@@ -129,6 +139,7 @@ export const DISCOVER_PROVIDERS: Provider[] = [
 
 export const DISCOVER_CONTROLLERS = [
   DiscoverController,
+  MaterialSourcesController,
   MaterialsController,
   LibraryController,
   TopicsController,
