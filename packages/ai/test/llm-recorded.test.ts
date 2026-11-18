@@ -79,4 +79,14 @@ describe('RecordedLlmAdapter：录制回放（dev VCR）', () => {
     );
     await expect(llm.generateStructured(req('topics', 'k'))).rejects.toThrow('NO_RECORDING:topics:k');
   });
+
+  it('查询侧规范化：大写/首尾空白的 cacheKey 命中同一录制（防键漂移回归）', async () => {
+    const data = [angle('ba_0', ['mat_k1']), angle('ba_1', ['mat_h1'])];
+    const llm = new RecordedLlmAdapter(
+      store([[llmRecordingKey('topics', 'SPEC驱动开发:0'), data]]),
+    );
+    // 用户主题词原样含大写；查询必须命中 normalize 后的同一键。
+    expect((await llm.generateStructured(req('topics', 'SPEC驱动开发:0'))).data).toEqual(data);
+    expect((await llm.generateStructured(req('topics', '  spec驱动开发:0 '))).data).toEqual(data);
+  });
 });

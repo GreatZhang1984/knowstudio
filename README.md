@@ -30,6 +30,10 @@
 
 本地联调验证码登录时，API 在本地开发模式（`NODE_ENV` 未设置或为 `development`）默认回显验证码。发送验证码后，登录页会弹窗显示 6 位验证码并支持复制；如需关闭可设置 `AUTH_DEV_CODE_ECHO=false`。生产环境强制不返回验证码。
 
+本地 dev 的选题/文案生成是录制回放（确定性、零成本），默认只收录种子主题「费曼学习法」。联调其他主题时，启动 API 前设置 `KNOWSTUDIO_DEV_LLM_KEYWORDS`（逗号分隔，如 `KNOWSTUDIO_DEV_LLM_KEYWORDS=SPEC驱动开发`）即可走通生成闭环；产出带「关键词：」前缀并标记 `provider=recorded`，是明确的占位录制而非真实生成。测试与 CI 不设置该变量。
+
+本地存储按进程工作目录落盘（缺省各为 `apps/api/.local-storage` 与 `apps/worker/.local-storage`）。API 读取、worker 写入是双进程，联调草稿/高清/导出等跨进程产物时，两个进程需设置同一 `LOCAL_STORAGE_ROOT`（如都指向 `apps/worker/.local-storage`），否则会出现产物 404。
+
 ### 素材源
 
 素材搜索页支持选择 `录制演示`、`Web 搜索` 与 `Obsidian`。素材源声明由 `GET /api/material-sources` 下发；前端只提交 source id，不提交外部 URL 或密钥。

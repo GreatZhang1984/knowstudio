@@ -85,7 +85,9 @@ export class TopicsController {
     try {
       return await this.topics.batch(principal.userId, attachedWork(request), batch);
     } catch (err) {
-      if ((err as { code?: string }).code === 'TOPIC_BATCH_NOT_FOUND') throw notFound('选题不存在');
+      // service 抛裸 Error(message=code)，与 derivatives.controller 同一惯例双查。
+      const code = (err as { code?: string }).code ?? (err as Error).message;
+      if (code === 'TOPIC_BATCH_NOT_FOUND') throw notFound('选题不存在');
       throw err;
     }
   }

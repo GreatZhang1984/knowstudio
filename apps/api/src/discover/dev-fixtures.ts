@@ -15,6 +15,7 @@ import {
   buildBlankAngleRecording,
   buildRecordingStore,
   llmRecordingKey,
+  normalizeKeyword,
   type GeneratedTopic,
   type GeneratedScriptSection,
   type BlankAngleSeed,
@@ -45,6 +46,25 @@ export function deriveBlankAngleSeeds(seed: SeedData): BlankAngleSeed[] {
 export interface DevRecordingStores {
   readonly sourceStore: RecordingStore;
   readonly llmStore: LlmRecordingStore;
+}
+
+/**
+ * 解析 KNOWSTUDIO_DEV_LLM_KEYWORDS（逗号分隔）为额外录制关键词。
+ * 本地联调非种子主题（如「SPEC驱动开发」）时无需改种子即可走通选题/文案生成；
+ * 测试与 CI 不设置该变量，录制集合与单种子词一致，断言零影响。
+ */
+export function parseExtraDevKeywords(envValue: string | undefined): readonly string[] {
+  if (envValue === undefined) return [];
+  const seen = new Set<string>();
+  const keywords: string[] = [];
+  for (const raw of envValue.split(',')) {
+    const trimmed = raw.trim();
+    const normalized = normalizeKeyword(trimmed);
+    if (normalized.length === 0 || seen.has(normalized)) continue;
+    seen.add(normalized);
+    keywords.push(trimmed);
+  }
+  return keywords;
 }
 
 function topicRecordings(seed: SeedData, keyword: string): GeneratedTopic[][] {
@@ -90,7 +110,12 @@ function restyleRecording(seed: SeedData): RestyleHunk[] {
  * 由种子构建 dev 录制 store：素材源（按规范化关键词）+ 空白角度 LLM（按 task:关键词）。
  * 默认读 fixtures/seed.json；测试可注入自定义种子。
  */
-export function buildDevRecordingStores(seed: SeedData = loadSeedData()): DevRecordingStores {
+export function buildDevRecordingStores(
+  seed: SeedData = loadSeedData(),
+  extraKeywords: readonly string[] = parseExtraDevKeywords(
+    process.env.KNOWSTUDIO_DEV_LLM_KEYWORDS,
+  ),
+): DevRecordingStores {
   const keyword = seed.search.keyword;
   const materials: RecordedMaterialSeed[] = seed.materials.map((m) => ({
     key: m.key,
@@ -115,6 +140,19 @@ export function buildDevRecordingStores(seed: SeedData = loadSeedData()): DevRec
   }
   llmEntries.push([llmRecordingKey('script', keyword), scriptRecording(seed, keyword)]);
   llmEntries.push([llmRecordingKey('restyle', ''), restyleRecording(seed)]);
+
+  // 额外关键词：复用同一种子结构，topicRecordings/scriptRecording 会给 hook/台词加
+  // 「关键词：」前缀，产出被明确标示为占位录制（provider=recorded），不伪造真实生成。
+  // 仅录 topics/script——饱和分析的 blankAngles 未录制时本就有 partial 降级（D-08 诚实空态）。
+  const seedNormalized = normalizeKeyword(keyword);
+  for (const extra of extraKeywords) {
+    if (normalizeKeyword(extra) === seedNormalized) continue;
+    for (const [index, topics] of topicRecordings(seed, extra).entries()) {
+      llmEntries.push([llmRecordingKey('topics', `${extra}:${index}`), topics]);
+    }
+    llmEntries.push([llmRecordingKey('script', extra), scriptRecording(seed, extra)]);
+  }
+
   const llmStore: LlmRecordingStore = new Map(llmEntries);
 
   return { sourceStore, llmStore };

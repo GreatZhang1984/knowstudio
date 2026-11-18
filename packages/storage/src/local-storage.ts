@@ -82,5 +82,7 @@ export function createLocalStorage(config: ObjectStorageConfig & { root: string 
 }
 
 export function localStorageRoot(): string {
-  return normalize(join(process.cwd(), '.local-storage'));
+  // 与 apps/worker 的 LOCAL_STORAGE_ROOT 口径一致：API（读）与 worker（写）是双进程，
+  // 缺省各自 cwd 下 .local-storage 会错位；本地联调设同一变量即可共享。
+  return normalize(process.env['LOCAL_STORAGE_ROOT'] ?? join(process.cwd(), '.local-storage'));
 }

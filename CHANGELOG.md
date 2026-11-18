@@ -2,6 +2,12 @@
 
 ## 2026-11-18
 
+- dev 录制回放支持注册额外关键词：
+  - 新增环境变量 `KNOWSTUDIO_DEV_LLM_KEYWORDS`（逗号分隔），本地联调非种子主题（如「SPEC驱动开发」）时选题/文案生成可走通完整闭环；产出带「关键词：」前缀并标记 `provider=recorded`，明确为占位录制。
+  - 测试与 CI 不设置该变量，录制集合与单种子词一致，既有断言零影响；真实 LLM 供应商落地后本机制自然废弃。
+- 修复 dev 录制回放查询键未规范化导致的大小写漂移：`RecordedLlmAdapter` 查询改走 `llmRecordingKey` 规范化，含大写/空白的主题词（如「SPEC驱动开发」）不再误报 `NO_RECORDING`；种子词为纯中文，normalize 前后一致，既有断言零影响。
+- 修复 API 与 worker 本地存储根目录错位：`localStorageRoot()` 支持 `LOCAL_STORAGE_ROOT` 环境变量；此前 API 读 `apps/api/.local-storage` 而 worker 写 `apps/worker/.local-storage`，导出/派生产物跨进程读取 404。本地联调两进程需设置同一变量。
+- 修复作品无选题批次时 `GET /api/works/:id/topics` 误报 500：service 抛裸 `Error` 无 `code` 属性导致 controller 的 404 转换失效，改为按项目惯例 `code ?? message` 双查，正确返回 404「选题不存在」。
 - 新增本地 Obsidian MCP 桥接服务 `infra/obsidian-mcp`：
   - 以只读方式扫描本机 Obsidian 库的 Markdown 笔记，通过 MCP Streamable HTTP 暴露 `search_notes` 工具；不依赖 Obsidian 运行，也不安装 Obsidian 插件。
   - 支持 MCP 握手（initialize / notifications/initialized / tools/list / tools/call）与 `mcp-session-id` 会话头，多词 AND 匹配，按标题/路径/正文加权排序并返回上下文摘要。

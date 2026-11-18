@@ -40,7 +40,9 @@ export class RecordedLlmAdapter implements LlmPort {
   async generateStructured<T>(req: RecordedLlmRequest<T>): Promise<AiResult<T>> {
     const start = Date.now();
     // cacheKey 由调用方传规范化关键词（见 generateBlankAngles）；缺省则空串，键仍稳定。
-    const key = `${req.task}:${req.cacheKey ?? ''}`;
+    // 查询也必须走 llmRecordingKey 规范化：种子词（纯中文）normalize 前后一致未曾暴露，
+    // 含大写/空白的用户主题词（如「SPEC驱动开发:0」）会直接拼原文而键漂移（NO_RECORDING 误报）。
+    const key = llmRecordingKey(req.task, req.cacheKey ?? '');
     const recorded = this.store.get(key);
     if (recorded === undefined) {
       // 诚实失败：未录制不等于「无角度」，更不能伪造常量答案（D-08）。API 层捕获后降级 partial。
