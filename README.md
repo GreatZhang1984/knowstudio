@@ -9,7 +9,7 @@
 - `apps/worker`：渲染队列 worker。领取持久队列任务、生成课件/字幕/时间轴/音频四类分层资产、调用 ffmpeg 输出 MP4；支持高清复用音频、局部重算、四平台画幅/时长派生、封面生成、四平台导出 ZIP/manifest/发布清单、过期租约重投、任务对账与小时级指标聚合，并提交配额、任务状态与关键事件。
 - `packages/contracts`：zod 契约、错误码、DTO、SSE 事件与 OpenAPI 快照。
 - `packages/domain`：Work 状态机、进度权重、闸门派生与合规指纹等纯函数。
-- `packages/db`：MySQL 8 迁移、36 表结构、种子与仓储。
+- `packages/db`：MySQL 8 迁移、37 表结构、种子与仓储。
 - `packages/ai`：素材源编排、录制回放 / Tavily Web Search / Obsidian MCP 适配器、饱和度、空白角度、选题生成、1024 维录制 Embedding、文案生成、搬运检测与风格重写。
 - `packages/redis`、`packages/storage`：Redis 缓存/限流/PubSub 与 S3 兼容存储抽象。
 - `packages/media`、`packages/queue`、`packages/quota`：视频分层与合成、持久队列租约/fencing、配额行锁预扣与结算。
@@ -31,24 +31,14 @@
 
 素材搜索页支持选择 `录制演示`、`Web 搜索` 与 `Obsidian`。素材源声明由 `GET /api/material-sources` 下发；前端只提交 source id，不提交外部 URL 或密钥。
 
-启用 Tavily Web Search：
+真实素材源在 `/settings/sources` 中按当前登录用户配置，不使用系统环境变量：
 
-```powershell
-$env:TAVILY_API_KEY='<your-tavily-key>'
-$env:WEB_SEARCH_MAX_RESULTS='5'
-```
+1. 登录后进入 `设置 -> 素材源配置`。
+2. 启用 `Web 搜索`，填写 Tavily API Key，可调整最大结果数；保存后界面只显示密钥末四位，再次修改时留空则保留原密钥。
+3. 启用 `Obsidian MCP`，填写本机或内网 MCP 地址、搜索工具名、超时与最大结果数；仅允许本机、内网和 `.local` 地址。
+4. 保存后执行 `测试连接`，通过后回到素材搜索页选择对应来源。
 
-启用 Obsidian MCP（当前面向 API 与 MCP Server 同机或内网可达的本地部署）：
-
-```powershell
-$env:MCP_OBSIDIAN_ENABLED='true'
-$env:MCP_OBSIDIAN_URL='http://127.0.0.1:3940/mcp'
-$env:MCP_OBSIDIAN_TOOL='search_notes'
-$env:MCP_OBSIDIAN_MAX_RESULTS='5'
-$env:MCP_OBSIDIAN_TIMEOUT_MS='8000'
-```
-
-配置后重启 API，素材搜索页会出现可选的真实素材源。Web 与 Obsidian 素材会按当前用户落库并进入素材库，授权状态默认 `unknown`，后续仍走既有合规与授权修复链路。
+Tavily API Key 使用 AES-256-GCM 加密后保存到 `user_source_config`，密钥文件为 `infra/.source-config.key`。该文件必须随部署卷持久化且不得提交到 Git；丢失后已保存密钥无法解密，需要重新录入。Web 与 Obsidian 素材会按当前用户落库并进入素材库，授权状态默认 `unknown`，后续仍走既有合规与授权修复链路。
 
 ## 验证
 
@@ -61,7 +51,7 @@ pnpm test
 pnpm build
 ```
 
-以上命令等价于 `pnpm check`。GitHub 已配置 Actions：`main` 的 push 和 pull request 会启动 MySQL 8.4、Redis 7、Node 22 与 ffmpeg，先执行 36 表迁移和种子，再跑完整检查。当前测试链路使用本地存储；MinIO S3 冒烟测试后续单独纳入 CI。
+以上命令等价于 `pnpm check`。GitHub 已配置 Actions：`main` 的 push 和 pull request 会启动 MySQL 8.4、Redis 7、Node 22 与 ffmpeg，先执行 37 表迁移和种子，再跑完整检查。当前测试链路使用本地存储；MinIO S3 冒烟测试后续单独纳入 CI。
 
 ### 指标运维
 

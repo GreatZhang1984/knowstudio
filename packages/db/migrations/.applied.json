@@ -45,6 +45,16 @@
         "template_catalog"
       ],
       "tablesSkipped": []
+    },
+    {
+      "id": "0002_user_source_config",
+      "sha256": "c4b14e38e6201b57d8b29d8e3f7ab5e0cda727ef92234d8b693fc5213094ea3a",
+      "appliedAt": "2026-11-18T03:26:49.464Z",
+      "statementCount": 1,
+      "tablesCreated": [
+        "user_source_config"
+      ],
+      "tablesSkipped": []
     }
   ]
 }

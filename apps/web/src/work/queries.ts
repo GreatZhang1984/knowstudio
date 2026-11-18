@@ -50,6 +50,7 @@ export const workKeys = {
   quota: ['quota'] as const,
   metrics: ['metrics'] as const,
   materialSources: ['material-sources'] as const,
+  materialSourceConfig: ['material-source-config'] as const,
   ledger: (month: string) => [...workKeys.quota, 'ledger', month] as const,
   platformRules: ['platform-rules'] as const,
 };

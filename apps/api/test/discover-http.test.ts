@@ -46,10 +46,16 @@ async function pollSession(t: DiscoverTestApp, token: string, id: string): Promi
   for (let i = 0; i < 250; i += 1) {
     const res = await fetch(`${t.baseUrl}/api/discover/search/${id}`, { headers: auth(token) });
     if (res.status !== 200) {
-      throw new Error(`轮询 GET /discover/search/${id} 失败 status=${res.status} body=${await res.text()}`);
+      throw new Error(
+        `轮询 GET /discover/search/${id} 失败 status=${res.status} body=${await res.text()}`,
+      );
     }
     const session = SearchSessionSchema.parse(await res.json());
-    if (session.status === 'succeeded' || session.status === 'failed' || session.status === 'canceled') {
+    if (
+      session.status === 'succeeded' ||
+      session.status === 'failed' ||
+      session.status === 'canceled'
+    ) {
       return session;
     }
     await delay(20);
@@ -87,10 +93,11 @@ describe('T-20/T-21 E2E：搜索主链路 + 缓存 + 诚实空态（真实生产
   }, 60_000);
 
   it('★搜索主链路：202→轮询 succeeded，真实 10 素材 + 输入驱动饱和度(=61≠72) + 3 空白角度 + collected 叠加 + 缓存命中 + force', async () => {
-    // 首次非 force：legacy ss1 早于 24h 窗口且 domain 不同 → 自然未命中 → 202 受理。
+    // force：本地持久库可能残留 24h 内的同关键词会话，先确保拿到新会话。
     const { id: id1, session } = await acceptAndPoll(t, t.tokenA, {
       workId: t.workId,
       keyword: '费曼学习法',
+      force: true,
     });
     expect(id1.startsWith('ss_')).toBe(true);
     expect(session.id).toBe(id1);
@@ -170,6 +177,7 @@ describe('T-20/T-21 E2E：搜索主链路 + 缓存 + 诚实空态（真实生产
     const { session } = await acceptAndPoll(t, t.tokenA, {
       workId: t.workId,
       keyword: '量子纠缠',
+      force: true,
     });
     expect(session.status).toBe('succeeded');
     expect(session.materials).toEqual([]);
@@ -195,7 +203,11 @@ describe('T-21 E2E：素材库列表 + 过滤 + 游标分页 + collected 用户�
   it('GET /library → 200 {items,nextCursor,total}，visible()=10（8 自有 + 2 全局），collected 用户级 {k1,h1}', async () => {
     const res = await fetch(`${t.baseUrl}/api/library?limit=100`, { headers: auth(t.tokenA) });
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { items: unknown[]; nextCursor: string | null; total: number };
+    const body = (await res.json()) as {
+      items: unknown[];
+      nextCursor: string | null;
+      total: number;
+    };
     // [待确认 #16] SPEC §3.9「素材库 8」vs 仓储 visible()（自有 OR 全局）=10：本层忠实反映仓储语义，分歧归 #16。
     expect(body.total).toBe(10);
     expect(body.items).toHaveLength(10);
@@ -248,7 +260,11 @@ describe('T-21 E2E：素材库列表 + 过滤 + 游标分页 + collected 用户�
 
     const page1Res = await fetch(`${t.baseUrl}/api/library?limit=5`, { headers: auth(t.tokenA) });
     expect(page1Res.status).toBe(200);
-    const page1 = (await page1Res.json()) as { items: { id: string }[]; nextCursor: string | null; total: number };
+    const page1 = (await page1Res.json()) as {
+      items: { id: string }[];
+      nextCursor: string | null;
+      total: number;
+    };
     expect(page1.total).toBe(10);
     expect(page1.items).toHaveLength(5);
     expect(page1.nextCursor).not.toBeNull();
@@ -271,7 +287,9 @@ describe('T-21 E2E：素材库列表 + 过滤 + 游标分页 + collected 用户�
   });
 
   it('非法游标 → 400 VALIDATION_FAILED，fields[0].path=cursor（客户端输入错误，不是 500）', async () => {
-    const res = await fetch(`${t.baseUrl}/api/library?cursor=not-a-cursor`, { headers: auth(t.tokenA) });
+    const res = await fetch(`${t.baseUrl}/api/library?cursor=not-a-cursor`, {
+      headers: auth(t.tokenA),
+    });
     expect(res.status).toBe(400);
     const body = (await res.json()) as { code: string; details: { fields: { path: string }[] } };
     expect(body.code).toBe('VALIDATION_FAILED');
@@ -358,14 +376,19 @@ describe('T-20/T-21 E2E：鉴权链序 401 + 跨用户隔离 404 + 防枚举 + D
         headers: noAuth,
         body: JSON.stringify({ workId: t.workId, keyword: '费曼学习法' }),
       }),
-      fetch(`${t.baseUrl}/api/discover/search/ss_0000000000000000000000000000dead`, { headers: noAuth }),
+      fetch(`${t.baseUrl}/api/discover/search/ss_0000000000000000000000000000dead`, {
+        headers: noAuth,
+      }),
       fetch(`${t.baseUrl}/api/library`, { headers: noAuth }),
       fetch(`${t.baseUrl}/api/works/${t.workId}/materials`, {
         method: 'POST',
         headers: noAuth,
         body: JSON.stringify({ materialId: t.mat.k1 }),
       }),
-      fetch(`${t.baseUrl}/api/works/${t.workId}/materials/${t.mat.k1}`, { method: 'DELETE', headers: noAuth }),
+      fetch(`${t.baseUrl}/api/works/${t.workId}/materials/${t.mat.k1}`, {
+        method: 'DELETE',
+        headers: noAuth,
+      }),
     ]);
     for (const res of attempts) {
       expect(res.status).toBe(401);
@@ -403,19 +426,28 @@ describe('T-20/T-21 E2E：鉴权链序 401 + 跨用户隔离 404 + 防枚举 + D
     });
 
     // B 读 A 的会话 → user_id 作用域 → null → 404。
-    const bGet = await fetch(`${t.baseUrl}/api/discover/search/${aId}`, { headers: auth(t.tokenB) });
+    const bGet = await fetch(`${t.baseUrl}/api/discover/search/${aId}`, {
+      headers: auth(t.tokenB),
+    });
     expect(bGet.status).toBe(404);
     // A 读不存在的会话（合法格式 id）→ 404。
-    const ghost = await fetch(`${t.baseUrl}/api/discover/search/ss_0000000000000000000000000000dead`, {
-      headers: auth(t.tokenA),
-    });
+    const ghost = await fetch(
+      `${t.baseUrl}/api/discover/search/ss_0000000000000000000000000000dead`,
+      {
+        headers: auth(t.tokenA),
+      },
+    );
     expect(ghost.status).toBe(404);
 
     // 「不属于你」与「根本不存在」的会话 404 响应体逐字节相同 → 无法用状态差/文案差枚举有效会话 id。
     const bBody = await bGet.text();
     const ghostBody = await ghost.text();
     expect(bBody).toBe(ghostBody);
-    expect(JSON.parse(bBody)).toEqual({ code: 'NOT_FOUND', message: '资源不存在或不属于你', details: {} });
+    expect(JSON.parse(bBody)).toEqual({
+      code: 'NOT_FOUND',
+      message: '资源不存在或不属于你',
+      details: {},
+    });
 
     // A 搜不存在的 work → 404（work 归属校验）。
     const ghostWork = await fetch(`${t.baseUrl}/api/discover/search`, {
@@ -442,14 +474,19 @@ describe('T-20/T-21 E2E：鉴权链序 401 + 跨用户隔离 404 + 防枚举 + D
       body: JSON.stringify({ keyword: '费曼学习法' }),
     });
     expect(missingWork.status).toBe(400);
-    const mwBody = (await missingWork.json()) as { code: string; details: { fields: { path: string }[] } };
+    const mwBody = (await missingWork.json()) as {
+      code: string;
+      details: { fields: { path: string }[] };
+    };
     expect(mwBody.code).toBe('VALIDATION_FAILED');
     expect(mwBody.details.fields.some((f) => f.path === 'workId')).toBe(true);
 
     const badLimit = await fetch(`${t.baseUrl}/api/library?limit=0`, { headers: auth(t.tokenA) });
     expect(badLimit.status).toBe(400);
 
-    const badType = await fetch(`${t.baseUrl}/api/library?type=invalid`, { headers: auth(t.tokenA) });
+    const badType = await fetch(`${t.baseUrl}/api/library?type=invalid`, {
+      headers: auth(t.tokenA),
+    });
     expect(badType.status).toBe(400);
     expect(((await badType.json()) as { code: string }).code).toBe('VALIDATION_FAILED');
   });

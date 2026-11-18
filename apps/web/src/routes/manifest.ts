@@ -3,7 +3,7 @@ import type { ComponentType, LazyExoticComponent } from 'react';
 import type { GateId } from '@knowstudio/contracts';
 
 /**
- * SPEC §2.5 的 18 个页面 + 两个域入口重定向，顺序与 SPEC 表格一致。
+ * SPEC §2.5 的 19 个页面 + 两个域入口重定向，顺序与 SPEC 表格一致。
  * gate 取自架构 §11.1；页面级只做「读服务端信封后决定是否渲染锁定态」，不做本地闸门判断。
  */
 export interface PageRoute {
@@ -174,6 +174,15 @@ export const PAGE_ROUTES: readonly PageRoute[] = [
     section: '设置',
     shell: 'app',
     component: lazy(() => import('../pages/SettingsQuotaPage')),
+  },
+  {
+    kind: 'page',
+    pageId: 'page-settings-sources',
+    path: '/settings/sources',
+    title: '素材源配置',
+    section: '设置',
+    shell: 'app',
+    component: lazy(() => import('../pages/SettingsSourcesPage')),
   },
   {
     kind: 'page',

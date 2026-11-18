@@ -2,8 +2,8 @@
  * T-03 对**真实 MySQL 8.4** 的集成证明（DoD ①②③④）。
  *
  * 为什么全部 DB 用例集中在一个文件：vitest 默认**并行跑文件**、文件内顺序跑用例。
- * 3780 探针要建临时表，若分散到多文件并行，36 表计数断言会被别的文件的探针污染。
- * 集中在此 + 每个探针 finally 清理 ⇒ 静止态恒为 36 张表。
+ * 3780 探针要建临时表，若分散到多文件并行，37 表计数断言会被别的文件的探针污染。
+ * 集中在此 + 每个探针 finally 清理 ⇒ 静止态恒为 37 张表。
  *
  * 连接走 mysql2 over TCP（127.0.0.1:3306），不使用 docker CLI。
  * 错误判定一律用结构化 **errno**，不按 error.message 猜类型。
@@ -26,14 +26,28 @@ import type { DbHandle } from '../src/client.js';
 // 冻结入口走**公共出口**（WP12 在 apps/api 里 import 的就是这条路径），不是内部模块
 import { createDbClient, dbHandleOf } from '../src/index.js';
 import type { Database } from '../src/schema/index.js';
-import { applySeed, loadSeedData, measureSeedCounts, seedId, SEED_EXPECTATIONS } from '../migrations/seed.js';
+import {
+  applySeed,
+  loadSeedData,
+  measureSeedCounts,
+  seedId,
+  SEED_EXPECTATIONS,
+} from '../migrations/seed.js';
 import { DEFAULT_LEDGER_PATH, listTables, migrate, readLedger } from '../migrations/runner.js';
 import { createdTableName, splitSqlStatements } from '../migrations/sql-split.js';
-import { compareAll, parseShowCreateDump, stripAutoIncrementCounter } from '../migrations/ddl-compare.js';
+import {
+  compareAll,
+  parseShowCreateDump,
+  stripAutoIncrementCounter,
+} from '../migrations/ddl-compare.js';
 import { FORBIDDEN_TABLES, TABLE_ORDER, TOTAL_TABLE_COUNT } from '../migrations/tables.js';
 
 const baselineText = readFileSync(
   fileURLToPath(new URL('../migrations/0001_baseline.sql', import.meta.url)),
+  'utf8',
+);
+const migrationText = readFileSync(
+  fileURLToPath(new URL('../migrations/0002_user_source_config.sql', import.meta.url)),
   'utf8',
 );
 const fixtureText = readFileSync(
@@ -42,7 +56,7 @@ const fixtureText = readFileSync(
 );
 
 const expectedDdls = new Map<string, string>();
-for (const stmt of splitSqlStatements(baselineText)) {
+for (const stmt of [...splitSqlStatements(baselineText), ...splitSqlStatements(migrationText)]) {
   const t = createdTableName(stmt);
   if (t !== null) expectedDdls.set(t, stmt);
 }
@@ -79,7 +93,9 @@ async function expectSqlErrno(run: () => Promise<unknown>, errno: number): Promi
 }
 
 async function showCreate(table: string): Promise<string> {
-  const { rows } = await sql.raw<Record<string, unknown>>(`SHOW CREATE TABLE \`${table}\``).execute(db);
+  const { rows } = await sql
+    .raw<Record<string, unknown>>(`SHOW CREATE TABLE \`${table}\``)
+    .execute(db);
   const values = Object.values(rows[0] as Record<string, unknown>);
   return values[1] as string;
 }
@@ -116,7 +132,7 @@ describe('DoD① 迁移真的跑进了 MySQL', () => {
     expect(caps.sqlMode).toContain('STRICT_TRANS_TABLES');
   });
 
-  it('库里恰好 36 张基表，集合与 TABLE_ORDER 双向一致', async () => {
+  it('库里恰好 37 张基表，集合与 TABLE_ORDER 双向一致', async () => {
     const tables = await listTables(db, handle.config.database);
     expect(tables).toHaveLength(TOTAL_TABLE_COUNT);
     expect([...tables].sort()).toEqual([...TABLE_ORDER].sort());
@@ -141,11 +157,11 @@ describe('DoD① 迁移真的跑进了 MySQL', () => {
     expect(entry).toBeDefined();
     const sha = createHash('sha256').update(baselineText, 'utf8').digest('hex');
     expect(entry?.sha256).toBe(sha);
-    expect(entry?.statementCount).toBe(TOTAL_TABLE_COUNT);
+    expect(entry?.statementCount).toBe(36);
     expect(sha).toBe('2da4a7b4d531bb43247fe42c3e90e3fadd97084b1e25b52a7280c6c31eafab8f');
   });
 
-  it('36 张表全部是 InnoDB 且表默认排序规则为 utf8mb4_0900_ai_ci', async () => {
+  it('37 张表全部是 InnoDB 且表默认排序规则为 utf8mb4_0900_ai_ci', async () => {
     const { rows } = await sql<{ TABLE_NAME: string; ENGINE: string; TABLE_COLLATION: string }>`
       SELECT TABLE_NAME, ENGINE, TABLE_COLLATION
       FROM information_schema.TABLES
@@ -160,7 +176,7 @@ describe('DoD① 迁移真的跑进了 MySQL', () => {
 });
 
 describe('DoD② 逐表 SHOW CREATE TABLE 与架构 §4.4 比对', () => {
-  it('36/36 逐表一致（列/类型/可空/默认/索引/约束/FK/表选项）', async () => {
+  it('37/37 逐表一致（列/类型/可空/默认/索引/约束/FK/表选项）', async () => {
     const actual = new Map<string, string>();
     for (const t of TABLE_ORDER) actual.set(t, await showCreate(t));
     const report = compareAll(expectedDdls, actual);
@@ -194,7 +210,8 @@ describe('DoD② 逐表 SHOW CREATE TABLE 与架构 §4.4 比对', () => {
     expect(mutated).not.toBe(fixture.get('quota_ledger'));
     expect(stripAutoIncrementCounter(live)).not.toBe(mutated);
     // 列上的 AUTO_INCREMENT 属性属于 schema，不得被抹掉
-    const withColAttr = 'CREATE TABLE `t` (\n  `n` bigint NOT NULL AUTO_INCREMENT,\n  PRIMARY KEY (`n`)\n) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4';
+    const withColAttr =
+      'CREATE TABLE `t` (\n  `n` bigint NOT NULL AUTO_INCREMENT,\n  PRIMARY KEY (`n`)\n) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4';
     expect(stripAutoIncrementCounter(withColAttr)).toBe(
       'CREATE TABLE `t` (\n  `n` bigint NOT NULL AUTO_INCREMENT,\n  PRIMARY KEY (`n`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4',
     );
@@ -207,7 +224,12 @@ describe('DoD② 逐表 SHOW CREATE TABLE 与架构 §4.4 比对', () => {
     expect(ddl).toContain('UNIQUE KEY `uq_user_email` (`email`)');
     expect(ddl).toContain('CONSTRAINT `ck_user_contact` CHECK');
     // 与架构基线结构一致（不是只看几个子串）
-    expect(compareAll(new Map([['app_user', expectedDdls.get('app_user') as string]]), new Map([['app_user', ddl]])).identical).toBe(1);
+    expect(
+      compareAll(
+        new Map([['app_user', expectedDdls.get('app_user') as string]]),
+        new Map([['app_user', ddl]]),
+      ).identical,
+    ).toBe(1);
   });
 });
 
@@ -295,9 +317,11 @@ describe('DoD③ 种子真的落库，计数由 SELECT 实测', () => {
     `.execute(db);
     const tag = rows[0]?.tag;
     expect(typeof tag).toBe('string');
-    const { rows: plan } = await sql.raw<Record<string, unknown>>(
-      `EXPLAIN SELECT id FROM material WHERE '${(tag as string).replace(/'/g, "''")}' MEMBER OF (tags)`,
-    ).execute(db);
+    const { rows: plan } = await sql
+      .raw<Record<string, unknown>>(
+        `EXPLAIN SELECT id FROM material WHERE '${(tag as string).replace(/'/g, "''")}' MEMBER OF (tags)`,
+      )
+      .execute(db);
     const text = JSON.stringify(plan);
     expect(text).toContain('ix_material_tags');
   });
@@ -310,27 +334,36 @@ describe('DoD④ 负向验证 · FK collation 不一致必须 errno 3780', () =>
   it('引用列 collation 与被引用列不一致 → 3780；一致 → 建表成功（正向对照）', async () => {
     try {
       await expectSqlErrno(
-        () => sql.raw(`
+        () =>
+          sql
+            .raw(
+              `
           CREATE TABLE \`${BAD}\` (
             id CHAR(36) COLLATE ascii_bin NOT NULL,
             user_id CHAR(36) COLLATE utf8mb4_general_ci NOT NULL,
             PRIMARY KEY (id),
             CONSTRAINT fk_probe_bad FOREIGN KEY (user_id) REFERENCES app_user (id)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-        `).execute(db),
+        `,
+            )
+            .execute(db),
         3780,
       );
 
       // 正向对照：唯一改动是 collation 对齐，必须成功。
       // 没有这一半，就无法排除「建表失败其实是别的原因」。
-      await sql.raw(`
+      await sql
+        .raw(
+          `
         CREATE TABLE \`${GOOD}\` (
           id CHAR(36) COLLATE ascii_bin NOT NULL,
           user_id CHAR(36) COLLATE ascii_bin NOT NULL,
           PRIMARY KEY (id),
           CONSTRAINT fk_probe_good FOREIGN KEY (user_id) REFERENCES app_user (id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-      `).execute(db);
+      `,
+        )
+        .execute(db);
       const tables = await listTables(db, handle.config.database);
       expect(tables).toContain(GOOD);
       expect(tables).not.toContain(BAD);
@@ -351,7 +384,9 @@ describe('DoD④ 负向验证 · 配额 CHECK 真的拦住超支', () => {
       () => sql`UPDATE quota_account SET used = 61 WHERE user_id = ${USER_ID}`.execute(db),
       3819,
     );
-    const { rows } = await sql<{ used: number }>`SELECT used FROM quota_account WHERE user_id = ${USER_ID}`.execute(db);
+    const { rows } = await sql<{
+      used: number;
+    }>`SELECT used FROM quota_account WHERE user_id = ${USER_ID}`.execute(db);
     expect(Number(rows[0]?.used)).toBe(22);
   });
 
@@ -363,9 +398,18 @@ describe('DoD④ 负向验证 · 配额 CHECK 真的拦住超支', () => {
   });
 
   it('负数 used / reserved / total 各自被对应 CHECK 拦住', async () => {
-    await expectSqlErrno(() => sql`UPDATE quota_account SET used = -1 WHERE user_id = ${USER_ID}`.execute(db), 3819);
-    await expectSqlErrno(() => sql`UPDATE quota_account SET reserved = -1 WHERE user_id = ${USER_ID}`.execute(db), 3819);
-    await expectSqlErrno(() => sql`UPDATE quota_account SET total = -1 WHERE user_id = ${USER_ID}`.execute(db), 3819);
+    await expectSqlErrno(
+      () => sql`UPDATE quota_account SET used = -1 WHERE user_id = ${USER_ID}`.execute(db),
+      3819,
+    );
+    await expectSqlErrno(
+      () => sql`UPDATE quota_account SET reserved = -1 WHERE user_id = ${USER_ID}`.execute(db),
+      3819,
+    );
+    await expectSqlErrno(
+      () => sql`UPDATE quota_account SET total = -1 WHERE user_id = ${USER_ID}`.execute(db),
+      3819,
+    );
   });
 
   it('边界 used+reserved = total 必须允许（事务回滚，不留痕）', async () => {
@@ -385,7 +429,9 @@ describe('DoD④ 负向验证 · 配额 CHECK 真的拦住超支', () => {
       rolledBack = true;
     }
     expect(rolledBack).toBe(true);
-    const { rows } = await sql<{ reserved: number }>`SELECT reserved FROM quota_account WHERE user_id = ${USER_ID}`.execute(db);
+    const { rows } = await sql<{
+      reserved: number;
+    }>`SELECT reserved FROM quota_account WHERE user_id = ${USER_ID}`.execute(db);
     expect(Number(rows[0]?.reserved)).toBe(0);
   });
 
@@ -394,7 +440,8 @@ describe('DoD④ 负向验证 · 配额 CHECK 真的拦住超支', () => {
     const id = 't03_probe_rsv_0000000000000001';
     try {
       await expectSqlErrno(
-        () => sql`
+        () =>
+          sql`
           INSERT INTO quota_reservation (id, user_id, work_id, points, state, expires_at)
           VALUES (${id}, ${USER_ID}, ${workId}, 0, 'held', '2026-12-13 00:00:00.000')
         `.execute(db),
@@ -407,7 +454,9 @@ describe('DoD④ 负向验证 · 配额 CHECK 真的拦住超支', () => {
 });
 
 async function firstWorkId(): Promise<string> {
-  const { rows } = await sql<{ id: string }>`SELECT id FROM work WHERE user_id = ${USER_ID} ORDER BY created_at LIMIT 1`.execute(db);
+  const { rows } = await sql<{
+    id: string;
+  }>`SELECT id FROM work WHERE user_id = ${USER_ID} ORDER BY created_at LIMIT 1`.execute(db);
   const id = rows[0]?.id;
   if (id === undefined) throw new Error('种子里没有作品，无法做 FK 探针');
   return id;
@@ -450,9 +499,11 @@ describe('DoD④ 负向验证 · ngram 中文 FULLTEXT 真命中', () => {
   });
 
   it('EXPLAIN 证明 FULLTEXT 索引被真正使用', async () => {
-    const { rows } = await sql.raw<Record<string, unknown>>(
-      "EXPLAIN SELECT id FROM work WHERE MATCH(title) AGAINST ('费曼' IN NATURAL LANGUAGE MODE)",
-    ).execute(db);
+    const { rows } = await sql
+      .raw<Record<string, unknown>>(
+        "EXPLAIN SELECT id FROM work WHERE MATCH(title) AGAINST ('费曼' IN NATURAL LANGUAGE MODE)",
+      )
+      .execute(db);
     expect(JSON.stringify(rows)).toContain('ft_work_title');
   });
 });
@@ -465,7 +516,8 @@ describe('DoD④ 负向验证 · 每用户渲染并发上限 1 真的生效', ()
 
   it('第二条活跃渲染 → 1062；已完成/非渲染类型不受限（NULL 互不相等）', async () => {
     const workId = await firstWorkId();
-    const ins = (id: string, type: string, status: string) => sql`
+    const ins = (id: string, type: string, status: string) =>
+      sql`
       INSERT INTO render_job (id, work_id, user_id, type, status)
       VALUES (${id}, ${workId}, ${USER_ID}, ${type}, ${status})
     `.execute(db);
@@ -495,9 +547,13 @@ describe('DoD④ 负向验证 · 每用户渲染并发上限 1 真的生效', ()
   it('把活跃任务改为 succeeded 后，同用户可再开一条（释放并发位）', async () => {
     const workId = await firstWorkId();
     try {
-      await sql`INSERT INTO render_job (id, work_id, user_id, type, status) VALUES (${A}, ${workId}, ${USER_ID}, 'hd', 'running')`.execute(db);
+      await sql`INSERT INTO render_job (id, work_id, user_id, type, status) VALUES (${A}, ${workId}, ${USER_ID}, 'hd', 'running')`.execute(
+        db,
+      );
       await sql`UPDATE render_job SET status = 'succeeded' WHERE id = ${A}`.execute(db);
-      await sql`INSERT INTO render_job (id, work_id, user_id, type, status) VALUES (${B}, ${workId}, ${USER_ID}, 'hd', 'queued')`.execute(db);
+      await sql`INSERT INTO render_job (id, work_id, user_id, type, status) VALUES (${B}, ${workId}, ${USER_ID}, 'hd', 'queued')`.execute(
+        db,
+      );
       const { rows } = await sql<{ n: number }>`
         SELECT COUNT(*) AS n FROM render_job WHERE user_id = ${USER_ID} AND active_render_flag = 1
       `.execute(db);
@@ -523,7 +579,8 @@ describe('DoD④ 负向验证 · 每平台恰好一个 current 版本', () => {
     const baseVersion = Number(rows[0]?.version);
     const vBad = baseVersion + 100;
     const vOk = baseVersion + 101;
-    const ins = (version: number, isCurrent: number) => sql`
+    const ins = (version: number, isCurrent: number) =>
+      sql`
       INSERT INTO platform_rule
         (platform_id, version, name, ratio, max_duration, orient, brand_color, style_hint,
          title_max, title_hard_max, tag_max, is_current)
@@ -538,7 +595,9 @@ describe('DoD④ 负向验证 · 每平台恰好一个 current 版本', () => {
       `.execute(db);
       expect(Number(after[0]?.n)).toBe(1);
     } finally {
-      await sql`DELETE FROM platform_rule WHERE platform_id = ${platformId as string} AND version IN (${vBad}, ${vOk})`.execute(db);
+      await sql`DELETE FROM platform_rule WHERE platform_id = ${platformId as string} AND version IN (${vBad}, ${vOk})`.execute(
+        db,
+      );
     }
   }, 60_000);
 
@@ -550,13 +609,17 @@ describe('DoD④ 负向验证 · 每平台恰好一个 current 版本', () => {
 
 describe('DoD④ 负向验证 · 其余关键约束真的生效', () => {
   it('ck_topic_basis：basis 为空数组的选题被拒（JSON_LENGTH >= 1）', async () => {
-    const { rows } = await sql<{ batch_id: string; work_id: string }>`SELECT batch_id, work_id FROM topic LIMIT 1`.execute(db);
+    const { rows } = await sql<{
+      batch_id: string;
+      work_id: string;
+    }>`SELECT batch_id, work_id FROM topic LIMIT 1`.execute(db);
     const batchId = rows[0]?.batch_id as string;
     const workId = rows[0]?.work_id as string;
     const id = 't03_probe_topic_00000000000001';
     try {
       await expectSqlErrno(
-        () => sql`
+        () =>
+          sql`
           INSERT INTO topic (id, batch_id, work_id, hook, angle, blank_point, basis_material_ids, hook_fingerprint, ord)
           VALUES (${id}, ${batchId}, ${workId}, 'probe', 'probe', 'probe', '[]', ${'0'.repeat(64)}, 999)
         `.execute(db),
@@ -568,13 +631,17 @@ describe('DoD④ 负向验证 · 其余关键约束真的生效', () => {
   }, 60_000);
 
   it('ck_topic_emb_dim：维度不是 1024 的 embedding 被拒', async () => {
-    const { rows } = await sql<{ batch_id: string; work_id: string }>`SELECT batch_id, work_id FROM topic LIMIT 1`.execute(db);
+    const { rows } = await sql<{
+      batch_id: string;
+      work_id: string;
+    }>`SELECT batch_id, work_id FROM topic LIMIT 1`.execute(db);
     const batchId = rows[0]?.batch_id as string;
     const workId = rows[0]?.work_id as string;
     const id = 't03_probe_topic_emb_000000001';
     try {
       await expectSqlErrno(
-        () => sql`
+        () =>
+          sql`
           INSERT INTO topic (id, batch_id, work_id, hook, angle, blank_point, basis_material_ids, embedding, hook_fingerprint, ord)
           VALUES (${id}, ${batchId}, ${workId}, 'probe', 'probe', 'probe', '["k1"]', '[1,2,3]', ${'1'.repeat(64)}, 998)
         `.execute(db),
@@ -587,8 +654,13 @@ describe('DoD④ 负向验证 · 其余关键约束真的生效', () => {
 
   it('ck_work_phase：phase 越界（5）被拒', async () => {
     const workId = await firstWorkId();
-    await expectSqlErrno(() => sql`UPDATE work SET phase = 5 WHERE id = ${workId}`.execute(db), 3819);
-    const { rows } = await sql<{ phase: number }>`SELECT phase FROM work WHERE id = ${workId}`.execute(db);
+    await expectSqlErrno(
+      () => sql`UPDATE work SET phase = 5 WHERE id = ${workId}`.execute(db),
+      3819,
+    );
+    const { rows } = await sql<{
+      phase: number;
+    }>`SELECT phase FROM work WHERE id = ${workId}`.execute(db);
     expect(Number(rows[0]?.phase)).toBeLessThanOrEqual(4);
   });
 
@@ -597,7 +669,8 @@ describe('DoD④ 负向验证 · 其余关键约束真的生效', () => {
     const id = 't03_probe_job_prog_0000000001';
     try {
       await expectSqlErrno(
-        () => sql`
+        () =>
+          sql`
           INSERT INTO render_job (id, work_id, user_id, type, status, progress)
           VALUES (${id}, ${workId}, ${USER_ID}, 'hd', 'succeeded', 101)
         `.execute(db),
@@ -612,7 +685,10 @@ describe('DoD④ 负向验证 · 其余关键约束真的生效', () => {
     const id = 't03_probe_user_00000000000001';
     try {
       await expectSqlErrno(
-        () => sql`INSERT INTO app_user (id, name, phone, email, plan_id) VALUES (${id}, 'probe', NULL, NULL, 'creator_168')`.execute(db),
+        () =>
+          sql`INSERT INTO app_user (id, name, phone, email, plan_id) VALUES (${id}, 'probe', NULL, NULL, 'creator_168')`.execute(
+            db,
+          ),
         3819,
       );
     } finally {
@@ -624,7 +700,8 @@ describe('DoD④ 负向验证 · 其余关键约束真的生效', () => {
     const id = 't03_probe_job_fk_000000000001';
     try {
       await expectSqlErrno(
-        () => sql`
+        () =>
+          sql`
           INSERT INTO render_job (id, work_id, user_id, type, status)
           VALUES (${id}, 't03_ghost_work_0000000000000', ${USER_ID}, 'hd', 'succeeded')
         `.execute(db),
@@ -639,10 +716,17 @@ describe('DoD④ 负向验证 · 其余关键约束真的生效', () => {
     const workId = await firstWorkId();
     const jobId = 't03_probe_job_seq_0000000001';
     try {
-      await sql`INSERT INTO render_job (id, work_id, user_id, type, status) VALUES (${jobId}, ${workId}, ${USER_ID}, 'hd', 'succeeded')`.execute(db);
-      await sql`INSERT INTO render_job_event (job_id, seq, event_type, payload) VALUES (${jobId}, 1, 'progress', '{}')`.execute(db);
+      await sql`INSERT INTO render_job (id, work_id, user_id, type, status) VALUES (${jobId}, ${workId}, ${USER_ID}, 'hd', 'succeeded')`.execute(
+        db,
+      );
+      await sql`INSERT INTO render_job_event (job_id, seq, event_type, payload) VALUES (${jobId}, 1, 'progress', '{}')`.execute(
+        db,
+      );
       await expectSqlErrno(
-        () => sql`INSERT INTO render_job_event (job_id, seq, event_type, payload) VALUES (${jobId}, 1, 'progress', '{}')`.execute(db),
+        () =>
+          sql`INSERT INTO render_job_event (job_id, seq, event_type, payload) VALUES (${jobId}, 1, 'progress', '{}')`.execute(
+            db,
+          ),
         1062,
       );
     } finally {
@@ -652,19 +736,25 @@ describe('DoD④ 负向验证 · 其余关键约束真的生效', () => {
   }, 60_000);
 
   it('时间以 UTC 字面量进出，DATETIME(3) 毫秒精度不丢', async () => {
-    const { rows } = await sql<{ v: string }>`SELECT CAST('2026-11-13 08:09:10.123' AS DATETIME(3)) AS v`.execute(db);
+    const { rows } = await sql<{
+      v: string;
+    }>`SELECT CAST('2026-11-13 08:09:10.123' AS DATETIME(3)) AS v`.execute(db);
     expect(rows[0]?.v).toBe('2026-11-13 08:09:10.123');
     const { rows: tz } = await sql<{ tz: string }>`SELECT @@time_zone AS tz`.execute(db);
     expect(tz[0]?.tz).toBe('+00:00');
   });
 
   it('BIGINT 以字符串返回，>2^53 不静默丢精度', async () => {
-    const { rows } = await sql<{ v: string }>`SELECT CAST(9007199254740993 AS UNSIGNED) AS v`.execute(db);
+    const { rows } = await sql<{
+      v: string;
+    }>`SELECT CAST(9007199254740993 AS UNSIGNED) AS v`.execute(db);
     expect(rows[0]?.v).toBe('9007199254740993');
   });
 
   it('DECIMAL 以字符串返回，计费不被浮点污染', async () => {
-    const { rows } = await sql<{ v: string }>`SELECT CAST(0.1 AS DECIMAL(10,4)) + CAST(0.2 AS DECIMAL(10,4)) AS v`.execute(db);
+    const { rows } = await sql<{
+      v: string;
+    }>`SELECT CAST(0.1 AS DECIMAL(10,4)) + CAST(0.2 AS DECIMAL(10,4)) AS v`.execute(db);
     expect(rows[0]?.v).toBe('0.3000');
   });
 });
@@ -720,7 +810,11 @@ describe('跨包冻结入口 · createDbClient 对真实 MySQL 的口径核验',
   it('返回值可直接当 Kysely<Database> 用：typed selectFrom 真的查到种子数据', async () => {
     const client = createDbClient({ url: realUrl(), connectionLimit: 1 });
     try {
-      const works = await client.selectFrom('work').select(['id', 'title']).orderBy('created_at').execute();
+      const works = await client
+        .selectFrom('work')
+        .select(['id', 'title'])
+        .orderBy('created_at')
+        .execute();
       expect(works).toHaveLength(3);
       expect(works.map((w) => w.title)).toContain('费曼学习法：为什么你学了就忘');
       // 列名以真实 DDL 为准：quota_account 只有 total/used/reserved，left 是推导量不是列

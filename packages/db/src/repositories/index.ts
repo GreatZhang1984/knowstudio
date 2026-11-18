@@ -9,6 +9,13 @@
  * 本 barrel **只导出仓储**，不重新导出 schema / client，避免与 WP10 的入口抢同一批符号。
  */
 export {
+  createUserSourceConfigRepository,
+  type SaveUserSourceConfigInput,
+  type ScopedUserSourceConfigRepository,
+  type UserSourceConfigRepository,
+  type UserSourceConfigRow,
+} from './user-source-config-repository.js';
+export {
   createWorkRepository,
   WorkIdInvalidError,
   WorkScopeRequiredError,

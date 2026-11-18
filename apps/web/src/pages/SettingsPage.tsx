@@ -1,4 +1,4 @@
-import { Alert, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Table, Tag, Typography } from 'antd';
 import type { MetricName, MetricsResponse } from '@knowstudio/contracts';
 import { ErrorState, LoadingState } from '@knowstudio/ui';
 import { useMetrics } from '../work/queries';
@@ -76,6 +76,7 @@ export default function SettingsPage() {
         <Tag color={metrics.data?.fresh === true ? 'green' : 'orange'}>
           {metrics.data === undefined ? '待刷新' : DATA_STATUS_LABELS[metrics.data.dataStatus]}
         </Tag>
+        <Button href="/settings/sources">素材源配置</Button>
       </header>
       {metrics.data?.task?.lastError !== null && metrics.data?.task?.lastError !== undefined ? (
         <Alert

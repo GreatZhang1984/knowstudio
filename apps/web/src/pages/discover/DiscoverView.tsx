@@ -363,6 +363,11 @@ export function DiscoverView(props: DiscoverViewProps) {
                     {source.name}
                   </Checkbox>
                   <span>{source.description}</span>
+                  {source.id === 'recorded' ? null : (
+                    <Link className="discover-form__source-link" to="/settings/sources">
+                      配置
+                    </Link>
+                  )}
                 </label>
               ))}
             </div>

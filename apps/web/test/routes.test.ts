@@ -6,7 +6,7 @@ import { WorkStep } from '@knowstudio/contracts';
 import { resumePath } from '@knowstudio/domain';
 import { NAV_ITEMS, PAGE_ROUTES, REDIRECT_ROUTES, ROUTES } from '../src/routes/manifest';
 
-/** SPEC §2.5 路由表的 18 行，[id] 写成 React Router 的 :id。 */
+/** SPEC §2.5 + T-65 设置页，[id] 写成 React Router 的 :id。 */
 const SPEC_PAGES: readonly [string, string][] = [
   ['page-home', '/'],
   ['page-works', '/works'],
@@ -24,14 +24,15 @@ const SPEC_PAGES: readonly [string, string][] = [
   ['page-settings', '/settings'],
   ['page-settings-style', '/settings/style'],
   ['page-settings-quota', '/settings/quota'],
+  ['page-settings-sources', '/settings/sources'],
   ['page-login', '/login'],
   ['page-welcome', '/welcome'],
 ];
 
 describe('路由表与 SPEC §2.5 逐行一致', () => {
-  it('20 行 = 18 页 + 2 个域入口重定向', () => {
-    expect(ROUTES).toHaveLength(20);
-    expect(PAGE_ROUTES).toHaveLength(18);
+  it('21 行 = 19 页 + 2 个域入口重定向', () => {
+    expect(ROUTES).toHaveLength(21);
+    expect(PAGE_ROUTES).toHaveLength(19);
     expect(REDIRECT_ROUTES.map((r) => r.path)).toEqual(['/studio', '/publish']);
   });
 
@@ -40,8 +41,8 @@ describe('路由表与 SPEC §2.5 逐行一致', () => {
   });
 
   it('path 与 pageId 均不重复', () => {
-    expect(new Set(PAGE_ROUTES.map((r) => r.path)).size).toBe(18);
-    expect(new Set(PAGE_ROUTES.map((r) => r.pageId)).size).toBe(18);
+    expect(new Set(PAGE_ROUTES.map((r) => r.path)).size).toBe(19);
+    expect(new Set(PAGE_ROUTES.map((r) => r.pageId)).size).toBe(19);
   });
 
   it('主导航 6 项且不超过 7（SPEC §2.5）', () => {
@@ -54,7 +55,7 @@ describe('路由表与 SPEC §2.5 逐行一致', () => {
 });
 
 describe('懒加载', () => {
-  it('18 页全部是 React.lazy 组件', () => {
+  it('19 页全部是 React.lazy 组件', () => {
     for (const route of PAGE_ROUTES) {
       expect(route.component.$$typeof, route.path).toBe(Symbol.for('react.lazy'));
     }
@@ -63,8 +64,8 @@ describe('懒加载', () => {
   it('每页各自一个模块文件（chunk 边界真实存在）', () => {
     const source = readFileSync(new URL('../src/routes/manifest.ts', import.meta.url), 'utf8');
     const specifiers = [...source.matchAll(/import\('(\.\.\/pages\/[^']+)'\)/g)].map((m) => m[1]);
-    expect(specifiers).toHaveLength(18);
-    expect(new Set(specifiers).size).toBe(18);
+    expect(specifiers).toHaveLength(19);
+    expect(new Set(specifiers).size).toBe(19);
     for (const spec of specifiers) {
       const file = new URL(`${spec}.tsx`, new URL('../src/routes/manifest.ts', import.meta.url));
       expect(existsSync(file), String(spec)).toBe(true);

@@ -31,18 +31,30 @@ type Equal<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 type AssertTrue<T extends true> = T;
 
 /** DbConfig 必须逐字是 { url: string; connectionLimit?: number }（不得多字段、不得改可选性）。 */
-export type FrozenDbConfigShape = AssertTrue<Equal<DbConfig, { url: string; connectionLimit?: number }>>;
+export type FrozenDbConfigShape = AssertTrue<
+  Equal<DbConfig, { url: string; connectionLimit?: number }>
+>;
 /** 返回类型必须是 Kysely<Database>，不得是 DbHandle、不得是 Promise。 */
-export type FrozenFactoryReturn = AssertTrue<Equal<ReturnType<typeof createDbClient>, Kysely<Database>>>;
+export type FrozenFactoryReturn = AssertTrue<
+  Equal<ReturnType<typeof createDbClient>, Kysely<Database>>
+>;
 /** 入参必须恰好一个 DbConfig。 */
-export type FrozenFactoryParams = AssertTrue<Equal<Parameters<typeof createDbClient>, [config: DbConfig]>>;
-/** Database 必须从公共入口可 import，且恰好 36 张表。 */
-export type FrozenDatabaseExport = AssertTrue<Equal<keyof Database extends string ? true : false, true>>;
+export type FrozenFactoryParams = AssertTrue<
+  Equal<Parameters<typeof createDbClient>, [config: DbConfig]>
+>;
+/** Database 必须从公共入口可 import，且恰好 37 张表。 */
+export type FrozenDatabaseExport = AssertTrue<
+  Equal<keyof Database extends string ? true : false, true>
+>;
 
 const URL_REAL = 'mysql://knowstudio:knowstudio_app_dev_only@127.0.0.1:3306/knowstudio';
 
 /** 断言结构化错误：一律看 code/field/problem，禁止按 message 分支。 */
-function expectConfigError(run: () => unknown, field: 'url' | 'connectionLimit', problem: string): DbClientConfigError {
+function expectConfigError(
+  run: () => unknown,
+  field: 'url' | 'connectionLimit',
+  problem: string,
+): DbClientConfigError {
   let caught: unknown;
   try {
     run();
@@ -152,7 +164,11 @@ describe('createDbClient · connectionLimit 校验（显式传参非法必须抛
   ];
   for (const [name, value, problem] of bad) {
     it(`${name} → connectionLimit/${problem}`, () => {
-      expectConfigError(() => createDbClient({ url: URL_REAL, connectionLimit: value }), 'connectionLimit', problem);
+      expectConfigError(
+        () => createDbClient({ url: URL_REAL, connectionLimit: value }),
+        'connectionLimit',
+        problem,
+      );
     });
   }
   it('上限边界 1000 允许', async () => {

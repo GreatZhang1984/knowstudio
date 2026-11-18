@@ -89,6 +89,10 @@ const DECLARED_EXTRA_ROUTES = [
   'POST /works/{id}/materials/{mid}/license', // T-55：合规阻断修复需要绑定授权凭证并立即复检
   'POST /events', // T-59：仅 script_first_edit / publish_receipt_marked 客户端事件
   'GET /material-sources', // T-64：工作台选择录制源 / Web 搜索 / Obsidian MCP
+  'GET /material-sources/config', // T-65：用户级素材源配置，不使用进程环境变量
+  'PUT /material-sources/config', // T-65：保存加密 API Key 与非敏感源参数
+  'POST /material-sources/config/test', // T-65：测试当前用户已保存配置
+  'DELETE /material-sources/config/{sourceId}', // T-65：删除当前用户指定源配置
   'GET /metrics', // T-60：只读小时级指标快照
   'POST /metrics/recompute', // T-63：运维修复指定小时指标快照
 ] as const;

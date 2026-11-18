@@ -7,6 +7,7 @@ import {
   ExportPackageSchema,
   JobSchema,
   LedgerEntrySchema,
+  MaterialSourceConfigResponse,
   MaterialSourcesResponse,
   MetricsResponse,
   PlatformRuleSchema,
@@ -30,6 +31,8 @@ import type {
   ExportPackage,
   LedgerEntry,
   Material,
+  MaterialSourceConfigRequest,
+  MaterialSourceConfigTestResponse,
   MetricsResponse as MetricsResponseData,
   PlatformRule,
   PlatformId,
@@ -753,6 +756,63 @@ export function startFixtureSearch(input: {
 
 export function fetchFixtureMaterialSources(): MaterialSourcesResponse {
   return FIXTURE_MATERIAL_SOURCES;
+}
+
+let fixtureConfig = MaterialSourceConfigResponse.parse({
+  webSearch: {
+    enabled: false,
+    apiKeyLast4: null,
+    maxResults: 5,
+    testedAt: null,
+    updatedAt: null,
+  },
+  obsidian: {
+    enabled: false,
+    endpoint: null,
+    tool: null,
+    timeoutMs: 8000,
+    maxResults: 5,
+    testedAt: null,
+    updatedAt: null,
+  },
+});
+
+export function fetchFixtureMaterialSourceConfig(): MaterialSourceConfigResponse {
+  return fixtureConfig;
+}
+
+export function updateFixtureMaterialSourceConfig(
+  input: MaterialSourceConfigRequest,
+): MaterialSourceConfigResponse {
+  const now = new Date().toISOString();
+  fixtureConfig = MaterialSourceConfigResponse.parse({
+    webSearch: {
+      ...fixtureConfig.webSearch,
+      enabled: input.webSearch?.enabled ?? fixtureConfig.webSearch.enabled,
+      apiKeyLast4:
+        input.webSearch?.apiKey === undefined
+          ? fixtureConfig.webSearch.apiKeyLast4
+          : input.webSearch.apiKey.slice(-4),
+      maxResults: input.webSearch?.maxResults ?? fixtureConfig.webSearch.maxResults,
+      updatedAt: now,
+    },
+    obsidian: {
+      ...fixtureConfig.obsidian,
+      enabled: input.obsidian?.enabled ?? fixtureConfig.obsidian.enabled,
+      endpoint: input.obsidian?.endpoint ?? fixtureConfig.obsidian.endpoint,
+      tool: input.obsidian?.tool ?? fixtureConfig.obsidian.tool,
+      timeoutMs: input.obsidian?.timeoutMs ?? fixtureConfig.obsidian.timeoutMs,
+      maxResults: input.obsidian?.maxResults ?? fixtureConfig.obsidian.maxResults,
+      updatedAt: now,
+    },
+  });
+  return fixtureConfig;
+}
+
+export function testFixtureMaterialSource(
+  sourceId: 'web_search' | 'obsidian',
+): MaterialSourceConfigTestResponse {
+  return { sourceId, ok: false, latencyMs: 0, error: 'fixture 模式不访问外部服务' };
 }
 
 export function fetchFixtureSearchSession(searchId: string): SearchSession {

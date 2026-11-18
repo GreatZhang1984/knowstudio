@@ -91,7 +91,9 @@ const compactLogger = {
   },
 };
 
-export async function createDiscoverTestApp(): Promise<DiscoverTestApp> {
+export async function createDiscoverTestApp(
+  extraOverrides: Provider[] = [],
+): Promise<DiscoverTestApp> {
   process.env['JWT_SECRET'] = 'knowstudio-t36-disc-test-jwt-secret-not-for-prod';
   process.env['COOKIE_SECURE'] = 'false';
 
@@ -171,6 +173,7 @@ export async function createDiscoverTestApp(): Promise<DiscoverTestApp> {
     { provide: USER_STORE, useValue: userStore },
     { provide: REDIS_CLIENT, useValue: redis },
     { provide: DB_CLIENT, useValue: db },
+    ...extraOverrides,
   ];
 
   const app = await NestFactory.create(buildAppModule(overrides, []), {

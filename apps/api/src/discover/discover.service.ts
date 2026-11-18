@@ -26,12 +26,7 @@ import {
   type SearchRequest,
   type SearchSession,
 } from '@knowstudio/contracts';
-import {
-  computeSaturation,
-  generateBlankAngles,
-  type LlmPort,
-  type SourceRegistry,
-} from '@knowstudio/ai';
+import { computeSaturation, generateBlankAngles, type LlmPort } from '@knowstudio/ai';
 import type {
   MaterialRepository,
   MaterialRow,
@@ -47,11 +42,12 @@ import { toRfc3339 } from '../works/work-envelope.js';
 import {
   LLM_PORT,
   MATERIAL_REPOSITORY,
+  MATERIAL_SOURCE_SERVICE,
   SEARCH_SESSION_REPOSITORY,
-  SOURCE_REGISTRY,
   WORK_MATERIAL_REPOSITORY,
 } from './discover.tokens.js';
 import { notFound } from './http.js';
+import type { MaterialSourceService } from './material-source.service.js';
 import { toMaterial } from './material-view.js';
 
 /** 24h 缓存窗口（架构 §9.4）。 */
@@ -73,7 +69,7 @@ export class DiscoverService {
     @Inject(SEARCH_SESSION_REPOSITORY) private readonly sessions: SearchSessionRepository,
     @Inject(MATERIAL_REPOSITORY) private readonly materials: MaterialRepository,
     @Inject(WORK_MATERIAL_REPOSITORY) private readonly workMaterials: WorkMaterialRepository,
-    @Inject(SOURCE_REGISTRY) private readonly registry: SourceRegistry,
+    @Inject(MATERIAL_SOURCE_SERVICE) private readonly materialSources: MaterialSourceService,
     @Inject(LLM_PORT) private readonly llm: LlmPort,
     @Inject(WORK_REPOSITORY) private readonly works: WorkRepository,
     @Inject(ANALYTICS_RECORDER) private readonly analytics: AnalyticsRecorder,
@@ -148,7 +144,8 @@ export class DiscoverService {
     const query =
       domain === undefined ? { keyword, ownerId: userId } : { keyword, domain, ownerId: userId };
     try {
-      const agg = await this.registry.aggregate(query, { sourceIds: sources });
+      const registry = await this.materialSources.registryFor(userId, sources);
+      const agg = await registry.aggregate(query, { sourceIds: sources });
       const durationMs = Date.now() - start;
       await this.materials.forUser(userId).upsertExternalMaterials(agg.externalMaterials);
 

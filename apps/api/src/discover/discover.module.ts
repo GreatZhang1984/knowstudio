@@ -1,8 +1,8 @@
 /**
  * discover 模块 provider / controller 清单（沿用 works.module.ts 约定，由 app.module 组合）。
  *
- * ## 端口绑定（M1 dev/CI = 录制回放 VCR）
- * SOURCE_REGISTRY 由 material-source.runtime 组合；LLM_PORT 仍绑录制适配器。
+ * ## 端口绑定
+ * 素材源由用户配置动态装配；LLM_PORT 仍绑录制适配器。
  *
  * ## 仓储工厂
  * 与 works.module 同一手法：useFactory 注入 DB_CLIENT（Kysely<Database>），用 Parameters<typeof>[0]
@@ -18,36 +18,36 @@ import {
   createStyleRepository,
   createTopicRepository,
   createWorkMaterialRepository,
+  createUserSourceConfigRepository,
   type MaterialRepository,
   type SearchSessionRepository,
   type ScriptRepository,
   type StyleRepository,
   type TopicRepository,
   type WorkMaterialRepository,
+  type UserSourceConfigRepository,
 } from '@knowstudio/db/repositories';
-import {
-  RecordedLlmAdapter,
-  RecordedEmbeddingAdapter,
-  type SourceRegistry,
-  type LlmPort,
-} from '@knowstudio/ai';
+import { RecordedLlmAdapter, RecordedEmbeddingAdapter, type LlmPort } from '@knowstudio/ai';
 import { DB_CLIENT } from '../shared/tokens.js';
 import { buildDevRecordingStores, type DevRecordingStores } from './dev-fixtures.js';
 import { DiscoverController } from './discover.controller.js';
 import { DiscoverService } from './discover.service.js';
-import { materialSourceRuntime } from './material-source.runtime.js';
+import { createFileSourceConfigCipher } from './source-config.crypto.js';
+import { MaterialSourceService } from './material-source.service.js';
 import { MaterialSourcesController } from './material-sources.controller.js';
 import {
   LLM_PORT,
-  MATERIAL_SOURCES,
   MATERIAL_REPOSITORY,
+  MATERIAL_SOURCE_SERVICE,
   SEARCH_SESSION_REPOSITORY,
-  SOURCE_REGISTRY,
+  SOURCE_CONFIG_CIPHER,
   TOPIC_REPOSITORY,
   SCRIPT_REPOSITORY,
   STYLE_REPOSITORY,
   WORK_MATERIAL_REPOSITORY,
   EMBEDDING_PORT,
+  USER_SOURCE_CONFIG_REPOSITORY,
+  WEB_SEARCH_ENDPOINT,
 } from './discover.tokens.js';
 import { LibraryController } from './library.controller.js';
 import { MaterialsController } from './materials.controller.js';
@@ -86,12 +86,20 @@ export const DISCOVER_PROVIDERS: Provider[] = [
     inject: [DB_CLIENT],
   },
   {
-    provide: SOURCE_REGISTRY,
-    useFactory: (): SourceRegistry => materialSourceRuntime().registry,
+    provide: USER_SOURCE_CONFIG_REPOSITORY,
+    useFactory: (db: unknown): UserSourceConfigRepository =>
+      createUserSourceConfigRepository(
+        db as Parameters<typeof createUserSourceConfigRepository>[0],
+      ),
+    inject: [DB_CLIENT],
   },
   {
-    provide: MATERIAL_SOURCES,
-    useFactory: () => ({ items: materialSourceRuntime().sources }),
+    provide: SOURCE_CONFIG_CIPHER,
+    useFactory: () => createFileSourceConfigCipher(),
+  },
+  {
+    provide: WEB_SEARCH_ENDPOINT,
+    useValue: 'https://api.tavily.com/search',
   },
   {
     provide: LLM_PORT,
@@ -120,6 +128,10 @@ export const DISCOVER_PROVIDERS: Provider[] = [
     inject: [DB_CLIENT],
   },
   DiscoverService,
+  {
+    provide: MATERIAL_SOURCE_SERVICE,
+    useClass: MaterialSourceService,
+  },
   TopicsService,
   ScriptService,
   DerivativesService,

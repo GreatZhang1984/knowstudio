@@ -25,7 +25,9 @@ import { TABLE_ORDER } from './tables.js';
 
 /** SHOW CREATE TABLE 的真实返回形态（mysql2 列名随表名变化，故按索引取第二列）。 */
 async function showCreate(handle: DbHandle, table: string): Promise<string> {
-  const { rows } = await sql.raw<Record<string, unknown>>(`SHOW CREATE TABLE \`${table}\``).execute(handle.db);
+  const { rows } = await sql
+    .raw<Record<string, unknown>>(`SHOW CREATE TABLE \`${table}\``)
+    .execute(handle.db);
   const row = rows[0];
   if (row === undefined) throw new Error(`SHOW CREATE TABLE ${table} 未返回行`);
   const values = Object.values(row);
@@ -69,29 +71,43 @@ async function main(): Promise<void> {
       }
       case 'seed': {
         const result = await applySeed({ handle });
-        process.stdout.write(`${JSON.stringify({ applied: result.applied, userId: result.userId, counts: result.counts }, null, 2)}\n`);
+        process.stdout.write(
+          `${JSON.stringify({ applied: result.applied, userId: result.userId, counts: result.counts }, null, 2)}\n`,
+        );
         return;
       }
       case 'show-create': {
         const out = rest[0];
         if (out === undefined) throw new Error('用法：show-create <输出文件>');
+        const { stripAutoIncrementCounter } = await import('./ddl-compare.js');
         const tables = await listTables(handle.db, handle.config.database);
         const chunks: string[] = [];
         for (const t of TABLE_ORDER) {
           if (!tables.includes(t)) throw new Error(`表 ${t} 不存在，先跑 migrate`);
-          chunks.push(`-- ===== ${t} =====\n${await showCreate(handle, t)};\n`);
+          chunks.push(
+            `-- ===== ${t} =====\n${stripAutoIncrementCounter(await showCreate(handle, t))};\n`,
+          );
         }
         writeFileSync(path.resolve(out), chunks.join('\n'), 'utf8');
-        process.stdout.write(`已写出 ${String(TABLE_ORDER.length)} 张表的 SHOW CREATE TABLE → ${path.resolve(out)}\n`);
+        process.stdout.write(
+          `已写出 ${String(TABLE_ORDER.length)} 张表的 SHOW CREATE TABLE → ${path.resolve(out)}\n`,
+        );
         return;
       }
       case 'compare': {
         const { readFileSync } = await import('node:fs');
         const { compareAll, compareTable } = await import('./ddl-compare.js');
         const { splitSqlStatements, createdTableName } = await import('./sql-split.js');
-        const baseline = readFileSync(path.join(DEFAULT_MIGRATIONS_DIR, '0001_baseline.sql'), 'utf8');
+        const baseline = readFileSync(
+          path.join(DEFAULT_MIGRATIONS_DIR, '0001_baseline.sql'),
+          'utf8',
+        );
+        const incremental = readFileSync(
+          path.join(DEFAULT_MIGRATIONS_DIR, '0002_user_source_config.sql'),
+          'utf8',
+        );
         const expected = new Map<string, string>();
-        for (const stmt of splitSqlStatements(baseline)) {
+        for (const stmt of [...splitSqlStatements(baseline), ...splitSqlStatements(incremental)]) {
           const t = createdTableName(stmt);
           if (t !== null) expected.set(t, stmt);
         }
@@ -103,7 +119,9 @@ async function main(): Promise<void> {
           const d = compareTable(expected.get(t) as string, actual.get(t) as string);
           process.stdout.write(`${d.equal ? 'OK  ' : 'DIFF'} ${t}\n`);
         }
-        process.stdout.write(`逐表比对：${String(report.identical)}/${String(report.total)} 一致\n`);
+        process.stdout.write(
+          `逐表比对：${String(report.identical)}/${String(report.total)} 一致\n`,
+        );
         for (const d of report.diffs) {
           process.stdout.write(`\n=== ${d.table} ===\n`);
           for (const p of d.problems) process.stdout.write(`  - ${p}\n`);
@@ -114,11 +132,15 @@ async function main(): Promise<void> {
       case 'counts': {
         const data = loadSeedData();
         const counts = await measureSeedCounts(handle.db, seedId('u', data.user.key));
-        process.stdout.write(`${JSON.stringify({ counts, expectations: SEED_EXPECTATIONS }, null, 2)}\n`);
+        process.stdout.write(
+          `${JSON.stringify({ counts, expectations: SEED_EXPECTATIONS }, null, 2)}\n`,
+        );
         return;
       }
       default:
-        throw new Error(`未知命令：${String(command)}（capabilities|migrate|seed|show-create|compare|counts）`);
+        throw new Error(
+          `未知命令：${String(command)}（capabilities|migrate|seed|show-create|compare|counts）`,
+        );
     }
   } finally {
     await handle.destroy();
@@ -128,10 +150,12 @@ async function main(): Promise<void> {
 main().catch((err: unknown) => {
   const code = (err as { code?: unknown } | null)?.code;
   process.stderr.write(`[T-03] 失败 code=${String(code ?? 'UNKNOWN')}\n`);
-  process.stderr.write(`${err instanceof Error ? err.stack ?? err.message : String(err)}\n`);
+  process.stderr.write(`${err instanceof Error ? (err.stack ?? err.message) : String(err)}\n`);
   const cause = (err as { cause?: unknown } | null)?.cause;
   if (cause !== undefined && cause !== null) {
-    process.stderr.write(`cause: ${cause instanceof Error ? cause.stack ?? cause.message : String(cause)}\n`);
+    process.stderr.write(
+      `cause: ${cause instanceof Error ? (cause.stack ?? cause.message) : String(cause)}\n`,
+    );
   }
   process.exitCode = 1;
 });

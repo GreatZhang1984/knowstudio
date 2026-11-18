@@ -34,6 +34,13 @@ function clip(value: string, max: number): string {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value;
 }
 
+function obsidianErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  return message === 'fetch failed'
+    ? '无法连接 Obsidian MCP 地址，请确认服务已启动且地址正确'
+    : message;
+}
+
 function record(value: unknown): Record<string, unknown> {
   return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
 }
@@ -285,7 +292,7 @@ export class ObsidianMcpSourceAdapter implements SourceAdapter {
             error instanceof Error && error.message.startsWith('MCP_')
               ? error.message
               : 'OBSIDIAN_MCP_FAILED',
-          message: error instanceof Error ? error.message : String(error),
+          message: obsidianErrorMessage(error),
         },
         latencyMs: now() - start,
       };

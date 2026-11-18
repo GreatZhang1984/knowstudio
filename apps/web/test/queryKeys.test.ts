@@ -12,7 +12,14 @@ const PROBE_ID = 'w_probe';
  * 允许不带 workId 的全局 key：它们本来就与作品无关。
  * 这份名单是**封闭**的——新增全局 key 必须先在这里登记，否则用例失败。
  */
-const GLOBAL_CONSTANT_NAMES = ['materialSources', 'metrics', 'platformRules', 'quota', 'recent'];
+const GLOBAL_CONSTANT_NAMES = [
+  'materialSourceConfig',
+  'materialSources',
+  'metrics',
+  'platformRules',
+  'quota',
+  'recent',
+];
 const GLOBAL_BUILDER_NAMES = ['ledger', 'library', 'styleProfile', 'styleSamples'];
 
 type UnknownBuilder = (...args: unknown[]) => readonly unknown[];

@@ -322,6 +322,8 @@ export type ExportPackage = z.infer<typeof ExportPackageSchema>;
 // ── 搜索 ──────────────────────────────────────────────────────────────────────
 export const MaterialSourceId = z.enum(['recorded', 'web_search', 'obsidian']);
 export type MaterialSourceId = z.infer<typeof MaterialSourceId>;
+export const ExternalMaterialSourceId = z.enum(['web_search', 'obsidian']);
+export type ExternalMaterialSourceId = z.infer<typeof ExternalMaterialSourceId>;
 
 export const SearchRequest = z.object({
   /**
@@ -355,6 +357,71 @@ export type MaterialSource = z.infer<typeof MaterialSourceSchema>;
 
 export const MaterialSourcesResponse = z.object({ items: z.array(MaterialSourceSchema) });
 export type MaterialSourcesResponse = z.infer<typeof MaterialSourcesResponse>;
+
+export const WebSearchConfigRequest = z
+  .object({
+    enabled: z.boolean(),
+    /** 省略表示保留已保存密钥；首次启用时必填。 */
+    apiKey: z.string().min(8).max(255).optional(),
+    maxResults: z.number().int().min(1).max(10).default(5),
+  })
+  .strict();
+export type WebSearchConfigRequest = z.infer<typeof WebSearchConfigRequest>;
+
+export const ObsidianConfigRequest = z
+  .object({
+    enabled: z.boolean(),
+    endpoint: z.string().min(1).max(1024),
+    tool: z.string().min(1).max(120),
+    timeoutMs: z.number().int().min(1000).max(30_000).default(8000),
+    maxResults: z.number().int().min(1).max(10).default(5),
+  })
+  .strict();
+export type ObsidianConfigRequest = z.infer<typeof ObsidianConfigRequest>;
+
+export const MaterialSourceConfigRequest = z
+  .object({
+    webSearch: WebSearchConfigRequest.optional(),
+    obsidian: ObsidianConfigRequest.optional(),
+  })
+  .strict()
+  .refine((value) => value.webSearch !== undefined || value.obsidian !== undefined, {
+    message: '至少配置一个素材源',
+  });
+export type MaterialSourceConfigRequest = z.infer<typeof MaterialSourceConfigRequest>;
+
+export const MaterialSourceConfigResponse = z.object({
+  webSearch: z.object({
+    enabled: z.boolean(),
+    apiKeyLast4: z.string().length(4).nullable(),
+    maxResults: z.number().int().min(1).max(10),
+    testedAt: UtcTimestamp.nullable(),
+    updatedAt: UtcTimestamp.nullable(),
+  }),
+  obsidian: z.object({
+    enabled: z.boolean(),
+    endpoint: z.string().nullable(),
+    tool: z.string().nullable(),
+    timeoutMs: z.number().int().min(1000).max(30_000),
+    maxResults: z.number().int().min(1).max(10),
+    testedAt: UtcTimestamp.nullable(),
+    updatedAt: UtcTimestamp.nullable(),
+  }),
+});
+export type MaterialSourceConfigResponse = z.infer<typeof MaterialSourceConfigResponse>;
+
+export const MaterialSourceConfigTestRequest = z
+  .object({ sourceId: ExternalMaterialSourceId })
+  .strict();
+export type MaterialSourceConfigTestRequest = z.infer<typeof MaterialSourceConfigTestRequest>;
+
+export const MaterialSourceConfigTestResponse = z.object({
+  sourceId: ExternalMaterialSourceId,
+  ok: z.boolean(),
+  latencyMs: z.number().int().min(0),
+  error: z.string().nullable(),
+});
+export type MaterialSourceConfigTestResponse = z.infer<typeof MaterialSourceConfigTestResponse>;
 
 export const MaterialSchema = z.object({
   id: PrefixedId,

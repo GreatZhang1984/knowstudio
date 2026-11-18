@@ -12,10 +12,14 @@ import {
   splitSqlStatements,
   stripSqlComments,
 } from '../migrations/sql-split.js';
-import { TABLE_ORDER, TOTAL_TABLE_COUNT } from '../migrations/tables.js';
+import { TABLE_ORDER } from '../migrations/tables.js';
 
 const BASELINE_PATH = fileURLToPath(new URL('../migrations/0001_baseline.sql', import.meta.url));
+const MIGRATION_PATH = fileURLToPath(
+  new URL('../migrations/0002_user_source_config.sql', import.meta.url),
+);
 const baseline = readFileSync(BASELINE_PATH, 'utf8');
+const migration = readFileSync(MIGRATION_PATH, 'utf8');
 
 describe('scanSql · 注释优先于引号', () => {
   it('头部注释里的分号不算语句边界（真实基线陷阱）', () => {
@@ -132,7 +136,9 @@ describe('createdTableName', () => {
     expect(createdTableName('create table Work (id int)')).toBe('Work');
   });
   it('注释里的同名词不干扰', () => {
-    expect(createdTableName('-- CREATE TABLE fake (x int)\nCREATE TABLE real_t (id INT)')).toBe('real_t');
+    expect(createdTableName('-- CREATE TABLE fake (x int)\nCREATE TABLE real_t (id INT)')).toBe(
+      'real_t',
+    );
   });
   it('非 CREATE TABLE 返回 null', () => {
     expect(createdTableName('ALTER TABLE a ADD COLUMN b INT')).toBeNull();
@@ -140,16 +146,16 @@ describe('createdTableName', () => {
   });
 });
 
-describe('真实基线 0001_baseline.sql', () => {
-  it('恰好切出 36 条语句，且每条都是 CREATE TABLE', () => {
+describe('真实迁移 SQL', () => {
+  it('0001 基线恰好切出 36 条语句，且每条都是 CREATE TABLE', () => {
     const stmts = splitSqlStatements(baseline);
-    expect(stmts).toHaveLength(TOTAL_TABLE_COUNT);
+    expect(stmts).toHaveLength(36);
     for (const s of stmts) expect(createdTableName(s)).not.toBeNull();
   });
 
-  it('切出的表名集合与 TABLE_ORDER 完全一致（顺序也一致）', () => {
+  it('基线切出的表名集合与 TABLE_ORDER 去掉 T-65 增量表后完全一致（顺序也一致）', () => {
     const names = splitSqlStatements(baseline).map((s) => createdTableName(s));
-    expect(names).toEqual([...TABLE_ORDER]);
+    expect(names).toEqual(TABLE_ORDER.filter((t) => t !== 'user_source_config'));
   });
 
   it('无 CRLF：账本 sha256 按原文计算，换行风格漂移会破坏幂等', () => {
@@ -161,8 +167,16 @@ describe('真实基线 0001_baseline.sql', () => {
     expect(sha).toBe('2da4a7b4d531bb43247fe42c3e90e3fadd97084b1e25b52a7280c6c31eafab8f');
   });
 
-  it('36 条 CREATE TABLE 与 36 张表一一对应，无重复', () => {
+  it('0002 增量只创建 user_source_config，当前全表数为 37', () => {
+    const names = splitSqlStatements(migration).map((s) => createdTableName(s) as string);
+    expect(names).toEqual(['user_source_config']);
+    expect([...TABLE_ORDER].filter((t) => t === 'user_source_config')).toEqual([
+      'user_source_config',
+    ]);
+  });
+
+  it('36 条基线 CREATE TABLE 与 36 张基线表一一对应，无重复', () => {
     const names = splitSqlStatements(baseline).map((s) => createdTableName(s) as string);
-    expect(new Set(names).size).toBe(TOTAL_TABLE_COUNT);
+    expect(new Set(names).size).toBe(36);
   });
 });

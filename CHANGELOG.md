@@ -2,10 +2,15 @@
 
 ## 2026-11-18
 
+- 完成 T-65 用户级素材源配置：
+  - 新增 `user_source_config` 表，配置按 `user_id + source_id` 隔离；Tavily API Key 以 AES-256-GCM 密文保存，接口只返回末四位。
+  - 新增素材源配置读写、测试与删除接口，API 启动时不再依赖 Tavily / Obsidian 系统环境变量，而是按当前用户动态装配真实素材源。
+  - 新增 `/settings/sources` 配置页，可在界面配置 Web 搜索与 Obsidian MCP；Obsidian 地址仅允许本机、内网和 `.local`。
+  - 服务端加密密钥保存于 `infra/.source-config.key`，文件不入库且必须随部署卷持久化。
 - 完成 T-64 多素材源接入：
   - 新增 `GET /api/material-sources`，工作台可多选录制演示、Tavily Web Search 与 Obsidian MCP 素材源，并在本浏览器记住默认选择。
   - `POST /api/discover/search` 支持 `sources`；真实源素材按当前用户稳定 ID 落库，可进入素材库、收藏与后续选题链路。
-  - 新增 Tavily Web Search 适配器与 Obsidian Streamable HTTP MCP 适配器；单源失败保持 partial，外部 URL 与密钥仅保存在服务端环境变量。
+  - 新增 Tavily Web Search 适配器与 Obsidian Streamable HTTP MCP 适配器；单源失败保持 partial，外部配置由 T-65 的用户级配置安全保存。
 - 修正素材搜索示例词与真实源配置状态展示：未配置源不可选，不再把录制库未收录关键词误认为前后端断链。
 
 - 完成 T-63 指标可信度补强：

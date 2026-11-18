@@ -395,6 +395,45 @@
   line-height: 1.4;
 }
 
+.discover-form__source-link {
+  width: fit-content;
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.source-settings-page {
+  display: grid;
+  gap: 16px;
+}
+
+.source-settings-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.source-settings-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.source-settings-panel label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.source-settings-panel__numbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 180px));
+  gap: 12px;
+}
+
 .discover-form__issue {
   margin-left: auto;
   color: var(--warning);

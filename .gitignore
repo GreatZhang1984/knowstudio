@@ -5,6 +5,7 @@ coverage/
 .env
 .env.*
 !.env.example
+infra/.source-config.key
 .DS_Store
 Thumbs.db
 *.log

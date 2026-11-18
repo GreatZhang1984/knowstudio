@@ -145,6 +145,27 @@ describe('T-64 Obsidian MCP 适配器', () => {
     expect(result.data).toHaveLength(1);
     expect(result.data[0]?.summary).toBe('AI coding 的个人实践记录');
   });
+
+  it('连接失败返回可操作的中文错误信息', async () => {
+    const adapter = new ObsidianMcpSourceAdapter({
+      client: {
+        callTool: async () => {
+          throw new TypeError('fetch failed');
+        },
+      },
+      tool: 'search_notes',
+    });
+
+    const result = await adapter.search({ keyword: 'AI coding', ownerId: 'u1' }, 8_000);
+
+    expect(result).toMatchObject({
+      status: 'error',
+      error: {
+        code: 'OBSIDIAN_MCP_FAILED',
+        message: '无法连接 Obsidian MCP 地址，请确认服务已启动且地址正确',
+      },
+    });
+  });
 });
 
 describe('T-64 Streamable HTTP MCP 客户端', () => {
