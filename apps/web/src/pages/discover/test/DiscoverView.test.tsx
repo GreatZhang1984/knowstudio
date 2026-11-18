@@ -157,8 +157,23 @@ describe('DiscoverView 五态', () => {
     };
     const markup = render({ session: empty, view: searchViewState({ session: empty }) });
     expect(markup).toContain('data-testid="discover-empty"');
-    expect(markup).toContain('当前录制源只包含示例关键词');
+    expect(markup).toContain('当前录制源只包含示例关键词；勾选 Web 搜索或 Obsidian 后重试。');
     expect(markup).not.toContain('饱和度 72');
+  });
+
+  it('真实源都未配置时，空态明确提示先完成服务端配置', () => {
+    const empty: SearchSession = {
+      ...successfulSession,
+      materials: [],
+      saturation: null,
+      blankAngles: [],
+    };
+    const markup = render({
+      session: empty,
+      view: searchViewState({ session: empty }),
+      materialSources: [base.materialSources[0]!],
+    });
+    expect(markup).toContain('服务端配置 Tavily 或 Obsidian MCP 并重启 API');
   });
 
   it('error：渲染错误态与重试动作；输入保留在表单里', () => {

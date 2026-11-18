@@ -274,6 +274,9 @@ export function DiscoverView(props: DiscoverViewProps) {
   } = props;
   const issue = searchInputIssue(keyword, domain);
   const submitLabel = sameResult ? '已是最新结果' : session == null ? '开始聚合' : '重新聚合';
+  const realSourceConfigured = materialSources.some(
+    (source) => source.configured && source.id !== 'recorded',
+  );
 
   return (
     <section className="discover-page">
@@ -420,7 +423,9 @@ export function DiscoverView(props: DiscoverViewProps) {
           title="没有搜到结果"
           description={
             selectedSourceIds.includes('recorded') && selectedSourceIds.length === 1
-              ? '当前录制源只包含示例关键词；选择 Web 搜索或 Obsidian 可搜索真实内容。'
+              ? realSourceConfigured
+                ? '当前录制源只包含示例关键词；勾选 Web 搜索或 Obsidian 后重试。'
+                : '当前录制源只包含示例关键词；服务端配置 Tavily 或 Obsidian MCP 并重启 API 后可搜索真实内容。'
               : '换一个更具体的词，或放宽领域偏好再试一次。'
           }
           level="section"
