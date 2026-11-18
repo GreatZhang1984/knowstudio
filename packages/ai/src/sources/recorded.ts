@@ -89,6 +89,7 @@ export function buildRecordingStore(
  * 从同一关键词录制里按 kind 过滤素材。未命中录制 → empty（诚实空态）。
  */
 export class RecordedSourceAdapter implements SourceAdapter {
+  readonly sourceId = 'recorded';
   constructor(
     readonly id: string,
     readonly kind: SourceKind,

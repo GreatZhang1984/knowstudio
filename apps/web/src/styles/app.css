@@ -354,6 +354,47 @@
   font-size: 12px;
 }
 
+.discover-form__sources {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.discover-form__sources legend {
+  padding: 0 6px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.discover-form__source-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.discover-form__source {
+  display: grid;
+  min-width: 180px;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 3px);
+  background: var(--surface-2);
+  font-size: 12px;
+}
+
+.discover-form__source[data-configured='false'] {
+  opacity: 0.62;
+}
+
+.discover-form__source > span {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 .discover-form__issue {
   margin-left: auto;
   color: var(--warning);

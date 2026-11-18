@@ -1884,6 +1884,73 @@
           "collected"
         ]
       },
+      "MaterialSource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "recorded",
+              "web_search",
+              "obsidian"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "configured": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "configured"
+        ]
+      },
+      "MaterialSources": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "enum": [
+                    "recorded",
+                    "web_search",
+                    "obsidian"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "configured": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "description",
+                "configured"
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "TopicBatch": {
         "type": "object",
         "properties": {
@@ -2196,6 +2263,22 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 40
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "recorded",
+                "web_search",
+                "obsidian"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 3,
+            "default": [
+              "recorded"
+            ]
           },
           "force": {
             "type": "boolean",
@@ -8252,6 +8335,43 @@
           },
           "404": {
             "description": "NOT_FOUND（不存在或不属于你）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/material-sources": {
+      "get": {
+        "summary": "可选素材源与配置状态（不暴露外部服务地址或密钥）",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialSources"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
             "content": {
               "application/json": {
                 "schema": {

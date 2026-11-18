@@ -28,6 +28,8 @@ import {
   ListWorksQuery,
   LoginRequest,
   MaterialSchema,
+  MaterialSourceSchema,
+  MaterialSourcesResponse,
   MeResponse,
   MetricRecomputeAccepted,
   MetricRecomputeRequest,
@@ -127,6 +129,8 @@ const NAMED_SCHEMAS = {
   SseEvent: SseEventSchema,
   WorkListItem,
   Material: MaterialSchema,
+  MaterialSource: MaterialSourceSchema,
+  MaterialSources: MaterialSourcesResponse,
   TopicBatch: TopicBatchSchema,
   SearchSession: SearchSessionSchema,
   SearchRequest,
@@ -354,6 +358,12 @@ function routeDefs(r: SchemaRefs): RouteDef[] {
     },
 
     // ── 搜索与素材收藏 ──
+    {
+      method: 'get',
+      path: '/material-sources',
+      summary: '可选素材源与配置状态（不暴露外部服务地址或密钥）',
+      responses: { 200: { description: 'OK', content: json(r.MaterialSources) }, ...err(r, AUTH) },
+    },
     {
       method: 'post',
       path: '/discover/search',
@@ -695,7 +705,10 @@ function routeDefs(r: SchemaRefs): RouteDef[] {
       path: '/events',
       summary: '前端可信事件批量上报（script_first_edit / publish_receipt_marked）',
       request: { body: { content: json(r.RecordEventsRequest) } },
-      responses: { 200: { description: 'OK', content: json(r.RecordEventsResponse) }, ...err(r, COLLECTION) },
+      responses: {
+        200: { description: 'OK', content: json(r.RecordEventsResponse) },
+        ...err(r, COLLECTION),
+      },
     },
     {
       method: 'get',

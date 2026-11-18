@@ -2,6 +2,12 @@
 
 ## 2026-11-18
 
+- 完成 T-64 多素材源接入：
+  - 新增 `GET /api/material-sources`，工作台可多选录制演示、Tavily Web Search 与 Obsidian MCP 素材源，并在本浏览器记住默认选择。
+  - `POST /api/discover/search` 支持 `sources`；真实源素材按当前用户稳定 ID 落库，可进入素材库、收藏与后续选题链路。
+  - 新增 Tavily Web Search 适配器与 Obsidian Streamable HTTP MCP 适配器；单源失败保持 partial，外部 URL 与密钥仅保存在服务端环境变量。
+- 修正素材搜索示例词与真实源配置状态展示：未配置源不可选，不再把录制库未收录关键词误认为前后端断链。
+
 - 完成 T-63 指标可信度补强：
   - `GET /api/metrics` 新增 `dataStatus`、期望小时桶与最近 `sys.metric` 任务状态、次数、起止时间、耗时、重试时间和结构化错误。
   - Worker 按队列 payload 指定的小时桶聚合，不再忽略 bucket；聚合失败进入队列重试/死信并保留错误，成功后清空旧错误。

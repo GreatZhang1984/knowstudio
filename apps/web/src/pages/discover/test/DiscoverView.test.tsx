@@ -70,6 +70,13 @@ const base: DiscoverViewProps = {
   workLoading: false,
   keyword: '费曼学习法',
   domain: '',
+  materialSources: [
+    { id: 'recorded', name: '录制演示', description: '内置素材', configured: true },
+    { id: 'web_search', name: 'Web 搜索', description: '真实网页', configured: true },
+    { id: 'obsidian', name: 'Obsidian', description: '未配置 MCP', configured: false },
+  ],
+  selectedSourceIds: ['recorded'],
+  sourcesLoading: false,
   sameResult: false,
   submitting: false,
   session: successfulSession,
@@ -80,6 +87,7 @@ const base: DiscoverViewProps = {
   collectingMaterialId: null,
   onKeywordChange: () => {},
   onDomainChange: () => {},
+  onToggleSource: () => {},
   onSubmit: () => {},
   onRetry: () => {},
   onToggleCollect: () => {},
@@ -149,7 +157,7 @@ describe('DiscoverView 五态', () => {
     };
     const markup = render({ session: empty, view: searchViewState({ session: empty }) });
     expect(markup).toContain('data-testid="discover-empty"');
-    expect(markup).toContain('换一个更具体的词');
+    expect(markup).toContain('当前录制源只包含示例关键词');
     expect(markup).not.toContain('饱和度 72');
   });
 
@@ -214,6 +222,16 @@ describe('DiscoverView 交互锚点', () => {
       view: searchViewState({ session: noneCollected }),
     });
     expect(markup).toContain('先收藏至少一条素材');
+  });
+
+  it('素材源可多选，未配置源禁用且说明配置状态', () => {
+    const markup = render();
+    expect(markup).toContain('素材源');
+    expect(markup).toContain('录制演示');
+    expect(markup).toContain('Web 搜索');
+    expect(markup).toContain('Obsidian');
+    expect(markup).toContain('未配置 MCP');
+    expect(markup).toContain('disabled');
   });
 
   it('收藏失败展示错误态，下一次操作前不残留成功假象', () => {

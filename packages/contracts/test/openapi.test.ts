@@ -88,6 +88,7 @@ const DECLARED_EXTRA_ROUTES = [
   'POST /works/{id}/materials/{mid}/replace', // T-55：合规阻断需要真实替换当前作品素材
   'POST /works/{id}/materials/{mid}/license', // T-55：合规阻断修复需要绑定授权凭证并立即复检
   'POST /events', // T-59：仅 script_first_edit / publish_receipt_marked 客户端事件
+  'GET /material-sources', // T-64：工作台选择录制源 / Web 搜索 / Obsidian MCP
   'GET /metrics', // T-60：只读小时级指标快照
   'POST /metrics/recompute', // T-63：运维修复指定小时指标快照
 ] as const;
@@ -100,7 +101,9 @@ describe('G5 静态防线③：OpenAPI 不得出现平台发布写路由', () =>
 
   it('路由表本身也不声明发布写路由', () => {
     const offenders = REGISTERED_ROUTES.filter(
-      (r) => G5_FORBIDDEN_ROUTE_PATTERN.test(r.path) && WRITE_METHODS.includes(r.method.toLowerCase() as never),
+      (r) =>
+        G5_FORBIDDEN_ROUTE_PATTERN.test(r.path) &&
+        WRITE_METHODS.includes(r.method.toLowerCase() as never),
     );
     expect(offenders).toEqual([]);
   });
@@ -118,7 +121,8 @@ describe('G5 静态防线③：OpenAPI 不得出现平台发布写路由', () =>
   it('四种写方法都被拦，读方法不误伤', () => {
     for (const method of WRITE_METHODS) {
       const doc: OpenApiDocument = {
-        openapi: '3.0.3', info: { title: 'x', version: '1' },
+        openapi: '3.0.3',
+        info: { title: 'x', version: '1' },
         paths: { '/publish/x': { [method]: {} } },
       };
       expect(() => assertNoPublishRoutes(doc)).toThrow(PublishRouteViolationError);

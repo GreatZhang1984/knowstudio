@@ -9,10 +9,10 @@ const SRC = fileURLToPath(new URL('../src', import.meta.url));
 const PROBE_ID = 'w_probe';
 
 /**
- * 唯一允许不带 workId 的两个 key：它们本来就与作品无关。
+ * 允许不带 workId 的全局 key：它们本来就与作品无关。
  * 这份名单是**封闭**的——新增全局 key 必须先在这里登记，否则用例失败。
  */
-const GLOBAL_CONSTANT_NAMES = ['metrics', 'platformRules', 'quota', 'recent'];
+const GLOBAL_CONSTANT_NAMES = ['materialSources', 'metrics', 'platformRules', 'quota', 'recent'];
 const GLOBAL_BUILDER_NAMES = ['ledger', 'library', 'styleProfile', 'styleSamples'];
 
 type UnknownBuilder = (...args: unknown[]) => readonly unknown[];
@@ -34,7 +34,7 @@ describe('架构 §11.2 · queryKey 规范（遍历断言，不是抽查）', ()
     expect(builders.length + constants.length).toBe(entries.length);
   });
 
-  it('全局 key 恰好只有 library/ledger/recent/quota/platformRules，没有偷偷新增的跨 work 缓存', () => {
+  it('全局 key 白名单封闭，没有偷偷新增的跨 work 缓存', () => {
     expect(constants.map(([name]) => name).sort()).toEqual([...GLOBAL_CONSTANT_NAMES].sort());
     expect(builders.map(([name]) => name)).toEqual(expect.arrayContaining(GLOBAL_BUILDER_NAMES));
   });

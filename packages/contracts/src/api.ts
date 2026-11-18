@@ -320,6 +320,8 @@ export const ExportPackageSchema = z.object({
 export type ExportPackage = z.infer<typeof ExportPackageSchema>;
 
 // ── 搜索 ──────────────────────────────────────────────────────────────────────
+export const MaterialSourceId = z.enum(['recorded', 'web_search', 'obsidian']);
+export type MaterialSourceId = z.infer<typeof MaterialSourceId>;
 
 export const SearchRequest = z.object({
   /**
@@ -335,11 +337,24 @@ export const SearchRequest = z.object({
   keyword: z.string().min(1).max(40),
   /** SPEC §3.2：可选领域偏好（来自设置）。SPEC 未枚举值域，故为自由短串。 */
   domain: z.string().min(1).max(40).optional(),
+  /** T-64：素材源可多选；不传保持原录制回放行为，兼容既有客户端。 */
+  sources: z.array(MaterialSourceId).min(1).max(3).default(['recorded']),
   force: z.boolean().default(false),
 });
 export type SearchRequest = z.infer<typeof SearchRequest>;
 
 export const SearchAccepted = z.object({ searchId: PrefixedId, cacheHit: z.boolean() });
+
+export const MaterialSourceSchema = z.object({
+  id: MaterialSourceId,
+  name: z.string(),
+  description: z.string(),
+  configured: z.boolean(),
+});
+export type MaterialSource = z.infer<typeof MaterialSourceSchema>;
+
+export const MaterialSourcesResponse = z.object({ items: z.array(MaterialSourceSchema) });
+export type MaterialSourcesResponse = z.infer<typeof MaterialSourcesResponse>;
 
 export const MaterialSchema = z.object({
   id: PrefixedId,

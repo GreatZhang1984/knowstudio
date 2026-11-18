@@ -1,11 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Material } from '@knowstudio/contracts';
 import type { PartialResult, SourceAdapter, SourceKind, SourceQuery } from '../src/ports.js';
-import {
-  CIRCUIT_OPEN_MS,
-  SourceRegistry,
-  type Clock,
-} from '../src/sources/framework.js';
+import { CIRCUIT_OPEN_MS, SourceRegistry, type Clock } from '../src/sources/framework.js';
 
 function material(id: string, type: Material['type'] = 'knowledge'): Material {
   return {
@@ -29,7 +25,7 @@ function adapter(
   kind: SourceKind,
   search: (q: SourceQuery, budgetMs: number) => Promise<PartialResult<Material[]>>,
 ): SourceAdapter {
-  return { id, kind, search };
+  return { id, sourceId: id.startsWith('web:') ? 'web_search' : 'recorded', kind, search };
 }
 
 const q: SourceQuery = { keyword: '费曼学习法' };
@@ -40,7 +36,9 @@ describe('SourceRegistry 编排（T-17）', () => {
     reg.register(adapter('k', 'knowledge', async () => ok([material('m1'), material('m2')])));
     reg.register(adapter('h', 'hot', async () => ok([material('m3', 'hot')])));
     // 与知识源重复的 m1：跨源去重后只保留一条。
-    reg.register(adapter('p', 'peer', async () => ok([material('m1', 'peer'), material('m4', 'peer')])));
+    reg.register(
+      adapter('p', 'peer', async () => ok([material('m1', 'peer'), material('m4', 'peer')])),
+    );
 
     const agg = await reg.aggregate(q);
     expect(agg.materials.map((m) => m.id).sort()).toEqual(['m1', 'm2', 'm3', 'm4']);
@@ -65,11 +63,39 @@ describe('SourceRegistry 编排（T-17）', () => {
     expect(seen).toEqual({ knowledge: 8000, hot: 6000, peer: 6000 });
   });
 
+  it('T-64：按用户选择的素材源过滤适配器，未选源不发起请求', async () => {
+    const calls: string[] = [];
+    const reg = new SourceRegistry();
+    reg.register(
+      adapter('recorded:knowledge', 'knowledge', async () => {
+        calls.push('recorded');
+        return ok([material('m1')]);
+      }),
+    );
+    reg.register({
+      id: 'web:tavily',
+      sourceId: 'web_search',
+      kind: 'knowledge',
+      search: async () => {
+        calls.push('web');
+        return ok([material('m2')]);
+      },
+    });
+
+    const agg = await reg.aggregate(q, { sourceIds: ['web_search'] });
+    expect(calls).toEqual(['web']);
+    expect(agg.materials.map((m) => m.id)).toEqual(['m2']);
+  });
+
   it('单源超时 → 该列 error，其余列正常，allFailed=false（AC-D1 partial）', async () => {
     const reg = new SourceRegistry();
     reg.register(adapter('k', 'knowledge', async () => ok([material('m1')])));
     reg.register(
-      adapter('h', 'hot', () => new Promise((resolve) => setTimeout(() => resolve(ok([material('m2', 'hot')])), 50))),
+      adapter(
+        'h',
+        'hot',
+        () => new Promise((resolve) => setTimeout(() => resolve(ok([material('m2', 'hot')])), 50)),
+      ),
     );
     const agg = await reg.aggregate(q, { budgetMs: { hot: 10 } });
 
@@ -85,7 +111,11 @@ describe('SourceRegistry 编排（T-17）', () => {
   it('单源 reject → SOURCE_FAILED，不阻塞整体', async () => {
     const reg = new SourceRegistry();
     reg.register(adapter('k', 'knowledge', async () => ok([material('m1')])));
-    reg.register(adapter('h', 'hot', async () => { throw new Error('boom'); }));
+    reg.register(
+      adapter('h', 'hot', async () => {
+        throw new Error('boom');
+      }),
+    );
     const agg = await reg.aggregate(q);
     expect(agg.materials.map((m) => m.id)).toEqual(['m1']);
     expect(agg.partialErrors[0]?.code).toBe('SOURCE_FAILED');
@@ -94,8 +124,22 @@ describe('SourceRegistry 编排（T-17）', () => {
 
   it('全部源失败 → allFailed=true（架构 §9.3 聚合失败可手动导入）', async () => {
     const reg = new SourceRegistry();
-    reg.register(adapter('k', 'knowledge', async () => ({ status: 'error', data: [], error: { code: 'X', message: 'x' }, latencyMs: 0 })));
-    reg.register(adapter('h', 'hot', async () => ({ status: 'error', data: [], error: { code: 'Y', message: 'y' }, latencyMs: 0 })));
+    reg.register(
+      adapter('k', 'knowledge', async () => ({
+        status: 'error',
+        data: [],
+        error: { code: 'X', message: 'x' },
+        latencyMs: 0,
+      })),
+    );
+    reg.register(
+      adapter('h', 'hot', async () => ({
+        status: 'error',
+        data: [],
+        error: { code: 'Y', message: 'y' },
+        latencyMs: 0,
+      })),
+    );
     const agg = await reg.aggregate(q);
     expect(agg.allFailed).toBe(true);
     expect(agg.materials).toEqual([]);
@@ -104,7 +148,9 @@ describe('SourceRegistry 编排（T-17）', () => {
 
   it('empty ≠ error：源健康但无命中是空态，不进 partialErrors', async () => {
     const reg = new SourceRegistry();
-    reg.register(adapter('k', 'knowledge', async () => ({ status: 'empty', data: [], latencyMs: 1 })));
+    reg.register(
+      adapter('k', 'knowledge', async () => ({ status: 'empty', data: [], latencyMs: 1 })),
+    );
     const agg = await reg.aggregate(q);
     expect(agg.allFailed).toBe(false);
     expect(agg.partialErrors).toEqual([]);
@@ -129,7 +175,12 @@ describe('SourceRegistry 熔断（架构 §9.2：连续5次失败开60s）', () 
   it('连续5次失败后第6次短路 CIRCUIT_OPEN，不再调用适配器', async () => {
     const now = 1000;
     const clock: Clock = { now: () => now };
-    const search = vi.fn(async () => ({ status: 'error' as const, data: [], error: { code: 'X', message: 'x' }, latencyMs: 0 }));
+    const search = vi.fn(async () => ({
+      status: 'error' as const,
+      data: [],
+      error: { code: 'X', message: 'x' },
+      latencyMs: 0,
+    }));
     const reg = new SourceRegistry(clock);
     reg.register(adapter('k', 'knowledge', search));
 

@@ -15,6 +15,7 @@ export const STYLE_REPOSITORY = Symbol('knowstudio.discover.styleRepository');
 
 /** 素材源编排注册表（架构 §9.2）。dev 绑录制适配器，staging/prod 换真实供应商，端口不变。 */
 export const SOURCE_REGISTRY = Symbol('knowstudio.discover.sourceRegistry');
+export const MATERIAL_SOURCES = Symbol('knowstudio.discover.materialSources');
 
 /** LLM 端口（架构 §9.1 / ADR-15）。dev 绑 RecordedLlmAdapter（VCR），产出空白角度。 */
 export const LLM_PORT = Symbol('knowstudio.discover.llmPort');

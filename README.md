@@ -10,7 +10,7 @@
 - `packages/contracts`：zod 契约、错误码、DTO、SSE 事件与 OpenAPI 快照。
 - `packages/domain`：Work 状态机、进度权重、闸门派生与合规指纹等纯函数。
 - `packages/db`：MySQL 8 迁移、36 表结构、种子与仓储。
-- `packages/ai`：素材源编排、录制回放适配器、饱和度、空白角度、选题生成、1024 维录制 Embedding、文案生成、搬运检测与风格重写。
+- `packages/ai`：素材源编排、录制回放 / Tavily Web Search / Obsidian MCP 适配器、饱和度、空白角度、选题生成、1024 维录制 Embedding、文案生成、搬运检测与风格重写。
 - `packages/redis`、`packages/storage`：Redis 缓存/限流/PubSub 与 S3 兼容存储抽象。
 - `packages/media`、`packages/queue`、`packages/quota`：视频分层与合成、持久队列租约/fencing、配额行锁预扣与结算。
 - `packages/compliance`：四平台导出前合规纯函数引擎，输出报告项、阻断计数与 domain 合规指纹。
@@ -26,6 +26,29 @@
 5. 可选启动 Grafana 指标看板：`docker compose --project-directory infra --profile metrics up -d grafana`，默认地址 `http://127.0.0.1:3001`，本地默认密码 `knowstudio-dev`。
 
 开发模式默认使用前端 fixture；如需联调真实 API，启动 Web 时设置 `VITE_USE_FIXTURES=false`。
+
+### 素材源
+
+素材搜索页支持选择 `录制演示`、`Web 搜索` 与 `Obsidian`。素材源声明由 `GET /api/material-sources` 下发；前端只提交 source id，不提交外部 URL 或密钥。
+
+启用 Tavily Web Search：
+
+```powershell
+$env:TAVILY_API_KEY='<your-tavily-key>'
+$env:WEB_SEARCH_MAX_RESULTS='5'
+```
+
+启用 Obsidian MCP（当前面向 API 与 MCP Server 同机或内网可达的本地部署）：
+
+```powershell
+$env:MCP_OBSIDIAN_ENABLED='true'
+$env:MCP_OBSIDIAN_URL='http://127.0.0.1:3940/mcp'
+$env:MCP_OBSIDIAN_TOOL='search_notes'
+$env:MCP_OBSIDIAN_MAX_RESULTS='5'
+$env:MCP_OBSIDIAN_TIMEOUT_MS='8000'
+```
+
+配置后重启 API，素材搜索页会出现可选的真实素材源。Web 与 Obsidian 素材会按当前用户落库并进入素材库，授权状态默认 `unknown`，后续仍走既有合规与授权修复链路。
 
 ## 验证
 

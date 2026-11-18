@@ -7,6 +7,7 @@ import {
   ExportPackageSchema,
   JobSchema,
   LedgerEntrySchema,
+  MaterialSourcesResponse,
   MetricsResponse,
   PlatformRuleSchema,
   PatchScriptResponse,
@@ -134,6 +135,14 @@ export const FIXTURE_RECENT: WorkListItem = {
   gates: { G1: true, G2: true, G3: false, G4: false },
   updatedAt: '2026-11-12T10:20:00Z',
 };
+
+const FIXTURE_MATERIAL_SOURCES = MaterialSourcesResponse.parse({
+  items: [
+    { id: 'recorded', name: '录制演示', description: '内置素材。', configured: true },
+    { id: 'web_search', name: 'Web 搜索', description: '真实 API 未启用。', configured: false },
+    { id: 'obsidian', name: 'Obsidian', description: 'MCP 未启用。', configured: false },
+  ],
+});
 
 export const FIXTURE_QUOTA: Quota = {
   total: 60,
@@ -730,6 +739,7 @@ export type FixtureSearchStart =
 export function startFixtureSearch(input: {
   readonly keyword: string;
   readonly force?: boolean;
+  readonly sources?: readonly string[];
 }): FixtureSearchStart {
   const normalized = input.keyword.trim().normalize('NFKC').toLowerCase();
   const session =
@@ -739,6 +749,10 @@ export function startFixtureSearch(input: {
   if (session === undefined) throw new Error('fixture search missing');
   if (!input.force) return { kind: 'session', session: { ...session, cacheHit: true } };
   return { kind: 'accepted', searchId: session.id };
+}
+
+export function fetchFixtureMaterialSources(): MaterialSourcesResponse {
+  return FIXTURE_MATERIAL_SOURCES;
 }
 
 export function fetchFixtureSearchSession(searchId: string): SearchSession {
@@ -807,9 +821,27 @@ function fixtureCompliance(workId: string, force = false): ComplianceReport {
     id: `cr_${workId}_${force ? 'force' : 'cached'}`,
     workId,
     items: [
-      { kind: 'image', status: 'pass', detail: '当前未引用图片素材。', blocking: false, materialIds: [] },
-      { kind: 'music', status: 'pass', detail: '当前未引用音乐素材。', blocking: false, materialIds: [] },
-      { kind: 'font', status: 'pass', detail: '模板使用思源黑体。', blocking: false, materialIds: [] },
+      {
+        kind: 'image',
+        status: 'pass',
+        detail: '当前未引用图片素材。',
+        blocking: false,
+        materialIds: [],
+      },
+      {
+        kind: 'music',
+        status: 'pass',
+        detail: '当前未引用音乐素材。',
+        blocking: false,
+        materialIds: [],
+      },
+      {
+        kind: 'font',
+        status: 'pass',
+        detail: '模板使用思源黑体。',
+        blocking: false,
+        materialIds: [],
+      },
       {
         kind: 'content',
         status: blocked.length === 0 ? 'pass' : 'block',

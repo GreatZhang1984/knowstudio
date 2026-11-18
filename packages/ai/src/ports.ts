@@ -12,7 +12,7 @@
  * 不直接触碰 LlmPort 的 ZodSchema（apps/api 禁 zod）；apps/web 永不 import 本包。
  */
 import type { ZodSchema } from 'zod';
-import type { Material } from '@knowstudio/contracts';
+import type { Material, MaterialSourceId } from '@knowstudio/contracts';
 
 /** 统一调用结果（架构 §9.1）：provider/model/latency/cost 落 ai_call_log，cacheHit/fallback/partial 供降级与计费。 */
 export interface AiResult<T> {
@@ -33,6 +33,8 @@ export type SourceKind = 'knowledge' | 'hot' | 'peer';
 export interface SourceQuery {
   keyword: string;
   domain?: string;
+  /** 素材归属用户；真实外部源用于生成用户隔离的稳定素材 ID。 */
+  ownerId?: string;
 }
 
 /**
@@ -54,6 +56,8 @@ export interface PartialResult<T> {
 /** 素材源适配器（架构 §9.1）。budgetMs 是编排层切给本源的超时预算（知识8s/热点6s/同行6s，§14）。 */
 export interface SourceAdapter {
   readonly id: string;
+  /** 用户可选择的大类：recorded / web_search / obsidian。 */
+  readonly sourceId: MaterialSourceId;
   readonly kind: SourceKind;
   search(q: SourceQuery, budgetMs: number): Promise<PartialResult<Material[]>>;
 }

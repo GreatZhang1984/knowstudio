@@ -56,6 +56,7 @@ import { toMaterial } from './material-view.js';
 
 /** 24h 缓存窗口（架构 §9.4）。 */
 const SEARCH_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+type MaterialSourceSelection = SearchRequest['sources'][number];
 
 /** 前缀化 ID：ss_ + 32hex = 35 字符，落在 CHAR(36)/PrefixedId(≤36) 内。 */
 function newSearchId(): string {
@@ -87,7 +88,8 @@ export class DiscoverService {
     const repo = this.sessions.forUser(userId);
     const domain = input.domain ?? null;
 
-    if (!input.force) {
+    const cacheable = input.sources.length === 1 && input.sources[0] === 'recorded';
+    if (!input.force && cacheable) {
       const since = new Date(Date.now() - SEARCH_CACHE_TTL_MS);
       const cached = await repo.findCached(input.keyword, domain, since);
       if (cached !== null) {
@@ -112,7 +114,7 @@ export class DiscoverService {
     const searchId = newSearchId();
     await repo.insert({ id: searchId, workId: input.workId, keyword: input.keyword, domain });
     // 进程内 fire-and-forget：runSearch 自带兜底，绝不向事件循环抛未处理 rejection。
-    void this.runSearch(userId, searchId, input.workId, input.keyword, input.domain);
+    void this.runSearch(userId, searchId, input.workId, input.keyword, input.domain, input.sources);
     return { kind: 'accepted', searchId };
   }
 
@@ -139,13 +141,16 @@ export class DiscoverService {
     workId: string,
     keyword: string,
     domain: string | undefined,
+    sources: readonly MaterialSourceSelection[],
   ): Promise<void> {
     const repo = this.sessions.forUser(userId);
     const start = Date.now();
-    const query = domain === undefined ? { keyword } : { keyword, domain };
+    const query =
+      domain === undefined ? { keyword, ownerId: userId } : { keyword, domain, ownerId: userId };
     try {
-      const agg = await this.registry.aggregate(query);
+      const agg = await this.registry.aggregate(query, { sourceIds: sources });
       const durationMs = Date.now() - start;
+      await this.materials.forUser(userId).upsertExternalMaterials(agg.externalMaterials);
 
       if (agg.allFailed) {
         await repo.updateResults(searchId, {

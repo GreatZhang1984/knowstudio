@@ -12,6 +12,7 @@ import {
   GenerateScriptRequest,
   JobSchema,
   LedgerEntrySchema,
+  MaterialSourcesResponse,
   MaterialSchema,
   PlatformRuleSchema,
   PatchScriptRequest,
@@ -46,6 +47,7 @@ import type {
   ExportPackage,
   LicenseState,
   Material,
+  MaterialSource,
   MaterialType,
   PlatformId,
   PlatformRule,
@@ -143,10 +145,22 @@ export interface SearchInput {
   readonly keyword: string;
   readonly domain?: string;
   readonly force?: boolean;
+  readonly sources?: readonly MaterialSource['id'][];
+}
+
+export async function fetchMaterialSources(): Promise<MaterialSourcesResponse> {
+  if (USE_FIXTURES) return (await import('./fixtures')).fetchFixtureMaterialSources();
+  return MaterialSourcesResponse.parse(await sendJson('/api/material-sources'));
 }
 
 export async function startSearch(input: SearchInput): Promise<SearchStart> {
-  const body = SearchRequest.parse(input);
+  const body = SearchRequest.parse({
+    workId: input.workId,
+    keyword: input.keyword,
+    ...(input.domain == null ? {} : { domain: input.domain }),
+    ...(input.sources == null ? {} : { sources: input.sources }),
+    force: input.force,
+  });
   if (USE_FIXTURES) return (await import('./fixtures')).startFixtureSearch(body);
   const json = await sendJson('/api/discover/search', {
     method: 'POST',
@@ -191,11 +205,7 @@ export async function replaceMaterial(
   replacementId: string,
 ): Promise<CollectMaterialResponse> {
   if (USE_FIXTURES) {
-    return (await import('./fixtures')).replaceFixtureMaterial(
-      workId,
-      materialId,
-      replacementId,
-    );
+    return (await import('./fixtures')).replaceFixtureMaterial(workId, materialId, replacementId);
   }
   return CollectMaterialResponse.parse(
     await sendJson(`/api/works/${workId}/materials/${materialId}/replace`, {
@@ -494,9 +504,7 @@ export async function fetchDerivatives(workId: string): Promise<DerivativesView>
   return DerivativesResponse.parse(await sendJson(`/api/works/${workId}/derivatives`));
 }
 
-export async function generateDerivativeMetadata(
-  workId: string,
-): Promise<DerivativesView> {
+export async function generateDerivativeMetadata(workId: string): Promise<DerivativesView> {
   if (USE_FIXTURES) return (await import('./fixtures')).generateFixtureDerivatives(workId);
   return DerivativesResponse.parse(
     await sendJson(`/api/works/${workId}/derivatives:generate`, {
