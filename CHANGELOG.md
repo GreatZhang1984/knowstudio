@@ -2,7 +2,7 @@
 
 ## 2026-11-18
 
-- 新增本地开发验证码回显：`AUTH_DEV_CODE_ECHO=true` 且非生产环境时，发码接口返回 `devCode`，登录页弹窗展示并支持复制；默认与生产环境仍不在响应中泄露验证码。
+- 新增本地开发验证码回显：本地开发模式默认在发码接口返回 `devCode`，登录页弹窗展示并支持复制；可设置 `AUTH_DEV_CODE_ECHO=false` 关闭，生产环境强制不返回验证码。
 - 完成 T-65 用户级素材源配置：
   - 新增 `user_source_config` 表，配置按 `user_id + source_id` 隔离；Tavily API Key 以 AES-256-GCM 密文保存，接口只返回末四位。
   - 新增素材源配置读写、测试与删除接口，API 启动时不再依赖 Tavily / Obsidian 系统环境变量，而是按当前用户动态装配真实素材源。

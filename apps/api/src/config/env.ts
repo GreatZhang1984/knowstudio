@@ -34,6 +34,14 @@ function intFrom(value: string | undefined, fallback: number): number {
 }
 
 export function readAuthOptions(env: Record<string, string | undefined>): AuthOptions {
+  const nodeEnv = env['NODE_ENV'];
+  const echoSetting = env['AUTH_DEV_CODE_ECHO'];
+  const localDevelopment = nodeEnv === undefined || nodeEnv === '' || nodeEnv === 'development';
+  const devCodeEcho =
+    nodeEnv !== 'production' &&
+    (echoSetting === 'true' ||
+      ((echoSetting === undefined || echoSetting === '') && localDevelopment));
+
   return {
     jwtSecret: env['JWT_SECRET'] ?? DEV_JWT_SECRET,
     accessTokenTtlSec: intFrom(env['ACCESS_TOKEN_TTL_SEC'], ACCESS_TOKEN_TTL_SEC),
@@ -42,7 +50,7 @@ export function readAuthOptions(env: Record<string, string | undefined>): AuthOp
     codeResendCooldownSec: intFrom(env['CODE_RESEND_COOLDOWN_SEC'], DEFAULT_CODE_RESEND_COOLDOWN_SEC),
     cookieSecure: env['COOKIE_SECURE'] === 'true',
     cookieDomain: env['COOKIE_DOMAIN'],
-    devCodeEcho: env['AUTH_DEV_CODE_ECHO'] === 'true' && env['NODE_ENV'] !== 'production',
+    devCodeEcho,
   };
 }
 

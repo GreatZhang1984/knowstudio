@@ -27,7 +27,7 @@
 
 开发模式默认使用前端 fixture；如需联调真实 API，启动 Web 时设置 `VITE_USE_FIXTURES=false`。
 
-本地联调验证码登录时，可给 API 设置 `AUTH_DEV_CODE_ECHO=true`。发送验证码后，登录页会弹窗显示 6 位验证码并支持复制；该开关仅非生产环境生效，生产环境不会在响应中返回验证码。
+本地联调验证码登录时，API 在本地开发模式（`NODE_ENV` 未设置或为 `development`）默认回显验证码。发送验证码后，登录页会弹窗显示 6 位验证码并支持复制；如需关闭可设置 `AUTH_DEV_CODE_ECHO=false`。生产环境强制不返回验证码。
 
 ### 素材源
 
