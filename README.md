@@ -16,6 +16,7 @@
 - `packages/compliance`：四平台导出前合规纯函数引擎，输出报告项、阻断计数与 domain 合规指纹。
 - `packages/observability`：浏览器埋点 SDK、服务端事件 Recorder、G1/G2/G3/G5/G6 与护栏指标小时级聚合、`sys.metric` 任务健康读取；`/browser` 子入口保持前端不携带服务端 DB 依赖。
 - `packages/ui`：主题 token、异常态组件、闸门锁定态与阶段步进器。
+- `infra/obsidian-mcp`：本地 Obsidian MCP 桥接服务。只读扫描本机 Obsidian 库的 Markdown 笔记，通过 MCP Streamable HTTP 暴露 `search_notes` 工具，作为 Obsidian 素材源的默认本机实现；不依赖 Obsidian 运行，也不安装 Obsidian 插件。
 
 ## 本地启动
 
@@ -39,6 +40,14 @@
 2. 启用 `Web 搜索`，填写 Tavily API Key，可调整最大结果数；保存后界面只显示密钥末四位，再次修改时留空则保留原密钥。
 3. 启用 `Obsidian MCP`，填写本机或内网 MCP 地址、搜索工具名、超时与最大结果数；仅允许本机、内网和 `.local` 地址。
 4. 保存后执行 `测试连接`，通过后回到素材搜索页选择对应来源。
+
+没有现成 Obsidian MCP 服务时，可直接使用仓库自带的本地桥接：
+
+```bash
+pnpm obsidian-mcp -- --vault "C:\Users\<用户名>\Documents\Obsidian Vault"
+```
+
+默认监听 `http://127.0.0.1:3940/mcp`、工具名 `search_notes`，与配置页默认值一致；`--vault` 省略时按 `我的文档\Obsidian Vault` 探测。桥接为只读实现，不会修改笔记。
 
 Tavily API Key 使用 AES-256-GCM 加密后保存到 `user_source_config`，密钥文件为 `infra/.source-config.key`。该文件必须随部署卷持久化且不得提交到 Git；丢失后已保存密钥无法解密，需要重新录入。Web 与 Obsidian 素材会按当前用户落库并进入素材库，授权状态默认 `unknown`，后续仍走既有合规与授权修复链路。
 

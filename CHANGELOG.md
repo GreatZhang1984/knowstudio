@@ -2,6 +2,10 @@
 
 ## 2026-11-18
 
+- 新增本地 Obsidian MCP 桥接服务 `infra/obsidian-mcp`：
+  - 以只读方式扫描本机 Obsidian 库的 Markdown 笔记，通过 MCP Streamable HTTP 暴露 `search_notes` 工具；不依赖 Obsidian 运行，也不安装 Obsidian 插件。
+  - 支持 MCP 握手（initialize / notifications/initialized / tools/list / tools/call）与 `mcp-session-id` 会话头，多词 AND 匹配，按标题/路径/正文加权排序并返回上下文摘要。
+  - 提供 `pnpm obsidian-mcp` 启动入口与 `node --test` 冒烟测试；已用真实库验证「配置 → 测试连接 → 搜索 → 落库 → 收藏 → 素材库」全链路。
 - 新增本地开发验证码回显：本地开发模式默认在发码接口返回 `devCode`，登录页弹窗展示并支持复制；可设置 `AUTH_DEV_CODE_ECHO=false` 关闭，生产环境强制不返回验证码。
 - 完成 T-65 用户级素材源配置：
   - 新增 `user_source_config` 表，配置按 `user_id + source_id` 隔离；Tavily API Key 以 AES-256-GCM 密文保存，接口只返回末四位。

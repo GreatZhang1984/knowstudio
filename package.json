@@ -19,6 +19,7 @@
     "build": "pnpm --filter @knowstudio/web build",
     "dev": "pnpm --filter @knowstudio/web dev",
     "worker": "pnpm --filter @knowstudio/worker dev",
+    "obsidian-mcp": "node infra/obsidian-mcp/server.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm guards && pnpm boundaries && pnpm test && pnpm build"
   },
   "pnpm": {
