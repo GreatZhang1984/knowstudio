@@ -7010,10 +7010,113 @@
           "fresh": {
             "type": "boolean"
           },
+          "dataStatus": {
+            "type": "string",
+            "enum": [
+              "missing",
+              "partial",
+              "stale",
+              "fresh"
+            ]
+          },
           "generatedAt": {
             "type": "string",
             "nullable": true,
             "format": "date-time"
+          },
+          "expectedBucket": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "task": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "bucket": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "idle",
+                  "queued",
+                  "running",
+                  "retry_scheduled",
+                  "succeeded",
+                  "failed",
+                  "canceled"
+                ]
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "leased",
+                  "done",
+                  "dead",
+                  "canceled"
+                ]
+              },
+              "attempt": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "maxAttempt": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "startedAt": {
+                "type": "string",
+                "nullable": true,
+                "format": "date-time"
+              },
+              "finishedAt": {
+                "type": "string",
+                "nullable": true,
+                "format": "date-time"
+              },
+              "durationMs": {
+                "type": "integer",
+                "nullable": true,
+                "minimum": 0
+              },
+              "runAfter": {
+                "type": "string",
+                "nullable": true,
+                "format": "date-time"
+              },
+              "lastError": {
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ]
+              }
+            },
+            "required": [
+              "bucket",
+              "status",
+              "state",
+              "attempt",
+              "maxAttempt",
+              "startedAt",
+              "finishedAt",
+              "durationMs",
+              "runAfter",
+              "lastError"
+            ]
           },
           "g4BlindTest": {
             "type": "object",
@@ -7038,8 +7141,41 @@
         "required": [
           "items",
           "fresh",
+          "dataStatus",
           "generatedAt",
+          "expectedBucket",
+          "task",
           "g4BlindTest"
+        ]
+      },
+      "MetricRecomputeRequest": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MetricRecomputeAccepted": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "queued": {
+            "type": "boolean"
+          },
+          "dedupKey": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "bucket",
+          "queued",
+          "dedupKey"
         ]
       },
       "RecordEventsRequest": {
@@ -10845,7 +10981,7 @@
     },
     "/metrics": {
       "get": {
-        "summary": "指标快照（只读 metric_snapshot；G4 盲测需人工录入）",
+        "summary": "指标快照与 sys.metric 任务健康（G4 盲测需人工录入）",
         "responses": {
           "200": {
             "description": "OK",
@@ -10853,6 +10989,62 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Metrics"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics/recompute": {
+      "post": {
+        "summary": "运维重算指定小时指标（生产需 METRIC_RECOMPUTE_TOKEN）",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetricRecomputeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricRecomputeAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
                 }
               }
             }

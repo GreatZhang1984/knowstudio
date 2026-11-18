@@ -651,10 +651,59 @@ export const MetricSnapshotItem = z.object({
 });
 export type MetricSnapshotItem = z.infer<typeof MetricSnapshotItem>;
 
+export const MetricTaskStatus = z.enum([
+  'idle',
+  'queued',
+  'running',
+  'retry_scheduled',
+  'succeeded',
+  'failed',
+  'canceled',
+]);
+export type MetricTaskStatus = z.infer<typeof MetricTaskStatus>;
+
+export const MetricTaskError = z.object({
+  code: z.string().min(1),
+  message: z.string().min(1),
+});
+export type MetricTaskError = z.infer<typeof MetricTaskError>;
+
+export const MetricTask = z.object({
+  bucket: UtcTimestamp,
+  status: MetricTaskStatus,
+  state: z.enum(['pending', 'leased', 'done', 'dead', 'canceled']),
+  attempt: z.number().int().min(0),
+  maxAttempt: z.number().int().min(1),
+  startedAt: UtcTimestamp.nullable(),
+  finishedAt: UtcTimestamp.nullable(),
+  durationMs: z.number().int().min(0).nullable(),
+  runAfter: UtcTimestamp.nullable(),
+  lastError: MetricTaskError.nullable(),
+});
+export type MetricTask = z.infer<typeof MetricTask>;
+
+export const MetricDataStatus = z.enum(['missing', 'partial', 'stale', 'fresh']);
+export type MetricDataStatus = z.infer<typeof MetricDataStatus>;
+
 export const MetricsResponse = z.object({
   items: z.array(MetricSnapshotItem),
   fresh: z.boolean(),
+  dataStatus: MetricDataStatus,
   generatedAt: UtcTimestamp.nullable(),
+  expectedBucket: UtcTimestamp,
+  task: MetricTask.nullable(),
   g4BlindTest: z.object({ source: z.literal('manual'), value: z.number().nullable() }),
 });
 export type MetricsResponse = z.infer<typeof MetricsResponse>;
+
+export const MetricRecomputeRequest = z.object({
+  bucket: UtcTimestamp.optional(),
+});
+export type MetricRecomputeRequest = z.infer<typeof MetricRecomputeRequest>;
+
+export const MetricRecomputeAccepted = z.object({
+  bucket: UtcTimestamp,
+  queued: z.boolean(),
+  dedupKey: z.string().nullable(),
+});
+export type MetricRecomputeAccepted = z.infer<typeof MetricRecomputeAccepted>;

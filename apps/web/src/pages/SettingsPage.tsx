@@ -17,11 +17,24 @@ const METRIC_LABELS: readonly { key: MetricName; label: string; unit: string }[]
   { key: 'north_star_within_60m', label: '60 分钟内完成占比', unit: '%' },
 ];
 
-function valueOf(
-  data: MetricsResponse | undefined,
-  metric: MetricName,
-  unit: string,
-): string {
+const TASK_LABELS: Record<NonNullable<MetricsResponse['task']>['status'], string> = {
+  idle: '未调度',
+  queued: '排队中',
+  running: '聚合中',
+  retry_scheduled: '等待重试',
+  succeeded: '成功',
+  failed: '失败',
+  canceled: '已取消',
+};
+
+const DATA_STATUS_LABELS: Record<MetricsResponse['dataStatus'], string> = {
+  missing: '无快照',
+  partial: '口径缺失',
+  stale: '已过期',
+  fresh: '实时',
+};
+
+function valueOf(data: MetricsResponse | undefined, metric: MetricName, unit: string): string {
   const item = data?.items.find((candidate) => candidate.metric === metric);
   if (item === undefined || item.value === null) return '—';
   const value =
@@ -49,11 +62,30 @@ export default function SettingsPage() {
               ? `快照时间：${metrics.data.generatedAt?.toLocaleString() ?? '—'}`
               : '快照缺失或过期，以下空值不以旧值冒充'}
           </p>
+          <p>
+            最近聚合：
+            {metrics.data?.task === null || metrics.data?.task === undefined
+              ? '未调度'
+              : `${TASK_LABELS[metrics.data.task.status]} · ${metrics.data.task.bucket.toLocaleString()} · ${
+                  metrics.data.task.durationMs === null
+                    ? '耗时 —'
+                    : `耗时 ${metrics.data.task.durationMs}ms`
+                }`}
+          </p>
         </div>
         <Tag color={metrics.data?.fresh === true ? 'green' : 'orange'}>
-          {metrics.data?.fresh === true ? '实时快照' : '待刷新'}
+          {metrics.data === undefined ? '待刷新' : DATA_STATUS_LABELS[metrics.data.dataStatus]}
         </Tag>
       </header>
+      {metrics.data?.task?.lastError !== null && metrics.data?.task?.lastError !== undefined ? (
+        <Alert
+          type={metrics.data.task.status === 'failed' ? 'error' : 'warning'}
+          showIcon
+          message={`指标聚合${TASK_LABELS[metrics.data.task.status]}`}
+          description={`${metrics.data.task.lastError.code}: ${metrics.data.task.lastError.message}`}
+          style={{ marginBottom: 16 }}
+        />
+      ) : null}
       <Alert
         type="info"
         showIcon

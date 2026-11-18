@@ -10,6 +10,7 @@ import {
   completeClaimedJob,
   completeJob,
   enqueueInTransaction,
+  failClaimedJob,
   failJob,
   recoverExpiredLeases,
   renewLease,
@@ -30,6 +31,14 @@ import { nextStep, phaseOf } from '@knowstudio/domain';
 import type { Script } from '@knowstudio/contracts';
 
 const owner = `${process.env['COMPUTERNAME'] ?? 'worker'}-${process.pid}-${randomUUID()}`;
+
+function metricBucketOf(payload: Record<string, unknown>): string {
+  const value = payload['bucket'];
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2} \d{2}:00:00\.000$/u.test(value)) {
+    throw new Error('METRIC_BUCKET_INVALID');
+  }
+  return value;
+}
 
 function nowLiteral(): string {
   return new Date().toISOString().replace('T', ' ').replace('Z', '');
@@ -911,13 +920,28 @@ export async function runOnce(db: Kysely<Database>): Promise<void> {
   }
   const metricJob = await claimJob(db, 'sys.metric', owner);
   if (metricJob !== null) {
+    let metricSucceeded = false;
     try {
-      await computeMetricSnapshots(db);
+      await computeMetricSnapshots(db, metricBucketOf(metricJob.payload));
+      metricSucceeded = true;
     } catch (error) {
-      console.error('[worker] metric snapshot failed', error instanceof Error ? error.message : error);
+      const message = error instanceof Error ? error.message : String(error);
+      const outcome = await failClaimedJob(db, owner, metricJob, {
+        code:
+          error instanceof Error && error.name !== 'Error'
+            ? error.name
+            : 'METRIC_AGGREGATION_FAILED',
+        message,
+      });
+      console.error(
+        `[worker] metric snapshot failed bucket=${String(metricJob.payload['bucket'] ?? '')} outcome=${outcome}: ${message}`,
+      );
+      if (outcome === 'fenced') return;
     }
-    const completed = await completeClaimedJob(db, owner, metricJob);
-    if (!completed) console.error('[worker] metric queue fencing rejected');
+    if (metricSucceeded) {
+      const completed = await completeClaimedJob(db, owner, metricJob);
+      if (!completed) console.error('[worker] metric queue fencing rejected');
+    }
   }
 
   for (const queue of [

@@ -60,6 +60,24 @@
       ],
       "title": "护栏指标",
       "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "mysql", "uid": "knowstudio-mysql" },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 8 },
+      "id": 4,
+      "options": { "showHeader": true },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "knowstudio-mysql" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT id, JSON_UNQUOTE(JSON_EXTRACT(payload, '$.bucket')) AS bucket, state, attempt, max_attempt, started_at, finished_at, TIMESTAMPDIFF(MICROSECOND, started_at, finished_at) DIV 1000 AS duration_ms, last_error FROM job_queue WHERE queue = 'sys.metric' ORDER BY id DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "title": "sys.metric 任务健康",
+      "type": "table"
     }
   ],
   "refresh": "5m",

@@ -29,6 +29,8 @@ import {
   LoginRequest,
   MaterialSchema,
   MeResponse,
+  MetricRecomputeAccepted,
+  MetricRecomputeRequest,
   MetricsResponse,
   PatchDerivativeRequest,
   PatchScriptRequest,
@@ -159,6 +161,8 @@ const NAMED_SCHEMAS = {
   ExportAccepted,
   PlatformRule: PlatformRuleSchema,
   Metrics: MetricsResponse,
+  MetricRecomputeRequest,
+  MetricRecomputeAccepted,
   RecordEventsRequest,
   RecordEventsResponse,
   PlatformId,
@@ -696,8 +700,18 @@ function routeDefs(r: SchemaRefs): RouteDef[] {
     {
       method: 'get',
       path: '/metrics',
-      summary: '指标快照（只读 metric_snapshot；G4 盲测需人工录入）',
+      summary: '指标快照与 sys.metric 任务健康（G4 盲测需人工录入）',
       responses: { 200: { description: 'OK', content: json(r.Metrics) }, ...err(r, AUTH) },
+    },
+    {
+      method: 'post',
+      path: '/metrics/recompute',
+      summary: '运维重算指定小时指标（生产需 METRIC_RECOMPUTE_TOKEN）',
+      request: { body: { content: json(r.MetricRecomputeRequest) } },
+      responses: {
+        202: { description: 'Accepted', content: json(r.MetricRecomputeAccepted) },
+        ...err(r, [400, ...AUTH]),
+      },
     },
     {
       method: 'get',

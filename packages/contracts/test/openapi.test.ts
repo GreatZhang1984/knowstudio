@@ -89,6 +89,7 @@ const DECLARED_EXTRA_ROUTES = [
   'POST /works/{id}/materials/{mid}/license', // T-55：合规阻断修复需要绑定授权凭证并立即复检
   'POST /events', // T-59：仅 script_first_edit / publish_receipt_marked 客户端事件
   'GET /metrics', // T-60：只读小时级指标快照
+  'POST /metrics/recompute', // T-63：运维修复指定小时指标快照
 ] as const;
 
 describe('G5 静态防线③：OpenAPI 不得出现平台发布写路由', () => {
@@ -123,7 +124,8 @@ describe('G5 静态防线③：OpenAPI 不得出现平台发布写路由', () =>
       expect(() => assertNoPublishRoutes(doc)).toThrow(PublishRouteViolationError);
     }
     const readOnly: OpenApiDocument = {
-      openapi: '3.0.3', info: { title: 'x', version: '1' },
+      openapi: '3.0.3',
+      info: { title: 'x', version: '1' },
       paths: { '/publish-guide': { get: {} } },
     };
     expect(() => assertNoPublishRoutes(readOnly)).not.toThrow();
@@ -141,17 +143,21 @@ describe('G5 静态防线③：OpenAPI 不得出现平台发布写路由', () =>
     ];
     for (const path of variants) {
       const doc: OpenApiDocument = {
-        openapi: '3.0.3', info: { title: 'x', version: '1' },
+        openapi: '3.0.3',
+        info: { title: 'x', version: '1' },
         paths: { [path]: { post: {} } },
       };
-      expect(() => assertNoPublishRoutes(doc), `${path} 未被拦下`).toThrow(PublishRouteViolationError);
+      expect(() => assertNoPublishRoutes(doc), `${path} 未被拦下`).toThrow(
+        PublishRouteViolationError,
+      );
     }
   });
 
   it('只读指引路由不误报：GET /publish-guide 与 GET /publishing-guide 放行', () => {
     for (const path of ['/publish-guide', '/publishing-guide', '/works/{id}/publish-guide']) {
       const doc: OpenApiDocument = {
-        openapi: '3.0.3', info: { title: 'x', version: '1' },
+        openapi: '3.0.3',
+        info: { title: 'x', version: '1' },
         paths: { [path]: { get: {} } },
       };
       expect(() => assertNoPublishRoutes(doc), `${path} 被误拦`).not.toThrow();
@@ -160,7 +166,8 @@ describe('G5 静态防线③：OpenAPI 不得出现平台发布写路由', () =>
 
   it('fail-closed：publish 后接字母的写路由一律拦（宁可误拦不可漏放）', () => {
     const doc: OpenApiDocument = {
-      openapi: '3.0.3', info: { title: 'x', version: '1' },
+      openapi: '3.0.3',
+      info: { title: 'x', version: '1' },
       paths: { '/publishing': { post: {} } },
     };
     expect(() => assertNoPublishRoutes(doc)).toThrow(PublishRouteViolationError);
@@ -210,7 +217,9 @@ describe('OpenAPI 快照可 diff（T-05 验收）', () => {
     const ops = Object.entries(doc.paths).flatMap(([path, item]) =>
       Object.keys(item).map((m) => `${m.toUpperCase()} ${path}`),
     );
-    expect(ops.sort()).toEqual(REGISTERED_ROUTES.map((r) => `${r.method.toUpperCase()} ${r.path}`).sort());
+    expect(ops.sort()).toEqual(
+      REGISTERED_ROUTES.map((r) => `${r.method.toUpperCase()} ${r.path}`).sort(),
+    );
     expect(new Set(ops).size).toBe(ops.length);
   });
 
@@ -235,7 +244,9 @@ describe('OpenAPI 快照可 diff（T-05 验收）', () => {
 
     const schemas = (doc.components?.schemas ?? {}) as Record<string, unknown>;
     const dangling = [...new Set(refs)].filter(
-      (r) => !r.startsWith('#/components/schemas/') || !(r.slice('#/components/schemas/'.length) in schemas),
+      (r) =>
+        !r.startsWith('#/components/schemas/') ||
+        !(r.slice('#/components/schemas/'.length) in schemas),
     );
     expect(dangling).toEqual([]);
   });
@@ -244,11 +255,18 @@ describe('OpenAPI 快照可 diff（T-05 验收）', () => {
     const doc = buildOpenApiDocument();
     let checked = 0;
     for (const item of Object.values(doc.paths)) {
-      for (const op of Object.values(item as Record<string, { responses?: Record<string, { content?: Record<string, { schema?: unknown }> }> }>)) {
+      for (const op of Object.values(
+        item as Record<
+          string,
+          { responses?: Record<string, { content?: Record<string, { schema?: unknown }> }> }
+        >,
+      )) {
         for (const [status, res] of Object.entries(op.responses ?? {})) {
           if (!/^4\d\d$|^5\d\d$/.test(status)) continue;
           const schema = res.content?.['application/json']?.schema;
-          expect(schema, `${status} 错误响应缺 schema`).toEqual({ $ref: '#/components/schemas/ApiError' });
+          expect(schema, `${status} 错误响应缺 schema`).toEqual({
+            $ref: '#/components/schemas/ApiError',
+          });
           checked++;
         }
       }
@@ -288,7 +306,8 @@ describe('契约完整性', () => {
   it('付费动作声明 402，0 点草稿不声明 402', () => {
     const doc = buildOpenApiDocument();
     const responsesOf = (path: string, method: string) =>
-      (doc.paths[path] as Record<string, { responses: Record<string, unknown> }>)[method]!.responses;
+      (doc.paths[path] as Record<string, { responses: Record<string, unknown> }>)[method]!
+        .responses;
     expect(responsesOf('/works/{id}/video:render', 'post')['402']).toBeDefined();
     expect(responsesOf('/works/{id}/video:patch', 'post')['402']).toBeDefined();
     expect(responsesOf('/works/{id}/video:draft', 'post')['402']).toBeUndefined();
@@ -296,7 +315,9 @@ describe('契约完整性', () => {
 
   it('导出路由声明 409 与 422（G4 服务端重算合规）', () => {
     const doc = buildOpenApiDocument();
-    const op = (doc.paths['/works/{id}/export'] as Record<string, { responses: Record<string, unknown> }>).post!;
+    const op = (
+      doc.paths['/works/{id}/export'] as Record<string, { responses: Record<string, unknown> }>
+    ).post!;
     expect(op.responses['409']).toBeDefined();
     expect(op.responses['422']).toBeDefined();
   });
@@ -315,10 +336,15 @@ describe('契约完整性', () => {
  */
 describe('回归：风格样本创建是 P0，且服务端权威字段不可被客户端覆盖', () => {
   const postOp = () =>
-    (buildOpenApiDocument().paths['/style-samples'] as Record<string, {
-      requestBody?: { content: Record<string, { schema?: { $ref?: string } }> };
-      responses: Record<string, unknown>;
-    }>).post;
+    (
+      buildOpenApiDocument().paths['/style-samples'] as Record<
+        string,
+        {
+          requestBody?: { content: Record<string, { schema?: { $ref?: string } }> };
+          responses: Record<string, unknown>;
+        }
+      >
+    ).post;
 
   it('POST /style-samples 已注册（缺它则 M1 §12.2 step 9 无法执行）', () => {
     expect(REGISTERED_ROUTES.map((r) => `${r.method} ${r.path}`)).toContain('POST /style-samples');
@@ -337,7 +363,11 @@ describe('回归：风格样本创建是 P0，且服务端权威字段不可被�
   });
 
   it('请求体拒绝客户端传 status / charCount —— 是 400 拒绝，不是静默 strip', () => {
-    const base = { title: '费曼学习法口播稿', content: '你有没有过这种经历……', source: 'paste' as const };
+    const base = {
+      title: '费曼学习法口播稿',
+      content: '你有没有过这种经历……',
+      source: 'paste' as const,
+    };
     expect(CreateStyleSampleRequest.parse(base)).toEqual(base);
 
     // status/charCount 由服务端权威决定（arch:446 DEFAULT 'learning' / arch:447 服务端计算）。
@@ -374,11 +404,17 @@ describe('回归：风格样本创建是 P0，且服务端权威字段不可被�
 
   it('title 上限对齐 DDL VARCHAR(255)，source 值域与响应 schema 同源', () => {
     const base = { content: '正文', source: 'upload' as const };
-    expect(CreateStyleSampleRequest.safeParse({ ...base, title: 'a'.repeat(255) }).success).toBe(true);
-    expect(CreateStyleSampleRequest.safeParse({ ...base, title: 'a'.repeat(256) }).success).toBe(false);
+    expect(CreateStyleSampleRequest.safeParse({ ...base, title: 'a'.repeat(255) }).success).toBe(
+      true,
+    );
+    expect(CreateStyleSampleRequest.safeParse({ ...base, title: 'a'.repeat(256) }).success).toBe(
+      false,
+    );
     expect(CreateStyleSampleRequest.safeParse({ ...base, title: '' }).success).toBe(false);
     expect(CreateStyleSampleRequest.safeParse({ ...base, content: '' }).success).toBe(false);
-    expect(CreateStyleSampleRequest.safeParse({ ...base, title: 'x', source: 'import' }).success).toBe(false);
+    expect(
+      CreateStyleSampleRequest.safeParse({ ...base, title: 'x', source: 'import' }).success,
+    ).toBe(false);
     // 请求与响应共用同一个 ENUM 实例，杜绝两处各抄一份导致值域漂移（arch:445）。
     expect(CreateStyleSampleRequest.shape.source).toBe(StyleSampleSchema.shape.source);
   });

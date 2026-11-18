@@ -14,7 +14,7 @@
 - `packages/redis`、`packages/storage`：Redis 缓存/限流/PubSub 与 S3 兼容存储抽象。
 - `packages/media`、`packages/queue`、`packages/quota`：视频分层与合成、持久队列租约/fencing、配额行锁预扣与结算。
 - `packages/compliance`：四平台导出前合规纯函数引擎，输出报告项、阻断计数与 domain 合规指纹。
-- `packages/observability`：浏览器埋点 SDK、服务端事件 Recorder、G1/G2/G3/G5/G6 与护栏指标小时级聚合；`/browser` 子入口保持前端不携带服务端 DB 依赖。
+- `packages/observability`：浏览器埋点 SDK、服务端事件 Recorder、G1/G2/G3/G5/G6 与护栏指标小时级聚合、`sys.metric` 任务健康读取；`/browser` 子入口保持前端不携带服务端 DB 依赖。
 - `packages/ui`：主题 token、异常态组件、闸门锁定态与阶段步进器。
 
 ## 本地启动
@@ -39,3 +39,17 @@ pnpm build
 ```
 
 以上命令等价于 `pnpm check`。GitHub 已配置 Actions：`main` 的 push 和 pull request 会启动 MySQL 8.4、Redis 7、Node 22 与 ffmpeg，先执行 36 表迁移和种子，再跑完整检查。当前测试链路使用本地存储；MinIO S3 冒烟测试后续单独纳入 CI。
+
+### 指标运维
+
+`/settings` 展示快照状态、最近 `sys.metric` 聚合任务、耗时与失败原因。需要修复指定小时快照时，运维人员可调用 `POST /api/metrics/recompute`：
+
+```bash
+curl -X POST http://127.0.0.1:3000/api/metrics/recompute \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "x-metric-recompute-token: <operatorToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"bucket":"2026-11-18T00:00:00Z"}'
+```
+
+开发环境未设置 `METRIC_RECOMPUTE_TOKEN` 时允许已登录用户触发；生产环境必须设置该变量，否则接口始终拒绝。

@@ -145,13 +145,51 @@ export const FIXTURE_QUOTA: Quota = {
 
 export const FIXTURE_METRICS: MetricsResponseData = MetricsResponse.parse({
   items: [
-    { metric: 'g1_e2e_p50', value: 42.5, sampleN: 6, bucket: '2026-11-17T00:00:00Z', computedAt: '2026-11-17T00:10:00Z' },
-    { metric: 'g3_polish_p50', value: 8.2, sampleN: 6, bucket: '2026-11-17T00:00:00Z', computedAt: '2026-11-17T00:10:00Z' },
-    { metric: 'g5_platform_coverage', value: 4, sampleN: 4, bucket: '2026-11-17T00:00:00Z', computedAt: '2026-11-17T00:10:00Z' },
-    { metric: 'g6_cost_per_work', value: 2.8, sampleN: 6, bucket: '2026-11-17T00:00:00Z', computedAt: '2026-11-17T00:10:00Z' },
+    {
+      metric: 'g1_e2e_p50',
+      value: 42.5,
+      sampleN: 6,
+      bucket: '2026-11-17T00:00:00Z',
+      computedAt: '2026-11-17T00:10:00Z',
+    },
+    {
+      metric: 'g3_polish_p50',
+      value: 8.2,
+      sampleN: 6,
+      bucket: '2026-11-17T00:00:00Z',
+      computedAt: '2026-11-17T00:10:00Z',
+    },
+    {
+      metric: 'g5_platform_coverage',
+      value: 4,
+      sampleN: 4,
+      bucket: '2026-11-17T00:00:00Z',
+      computedAt: '2026-11-17T00:10:00Z',
+    },
+    {
+      metric: 'g6_cost_per_work',
+      value: 2.8,
+      sampleN: 6,
+      bucket: '2026-11-17T00:00:00Z',
+      computedAt: '2026-11-17T00:10:00Z',
+    },
   ],
   fresh: true,
+  dataStatus: 'fresh',
   generatedAt: '2026-11-17T00:10:00Z',
+  expectedBucket: '2026-11-17T00:00:00Z',
+  task: {
+    bucket: '2026-11-17T00:00:00Z',
+    status: 'succeeded',
+    state: 'done',
+    attempt: 1,
+    maxAttempt: 3,
+    startedAt: '2026-11-17T00:09:58Z',
+    finishedAt: '2026-11-17T00:10:01Z',
+    durationMs: 3000,
+    runAfter: '2026-11-17T00:00:00Z',
+    lastError: null,
+  },
   g4BlindTest: { source: 'manual', value: null },
 });
 
