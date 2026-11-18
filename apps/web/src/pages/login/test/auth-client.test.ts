@@ -110,10 +110,10 @@ describe('createAuthClient.login', () => {
 });
 
 describe('createAuthClient.sendCode', () => {
-  it('202 → 受理，body 带 account 与推断 channel', async () => {
+  it('202 → 受理，body 带 account 与推断 channel；无开发验证码时返回空对象', async () => {
     const { http, calls } = recorder(() => json({ accepted: true }, 202));
     const client = createAuthClient(http);
-    await expect(client.sendCode('user@example.com', 'email')).resolves.toBeUndefined();
+    await expect(client.sendCode('user@example.com', 'email')).resolves.toEqual({});
     expect(calls[0]?.input).toBe('/api/auth/code');
     expect(bodyOf(calls[0]!)).toEqual({ account: 'user@example.com', channel: 'email' });
   });
@@ -139,6 +139,12 @@ describe('createAuthClient.sendCode', () => {
       expect(e.apiError?.code).toBe('RATE_LIMITED');
       if (e.apiError?.code === 'RATE_LIMITED') expect(e.apiError.details.retryAfterSec).toBe(42);
     }
+  });
+
+  it('202 + devCode → 返回开发验证码，供登录页弹窗展示', async () => {
+    const { http } = recorder(() => json({ accepted: true, devCode: '123456' }, 202));
+    const client = createAuthClient(http);
+    await expect(client.sendCode('13800000000')).resolves.toEqual({ devCode: '123456' });
   });
 });
 

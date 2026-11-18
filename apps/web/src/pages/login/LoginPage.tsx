@@ -47,6 +47,7 @@ export default function LoginPage() {
   const [error, setError] = useState<ApiError | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [fieldIssues, setFieldIssues] = useState<readonly LoginFieldIssue[]>([]);
+  const [devCode, setDevCode] = useState<string | null>(null);
 
   // 冷却倒计时：每秒递减，归零即停。SSR 不跑 effect，首帧不受影响。
   useEffect(() => {
@@ -91,9 +92,11 @@ export default function LoginPage() {
     setFieldIssues([]);
     setError(null);
     setNotice(null);
+    setDevCode(null);
     setSendingCode(true);
     try {
-      await client.sendCode(trimmed, inferChannel(trimmed));
+      const result = await client.sendCode(trimmed, inferChannel(trimmed));
+      if (result.devCode !== undefined) setDevCode(result.devCode);
       setCodeCooldownSec(DEFAULT_CODE_COOLDOWN_SEC);
     } catch (err) {
       if (err instanceof AuthRequestError && err.apiError != null) {
@@ -143,6 +146,8 @@ export default function LoginPage() {
       notice={notice}
       returnTo={returnTo}
       fieldIssues={fieldIssues}
+      devCode={devCode}
+      onDevCodeClose={() => setDevCode(null)}
       onRecovery={handleRecovery}
     />
   );

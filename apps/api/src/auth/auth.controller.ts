@@ -43,6 +43,11 @@ interface CookieRequest {
   headers: Record<string, string | string[] | undefined>;
 }
 
+interface SendCodeResponse {
+  accepted: true;
+  devCode?: string;
+}
+
 function parseCookies(header: string | string[] | undefined): Record<string, string> {
   const value = Array.isArray(header) ? header[0] : header;
   const out: Record<string, string> = {};
@@ -96,7 +101,7 @@ export class AuthController {
    */
   @Post('auth/code')
   @HttpCode(202)
-  async sendCode(@Body() body: unknown): Promise<{ accepted: true }> {
+  async sendCode(@Body() body: unknown): Promise<SendCodeResponse> {
     const record = (typeof body === 'object' && body !== null ? body : {}) as Record<string, unknown>;
     const account = record['account'];
     if (typeof account !== 'string' || account.length === 0 || account.length > 255) {
@@ -115,8 +120,8 @@ export class AuthController {
         fields: [{ path: 'channel', message: 'channel 只能是 sms 或 email' }],
       });
     }
-    await this.auth.sendCode(account, channel);
-    return { accepted: true };
+    const code = await this.auth.sendCode(account, channel);
+    return this.options.devCodeEcho ? { accepted: true, devCode: code } : { accepted: true };
   }
 
   @Post('auth/refresh')

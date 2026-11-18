@@ -22,6 +22,10 @@ export type TokenPairData = ReturnType<typeof TokenPair.parse>;
 export type CodeChannel = 'sms' | 'email';
 /** 登录方式。 */
 export type LoginMethod = LoginInput['method'];
+/** 发码响应。devCode 仅在本地开发回显开关开启时存在。 */
+export interface SendCodeResult {
+  readonly devCode?: string;
+}
 
 /** fetch 兼容的 transport。组合根注入 globalThis.fetch；单测注入假实现。 */
 export type HttpClient = (input: string, init?: RequestInit) => Promise<Response>;
@@ -44,7 +48,7 @@ export interface AuthClient {
   /** 手机号/邮箱 + 验证码或密码登录。成功返回 TokenPair；refresh/csrf 由服务端写 HttpOnly Cookie。 */
   login(req: LoginInput): Promise<TokenPairData>;
   /** 发送登录验证码。202 受理；冷却期内服务端回 429 RATE_LIMITED。 */
-  sendCode(account: string, channel?: CodeChannel): Promise<void>;
+  sendCode(account: string, channel?: CodeChannel): Promise<SendCodeResult>;
   /** 轮换刷新。csrfToken 由调用方从 ks_csrf cookie 读出做 double-submit（arch §13）。 */
   refresh(csrfToken: string): Promise<TokenPairData>;
   /** 吊销会话。需要 Bearer accessToken；服务端立即失效旧 refresh 与旧 access。 */
@@ -80,6 +84,19 @@ async function send(http: HttpClient, input: string, init: RequestInit): Promise
   throw new AuthRequestError(res.status, apiError);
 }
 
+function parseSendCodeResult(json: unknown): SendCodeResult {
+  const record = (typeof json === 'object' && json !== null ? json : {}) as Record<string, unknown>;
+  if (record['accepted'] !== true) {
+    throw new Error('验证码响应格式不正确');
+  }
+  const devCode = record['devCode'];
+  if (devCode === undefined) return {};
+  if (typeof devCode !== 'string' || devCode.length === 0) {
+    throw new Error('验证码响应格式不正确');
+  }
+  return { devCode };
+}
+
 /**
  * 用注入的 transport 构建 AuthClient。这是 auth 数据访问的唯一缝隙：
  * 视图与容器只依赖 AuthClient 接口，不知道 fetch 的存在。
@@ -100,12 +117,13 @@ export function createAuthClient(http: HttpClient): AuthClient {
     async sendCode(account, channel) {
       const payload: Record<string, unknown> = { account };
       if (channel !== undefined) payload['channel'] = channel;
-      await send(http, '/api/auth/code', {
+      const json = await send(http, '/api/auth/code', {
         method: 'POST',
         headers: JSON_HEADERS,
         credentials: 'include',
         body: JSON.stringify(payload),
       });
+      return parseSendCodeResult(json);
     },
 
     async refresh(csrfToken) {

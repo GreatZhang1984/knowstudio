@@ -82,6 +82,7 @@ describe('认证 HTTP 流程 · 真实 Nest + 真实 Redis', () => {
       body: JSON.stringify({ account }),
     });
     expect(sendRes.status).toBe(202);
+    expect(((await sendRes.json()) as { devCode?: string }).devCode).toBeUndefined();
     const sender = t.app.get<LocalDevCodeSender>(CODE_SENDER);
     const code = sender.peek(account)?.code;
     expect(code).toMatch(/^\d{6}$/);
@@ -112,6 +113,37 @@ describe('认证 HTTP 流程 · 真实 Nest + 真实 Redis', () => {
     });
     const res = await login({ account, credential: '000000', method: 'code' });
     expect(res.status).toBe(401);
+  });
+
+  it('AUTH_DEV_CODE_ECHO=true 时发码响应回显开发验证码，可直接登录', async () => {
+    const previous = process.env['AUTH_DEV_CODE_ECHO'];
+    process.env['AUTH_DEV_CODE_ECHO'] = 'true';
+    const account = uniquePhone();
+    const user = await makeUser({ id: `u_echo_${account}`, phone: account });
+    let echoApp: TestApp | undefined;
+    try {
+      echoApp = await createTestApp({ users: [user] });
+      const res = await fetch(`${echoApp.baseUrl}/api/auth/code`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ account }),
+      });
+      expect(res.status).toBe(202);
+      const body = (await res.json()) as { accepted: boolean; devCode: string };
+      expect(body.accepted).toBe(true);
+      expect(body.devCode).toMatch(/^\d{6}$/);
+
+      const loginRes = await fetch(`${echoApp.baseUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ account, credential: body.devCode, method: 'code' }),
+      });
+      expect(loginRes.status).toBe(200);
+    } finally {
+      if (previous === undefined) delete process.env['AUTH_DEV_CODE_ECHO'];
+      else process.env['AUTH_DEV_CODE_ECHO'] = previous;
+      await echoApp?.close();
+    }
   });
 
   it('/me：带有效 Bearer → 200 MeResponse；无 token → 401 + loginUrl（未登录重定向依据）', async () => {

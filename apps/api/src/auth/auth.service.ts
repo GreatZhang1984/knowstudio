@@ -77,9 +77,10 @@ export class AuthService {
   }
 
   /** 发送登录验证码。冷却期内 VerificationCodeStore 抛 CodeRateLimitedError，由 controller 映射 429。 */
-  async sendCode(account: string, channel: CodeChannel): Promise<void> {
+  async sendCode(account: string, channel: CodeChannel): Promise<string> {
     const code = await this.codes.issue(account);
     await this.sender.send(account, code, channel);
+    return code;
   }
 
   /**

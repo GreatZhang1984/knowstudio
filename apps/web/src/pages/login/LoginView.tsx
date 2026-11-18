@@ -7,7 +7,7 @@
  * 错误态复用 @knowstudio/ui 的 ErrorState：分支只看契约 code，文案/恢复动作由 ERROR_UI
  * 派生；登录语境下对 UNAUTHENTICATED 做文案覆盖（loginErrorOverride），不另抄一份映射。
  */
-import { Alert, Button, Card, Input, Segmented, Space, Typography } from 'antd';
+import { Alert, Button, Card, Input, Modal, Segmented, Space, Typography } from 'antd';
 import { ErrorState } from '@knowstudio/ui';
 import type { RecoveryAction } from '@knowstudio/ui';
 import type { ApiError } from '@knowstudio/contracts';
@@ -33,6 +33,9 @@ export interface LoginViewProps {
   notice?: string | null;
   /** 已校验的站内回跳路径，登录后回到这里。 */
   returnTo?: string;
+  /** 本地开发发码响应回显的验证码；null/undefined 表示不弹窗。 */
+  devCode?: string | null;
+  onDevCodeClose: () => void;
   fieldIssues?: readonly LoginFieldIssue[];
   onRecovery?: (action: RecoveryAction) => void;
 }
@@ -57,6 +60,8 @@ export function LoginView({
   error,
   notice,
   returnTo,
+  devCode,
+  onDevCodeClose,
   fieldIssues,
   onRecovery,
 }: LoginViewProps) {
@@ -66,6 +71,21 @@ export function LoginView({
 
   return (
     <div className="bare-page">
+      <Modal
+        open={devCode != null && devCode.length > 0}
+        title="开发验证码"
+        onOk={onDevCodeClose}
+        onCancel={onDevCodeClose}
+        cancelButtonProps={{ style: { display: 'none' } }}
+        okText="已复制"
+      >
+        <Typography.Paragraph style={{ marginBottom: 0 }}>
+          本地开发验证码：
+          <Typography.Text strong copyable data-testid="login-dev-code">
+            {devCode}
+          </Typography.Text>
+        </Typography.Paragraph>
+      </Modal>
       <Card title="登录" data-return-to={returnTo ?? ''}>
         <form
           onSubmit={(e) => {

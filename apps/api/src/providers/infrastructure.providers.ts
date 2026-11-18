@@ -27,6 +27,8 @@ function envRecord(cfg: ConfigService): Record<string, string | undefined> {
     'REFRESH_TTL_SEC',
     'CODE_TTL_SEC',
     'CODE_RESEND_COOLDOWN_SEC',
+    'AUTH_DEV_CODE_ECHO',
+    'NODE_ENV',
     'COOKIE_SECURE',
     'COOKIE_DOMAIN',
     'DATABASE_URL',

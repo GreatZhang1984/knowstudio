@@ -15,6 +15,8 @@ export interface AuthOptions {
   /** 生产置 true：refresh cookie 加 Secure。 */
   readonly cookieSecure: boolean;
   readonly cookieDomain: string | undefined;
+  /** 仅本地开发：登录验证码随发码响应回显，生产环境强制关闭。 */
+  readonly devCodeEcho: boolean;
 }
 
 /** 开发兜底密钥。生产必须用环境变量覆盖；本值公开写在代码里，不具备保密性。 */
@@ -40,6 +42,7 @@ export function readAuthOptions(env: Record<string, string | undefined>): AuthOp
     codeResendCooldownSec: intFrom(env['CODE_RESEND_COOLDOWN_SEC'], DEFAULT_CODE_RESEND_COOLDOWN_SEC),
     cookieSecure: env['COOKIE_SECURE'] === 'true',
     cookieDomain: env['COOKIE_DOMAIN'],
+    devCodeEcho: env['AUTH_DEV_CODE_ECHO'] === 'true' && env['NODE_ENV'] !== 'production',
   };
 }
 

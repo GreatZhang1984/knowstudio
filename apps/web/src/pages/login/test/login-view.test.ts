@@ -39,6 +39,8 @@ const base: LoginViewProps = {
   pending: false,
   sendingCode: false,
   codeCooldownSec: 0,
+  devCode: null,
+  onDevCodeClose: () => {},
   onRecovery: () => {},
 };
 
