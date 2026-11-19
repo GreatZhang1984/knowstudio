@@ -1,7 +1,9 @@
 import { Alert, Button, Table, Tag, Typography } from 'antd';
+import { useLocation } from 'react-router-dom';
 import type { MetricName, MetricsResponse } from '@knowstudio/contracts';
 import { ErrorState, LoadingState } from '@knowstudio/ui';
 import { useMetrics } from '../work/queries';
+import { apiErrorOf } from './discover/searchLogic';
 
 const METRIC_LABELS: readonly { key: MetricName; label: string; unit: string }[] = [
   { key: 'g1_e2e_p50', label: 'G1 端到端 P50', unit: '分钟' },
@@ -48,9 +50,21 @@ function valueOf(data: MetricsResponse | undefined, metric: MetricName, unit: st
 
 export default function SettingsPage() {
   const metrics = useMetrics();
+  const location = useLocation();
 
   if (metrics.isLoading) return <LoadingState label="指标读取中" />;
-  if (metrics.isError) return <ErrorState title="指标暂不可用" description="请稍后重新读取。" />;
+  if (metrics.isError) {
+    const apiError = apiErrorOf(metrics.error);
+    return (
+      <ErrorState
+        error={apiError ?? undefined}
+        title={apiError == null ? '指标暂不可用' : undefined}
+        description={apiError == null ? '请稍后重新读取。' : undefined}
+        level="page"
+        context={{ returnTo: location.pathname }}
+      />
+    );
+  }
 
   return (
     <section className="settings-page">

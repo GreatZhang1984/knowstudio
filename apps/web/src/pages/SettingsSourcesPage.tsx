@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { App as AntApp } from 'antd';
+import { useLocation } from 'react-router-dom';
 import { ErrorState, LoadingState } from '@knowstudio/ui';
 import {
   fetchMaterialSourceConfig,
@@ -8,11 +9,13 @@ import {
   type MaterialSourceConfigInput,
 } from '../work/api';
 import { workKeys } from '../work/queries';
+import { apiErrorOf } from './discover/searchLogic';
 import { SettingsSourcesView } from './settings-sources/SettingsSourcesView';
 
 export default function SettingsSourcesPage() {
   const queryClient = useQueryClient();
   const { message } = AntApp.useApp();
+  const location = useLocation();
   const config = useQuery({
     queryKey: workKeys.materialSourceConfig,
     queryFn: fetchMaterialSourceConfig,
@@ -41,13 +44,19 @@ export default function SettingsSourcesPage() {
 
   if (config.isPending) return <LoadingState label="正在读取素材源配置" />;
   if (config.isError) {
+    const apiError = apiErrorOf(config.error);
     return (
       <ErrorState
-        title="素材源配置暂时读不到"
-        description="稍后可以重新读取；已保存配置不会被清除。"
-        actions={[
-          { key: 'retry', label: '重试', primary: true, onClick: () => void config.refetch() },
-        ]}
+        error={apiError ?? undefined}
+        title={apiError == null ? '素材源配置暂时读不到' : undefined}
+        description={apiError == null ? '稍后可以重新读取；已保存配置不会被清除。' : undefined}
+        level="page"
+        context={{ returnTo: location.pathname }}
+        actions={
+          apiError == null
+            ? [{ key: 'retry', label: '重试', primary: true, onClick: () => void config.refetch() }]
+            : undefined
+        }
       />
     );
   }

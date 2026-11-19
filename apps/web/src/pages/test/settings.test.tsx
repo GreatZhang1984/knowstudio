@@ -34,6 +34,9 @@ describe('T-60 指标看板', () => {
     expect(screen.getByText(/最近聚合：成功/)).toBeTruthy();
     expect(screen.getByText(/耗时 3000ms/)).toBeTruthy();
     expect(screen.getByText('G4 盲测结果需人工录入')).toBeTruthy();
+    expect(screen.getByRole('link', { name: '素材源配置' }).getAttribute('href')).toBe(
+      '/settings/sources',
+    );
     expect(screen.getByText('42.5 分钟')).toBeTruthy();
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   }, 15_000);
